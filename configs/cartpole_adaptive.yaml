@@ -1,30 +1,40 @@
 # configs/cartpole_adaptive.yaml
 
-project_name: "NonStationary-RL"
+# 1. Environment Configuration
 env_id: "CartPole-v1"
 
-# Env parameters
 env:
-  drift_type: "jump"      # jump, sine, ramp
-  change_period: 5000
+  # Physics parameter to drift 
+  parameter: "gravity"       # Options: gravity, masscart, length
+  
+  # Drift Pattern 
+  drift_type: "jump"         # Options: linear, sine, jump, static
+  
+  # Drift Dynamics
+  magnitude: 10.0             # Delta range (e.g., +/- 5.0m/s^2)
+  period: 30000               # Steps per cycle or change point
 
-# Train parameters
+# 2. Weights & Biases Logging (Online)
+wandb:
+  project: "CartPole_Drift_Research"
+  entity: null
+  tags: ["baseline", "jump_gravity"]
+  mode: "online"             # Set 'disabled' for local debugging
+
+# 3. PPO Training Hyperparameters (Stationary Baseline)
 train:
-  total_timesteps: 100000
-  learning_rate: 0.0003
+  learning_rate: 0.0003      # Base LR
   n_steps: 2048
   batch_size: 64
   gamma: 0.99
+  total_timesteps: 100000
 
-# Adaptive algorithm configuration
+# 4. Adaptive Mechanism Configuration (Ours)
 adaptive:
-  enabled: true           # Enable/Disable adaptive mechanism
-  check_freq: 1000        # Check for drift every N steps
-  threshold: 0.3          # Reward drop threshold to trigger adaptation (30%)
-  adaptive_lr: 0.001      # Learning rate during adaptation
-  adaptation_steps: 3000  # Duration to maintain adaptation
+  enabled: false              # Toggle the DriftAdaptiveCallback
+  scale_factor: 0.1          # Sensitivity of LR adaptation to drift
 
-# Storage paths
+# 5. Paths
 paths:
   log_dir: "logs/"
   model_dir: "models/"

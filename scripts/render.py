@@ -11,8 +11,8 @@ from src.envs.wrappers import NonStationaryCartPoleWrapper
 def main():
     # Config
     config_path = "configs/cartpole_adaptive.yaml"
-    model_path = "models/CartPole-v1_jump_YYYYMMDD-HHMMSS_Adaptive.zip" # <--- SỬA TÊN FILE NÀY
-    video_folder = "videos/"
+    model_path = "models/CartPole-v1_jump_20251216-120607_Adaptive.zip" # <--- SỬA TÊN FILE NÀY
+    video_folder = f"videos/CartPole_eval_video"
 
     if not os.path.exists(model_path):
         print(f"Error: Model not found at {model_path}")

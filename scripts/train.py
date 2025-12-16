@@ -3,14 +3,14 @@ import os
 import yaml
 import datetime
 import gymnasium as gym
-import wandb # <--- Thêm ông thần này vào
-from wandb.integration.sb3 import WandbCallback # <--- Thêm callback chuyên dụng
+import wandb
+from wandb.integration.sb3 import WandbCallback
+import argparse
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 
-# Hack path để import src
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.envs.wrappers import NonStationaryCartPoleWrapper
@@ -28,15 +28,17 @@ def make_env(config, log_dir=None):
         drift_type=config['env']['drift_type'], 
         change_period=config['env']['change_period']
     )
-    # Wrap Monitor để ghi log CSV/Tensorboard cho từng episode
     if log_dir:
-        # allow_early_resets=True để tránh lỗi khi reset env
         env = Monitor(env, log_dir, allow_early_resets=True)
     return env
 
 def main():
+    parser = argparse.ArgumentParser(description="Insert config path")
+    parser.add_argument("--config", type=str, default="configs/cartpole_adaptive.yaml", help="Path to the config file")
+    args = parser.parse_args()
+
     # 1. Load Config
-    config_path = "configs/cartpole_adaptive.yaml"
+    config_path = args.config
     cfg = load_config(config_path)
     
     # Unique run name
@@ -46,7 +48,7 @@ def main():
     else:
         run_name += "_Baseline"
 
-    # Tạo thư mục
+    # Create folders
     log_path = os.path.join(cfg['paths']['log_dir'], run_name)
     os.makedirs(log_path, exist_ok=True)
     os.makedirs(cfg['paths']['model_dir'], exist_ok=True)
@@ -56,17 +58,25 @@ def main():
     # ======================================================
     # >>> SETUP WANDB (ONLINE LOGGING) <<<
     # ======================================================
-    # sync_tensorboard=True: Tự động đẩy log từ TensorBoard lên WandB
-    # monitor_gym=True: Tự động record video (nếu có video wrapper)
-    # save_code=True: Lưu luôn code train.py lên server để sau này biết mình chạy cái gì
+    # sync_tensorboard=True: Auto sync log from SB3 TensorBoard (OFFLINE) to WandB (ONLINE)
+    # monitor_gym=True: Auto record videos
+    # save_code=True: Save the train.py code to the server for future reference
     wandb.init(
-        project=cfg.get("wandb_project", "CartPole_Drift"), # Nên thêm field này vào yaml
-        name=run_name,
-        config=cfg,
-        sync_tensorboard=True, 
-        monitor_gym=True,
-        save_code=True,
-        dir=log_path # Lưu metadata wandb vào cùng folder log cho gọn
+    # Lấy tên project từ file yaml, nếu không có thì fallback về string mặc định
+    project=cfg.get('wandb', {}).get('project', "CartPole_Default"),
+    
+    # Lấy tags từ file yaml
+    tags=cfg.get('wandb', {}).get('tags', []),
+    
+    # Mode online/offline từ yaml
+    mode=cfg.get('wandb', {}).get('mode', "online"),
+    
+    name=run_name,
+    config=cfg,
+    sync_tensorboard=True, 
+    monitor_gym=True,
+    save_code=True,
+    dir=log_path
     )
 
     # 2. Setup Env
