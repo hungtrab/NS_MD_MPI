@@ -1,0 +1,9 @@
+env_id: "CartPole-v1"
+drift_type: "jump"
+total_timesteps: 100000
+algo:
+  learning_rate: 0.0003
+  clip_range: 0.2
+adaptive:
+  enabled: true
+  sensitivity: 0.5

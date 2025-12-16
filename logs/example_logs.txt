@@ -1,0 +1,13 @@
+[2024-01-15 10:23:45] INFO: Initializing Deep RL environment
+[2024-01-15 10:23:46] INFO: Loading model from checkpoint
+[2024-01-15 10:23:47] DEBUG: Model architecture: DQN with 3 hidden layers
+[2024-01-15 10:23:48] INFO: Training started - Episode 1/1000
+[2024-01-15 10:23:49] INFO: Episode 1 - Reward: 125.5, Avg Loss: 0.0234
+[2024-01-15 10:24:01] INFO: Episode 2 - Reward: 142.3, Avg Loss: 0.0198
+[2024-01-15 10:24:12] INFO: Episode 3 - Reward: 156.8, Avg Loss: 0.0167
+[2024-01-15 10:24:23] WARNING: Exploration rate decreased to 0.95
+[2024-01-15 10:24:34] INFO: Episode 4 - Reward: 168.2, Avg Loss: 0.0145
+[2024-01-15 10:24:45] INFO: Episode 5 - Reward: 175.1, Avg Loss: 0.0132
+[2024-01-15 10:25:00] INFO: Checkpoint saved at episode 5
+[2024-01-15 10:25:01] INFO: Training completed successfully
+[2024-01-15 10:25:02] INFO: Final average reward: 153.6
