@@ -1,41 +1,147 @@
-# configs/cartpole_adaptive.yaml
+# ============================================================================
+# CONFIGURATION GUIDE: Non-Stationary CartPole Experiments
+# ============================================================================
+#
+# This file controls all aspects of the experiment. Below are the key settings
+# you'll want to modify for different experiments.
+#
+# QUICK START - Common Experiments:
+# ---------------------------------
+# 1. Baseline (no drift):     Set drift_type: "static"
+# 2. Sudden change:           Set drift_type: "jump", magnitude: 10.0
+# 3. Gradual drift:           Set drift_type: "linear", magnitude: 5.0
+# 4. Periodic oscillation:    Set drift_type: "sine", magnitude: 3.0
+# 5. Enable adaptation:       Set adaptive.enabled: true
+#
+# ============================================================================
 
 # 1. Environment Configuration
 env_id: "CartPole-v1"
 
 env:
-  # Physics parameter to drift 
-  parameter: "gravity"       # Options: gravity, masscart, length
+  # -------------------------------------------------------------------------
+  # PARAMETER TO DRIFT
+  # -------------------------------------------------------------------------
+  # Which physics parameter should change over time?
+  # Options:
+  #   - "gravity"   : Earth gravity (default=9.8 m/s²). Higher = harder to balance
+  #   - "masscart"  : Cart mass (default=1.0 kg). Higher = more inertia
+  #   - "masspole"  : Pole mass (default=0.1 kg). Higher = harder to balance
+  #   - "length"    : Pole half-length (default=0.5 m). Longer = easier
+  parameter: "masscart"
   
-  # Drift Pattern 
-  drift_type: "jump"         # Options: linear, sine, jump, static
+  # -------------------------------------------------------------------------
+  # DRIFT PATTERN
+  # -------------------------------------------------------------------------
+  # How should the parameter change over time?
+  # Options:
+  #   - "static"      : No change (stationary baseline)
+  #   - "jump"        : Sudden regime shift after 'period' steps
+  #   - "linear"      : Gradual ramp up then down (triangular wave)
+  #   - "sine"        : Smooth oscillation (sinusoidal wave)
+  #   - "random_walk" : Stochastic drift (Brownian motion, bounded)
+  drift_type: "random_walk"
   
-  # Drift Dynamics
-  magnitude: 10.0             # Delta range (e.g., +/- 5.0m/s^2)
-  period: 30000               # Steps per cycle or change point
+  # -------------------------------------------------------------------------
+  # DRIFT DYNAMICS
+  # -------------------------------------------------------------------------
+  # magnitude: How much the parameter changes from its base value
+  #   - For gravity (base=9.8): magnitude=10 → varies from 9.8 to 19.8
+  #   - For masscart (base=1.0): magnitude=0.5 → varies from 1.0 to 1.5
+  #   - Larger values = more non-stationarity = harder problem
+  magnitude: 0.5
+  
+  # period: Timing of drift changes (in environment steps)
+  #   - For "jump": parameter changes after this many steps
+  #   - For "linear"/"sine": one full cycle takes this many steps
+  #   - Smaller period = faster changes = harder to adapt
+  period: 10000
+  
+  # -------------------------------------------------------------------------
+  # RANDOM WALK ONLY (ignored for other drift types)
+  # -------------------------------------------------------------------------
+  # sigma: Step size standard deviation for random walk
+  sigma: 0.1
+  
+  # bounds: [min, max] limits for random walk
+  bounds: [0.0, 25.0]
 
 # 2. Weights & Biases Logging (Online)
 wandb:
   project: "CartPole_Drift_Research"
-  entity: null
-  tags: ["baseline", "jump_gravity"]
-  mode: "online"             # Set 'disabled' for local debugging
+  entity: null                       # Your W&B username (null = default)
+  tags: ["baseline", "jump_gravity"] # Tags for filtering runs
+  mode: "online"                     # "online", "offline", or "disabled"
 
-# 3. PPO Training Hyperparameters (Stationary Baseline)
+# 3. PPO Training Hyperparameters
 train:
-  learning_rate: 0.0003      # Base LR
-  n_steps: 2048
-  batch_size: 64
-  gamma: 0.99
-  total_timesteps: 100000
+  learning_rate: 0.0003              # Base learning rate (η₀)
+  n_steps: 2048                      # Steps per rollout
+  batch_size: 64                     # Minibatch size
+  gamma: 0.99                        # Discount factor
+  total_timesteps: 100000            # Total training steps
+  seed: 42                           # Random seed for reproducibility
 
 # 4. Adaptive Mechanism Configuration (Ours)
+# -------------------------------------------------------------------------
+# When enabled, the learning rate adapts based on detected drift:
+#   η_t = η₀ × (1 + scale_factor × drift_magnitude)
+# 
+# This implements the "follow the drift" principle from the paper.
+# -------------------------------------------------------------------------
 adaptive:
-  enabled: false              # Toggle the DriftAdaptiveCallback
-  scale_factor: 0.1          # Sensitivity of LR adaptation to drift
+  enabled: false                     # true = Adaptive, false = Baseline
+  scale_factor: 0.1                  # c₁: Sensitivity to drift (try 0.05-0.5)
+  min_lr_multiplier: 0.5             # LR won't go below base_lr × 0.5
+  max_lr_multiplier: 3.0             # LR won't go above base_lr × 3.0
+  log_freq: 100                      # Log metrics every N steps
 
 # 5. Paths
 paths:
   log_dir: "logs/"
   model_dir: "models/"
   video_dir: "videos/"
+
+
+# ============================================================================
+# EXAMPLE CONFIGURATIONS
+# ============================================================================
+#
+# --- EXPERIMENT 1: Stationary Baseline ---
+# env:
+#   parameter: "gravity"
+#   drift_type: "static"
+#   magnitude: 0.0
+# adaptive:
+#   enabled: false
+#
+# --- EXPERIMENT 2: Sudden Gravity Increase ---
+# env:
+#   parameter: "gravity"
+#   drift_type: "jump"
+#   magnitude: 10.0      # Gravity jumps from 9.8 to 19.8
+#   period: 30000        # After 30k steps
+# adaptive:
+#   enabled: false       # Baseline (no adaptation)
+#
+# --- EXPERIMENT 3: Adaptive Agent with Sine Drift ---
+# env:
+#   parameter: "gravity"
+#   drift_type: "sine"
+#   magnitude: 5.0       # Gravity oscillates 9.8 ± 5.0
+#   period: 20000        # Full cycle every 20k steps
+# adaptive:
+#   enabled: true        # Enable LR adaptation
+#   scale_factor: 0.2    # Moderate sensitivity
+#
+# --- EXPERIMENT 4: Mass Drift with Random Walk ---
+# env:
+#   parameter: "masscart"
+#   drift_type: "random_walk"
+#   magnitude: 0.0       # (not used for random walk)
+#   sigma: 0.01          # Small random steps
+#   bounds: [0.5, 2.0]   # Mass stays in [0.5, 2.0] kg
+# adaptive:
+#   enabled: true
+#
+# ============================================================================

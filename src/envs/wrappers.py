@@ -1,6 +1,16 @@
+"""
+Non-Stationary Environment Wrappers.
+
+Implements Gym wrappers that introduce dynamics drift to standard environments,
+converting them into Non-Stationary MDPs for research purposes.
+"""
+
 import numpy as np
 import gymnasium as gym
-import math
+from typing import Dict, Any, Optional, List, Union
+
+from .drift_generator import DriftGenerator, DriftConfig, create_drift_generator
+
 
 class NonStationaryCartPoleWrapper(gym.Wrapper):
     """
@@ -8,13 +18,46 @@ class NonStationaryCartPoleWrapper(gym.Wrapper):
     It introduces drift to physical parameters (gravity, mass, length) over time.
     
     Theoretical Basis:
-        - Simulates Dynamics Drift (Delta_P) as described in Eq. 11[cite: 240].
-        - Implements specific drift patterns: Linear, Sinusoidal, and Jumps[cite: 770, 771, 774].
+        - Simulates Dynamics Drift (Δ_P) as described in Eq. 11
+        - Implements specific drift patterns: Linear, Sinusoidal, Jumps, Random Walk
+    
+    Usage:
+        drift_conf = {
+            'parameter': 'gravity',
+            'drift_type': 'sine',
+            'magnitude': 5.0,
+            'period': 10000,
+        }
+        env = gym.make('CartPole-v1')
+        env = NonStationaryCartPoleWrapper(env, drift_conf)
     """
-    def __init__(self, env, drift_conf):
+    
+    # Valid parameters that can be drifted in CartPole
+    VALID_PARAMS = ['gravity', 'masscart', 'masspole', 'length']
+    
+    def __init__(
+        self, 
+        env: gym.Env, 
+        drift_conf: Union[Dict[str, Any], List[Dict[str, Any]]],
+        seed: Optional[int] = None
+    ):
+        """
+        Initialize the non-stationary wrapper.
+        
+        Args:
+            env: The base CartPole environment
+            drift_conf: Drift configuration dict or list of dicts for multiple params
+            seed: Random seed for reproducibility
+        """
         super().__init__(env)
-        self.drift_conf = drift_conf
+        
+        # Handle single config or multiple configs
+        if isinstance(drift_conf, dict):
+            drift_conf = [drift_conf]
+        
+        self.drift_configs = drift_conf
         self.step_counter = 0
+        self.total_steps = 0  # Tracks total steps across episodes
         
         # Store original parameters for reference
         self.original_params = {
@@ -24,69 +67,79 @@ class NonStationaryCartPoleWrapper(gym.Wrapper):
             'length': self.unwrapped.length
         }
         
-        # Identify the target parameter to drift (e.g., 'gravity')
-        self.target_param = drift_conf.get('parameter', 'gravity')
-        self.base_value = self.original_params[self.target_param]
+        # Create drift generators for each parameter
+        self.drift_generators: Dict[str, DriftGenerator] = {}
         
-        print(f">>> [Wrapper] Initialized Non-Stationary Env. Target: {self.target_param} | Type: {drift_conf['drift_type']}")
+        for conf in self.drift_configs:
+            param = conf.get('parameter', 'gravity')
+            if param not in self.VALID_PARAMS:
+                raise ValueError(f"Invalid parameter '{param}'. Must be one of {self.VALID_PARAMS}")
+            
+            # Set base value from environment if not specified
+            if 'base_value' not in conf:
+                conf['base_value'] = self.original_params[param]
+            
+            self.drift_generators[param] = create_drift_generator(conf, seed=seed)
+        
+        # Store target param for backwards compatibility
+        self.target_param = list(self.drift_generators.keys())[0]
+        
+        # For logging
+        self._current_drift_info = {}
+        
+        print(f">>> [Wrapper] Initialized Non-Stationary CartPole")
+        for param, gen in self.drift_generators.items():
+            print(f"    - {param}: {gen.config.drift_type} (magnitude={gen.config.magnitude}, period={gen.config.period})")
 
     def step(self, action):
+        """Execute one step with drifting physics."""
         # 1. Update physics engine before the step to simulate continuous drift
         self._update_physics()
         
         # 2. Execute action
         obs, reward, terminated, truncated, info = self.env.step(action)
         
-        # 3. Log current physical parameter to info dict (for Oracle/Callback access)
-        # This acts as the "Drift Proxy" mentioned in Sec 7.2 [cite: 631]
-        current_val = getattr(self.unwrapped, self.target_param)
-        info['drift/current_value'] = current_val
-        info['drift/step'] = self.step_counter
+        # 3. Log current physical parameters to info dict (for Oracle/Callback access)
+        info['drift/step'] = self.total_steps
+        info['drift/params'] = {}
+        
+        for param, gen in self.drift_generators.items():
+            current_val = getattr(self.unwrapped, param)
+            base_val = self.original_params[param]
+            info['drift/params'][param] = {
+                'current': current_val,
+                'base': base_val,
+                'delta': current_val - base_val,
+            }
+        
+        # Backwards compatible: single param access
+        if len(self.drift_generators) == 1:
+            param = list(self.drift_generators.keys())[0]
+            info['drift/current_value'] = getattr(self.unwrapped, param)
+            info['drift/parameter'] = param
         
         self.step_counter += 1
+        self.total_steps += 1
+        
         return obs, reward, terminated, truncated, info
 
     def reset(self, **kwargs):
+        """Reset the environment."""
         self.step_counter = 0
-        # Reset parameter to base value to ensure consistent episodes during training
-        self._set_env_param(self.target_param, self.base_value)
+        # Note: We don't reset total_steps to maintain drift continuity across episodes
+        
+        # Update physics to current drift state
+        self._update_physics()
+        
         return self.env.reset(**kwargs)
 
     def _update_physics(self):
-        """
-        Calculates the new parameter value based on the configured drift pattern.
-        Corresponds to the "Drift patterns" in Sec 8.1.
-        """
-        t = self.step_counter
-        mode = self.drift_conf['drift_type']
-        
-        # Drift configuration
-        magnitude = self.drift_conf.get('magnitude', 0.0) 
-        period = self.drift_conf.get('period', 1000)
-        
-        new_value = self.base_value
+        """Update all drifting parameters based on current timestep."""
+        for param, gen in self.drift_generators.items():
+            new_value = gen.get_value(self.total_steps)
+            self._set_env_param(param, new_value)
 
-        # --- DRIFT PATTERNS ---
-        if mode == 'linear':
-            # Linear ramps (slow drift) [cite: 771]
-            rate = magnitude / period 
-            new_value = self.base_value + (rate * t)
-
-        elif mode == 'sine':
-            # Sinusoidal drift (periodic) [cite: 774]
-            # Formula: base + mag * sin(2 * pi * t / period)
-            new_value = self.base_value + magnitude * math.sin(2 * math.pi * t / period)
-
-        elif mode == 'jump':
-            # Piecewise-constant jumps [cite: 770]
-            # Simulates abrupt system faults or regime shifts
-            if t > period:
-                new_value = self.base_value + magnitude
-        
-        # --- APPLY TO ENV ---
-        self._set_env_param(self.target_param, new_value)
-
-    def _set_env_param(self, param_name, value):
+    def _set_env_param(self, param_name: str, value: float):
         """
         Updates the environment parameter and recalculates dependent variables.
         Crucial for maintaining physics consistency in CartPole.
@@ -94,10 +147,108 @@ class NonStationaryCartPoleWrapper(gym.Wrapper):
         setattr(self.unwrapped, param_name, value)
         
         # Recalculate derived physical quantities
-        # total_mass = masspole + masscart
         if param_name in ['masscart', 'masspole']:
             self.unwrapped.total_mass = self.unwrapped.masspole + self.unwrapped.masscart
         
-        # polemass_length = masspole * length
         if param_name in ['length', 'masspole']:
             self.unwrapped.polemass_length = self.unwrapped.masspole * self.unwrapped.length
+    
+    def get_drift_info(self) -> Dict[str, Any]:
+        """Get current drift information for all parameters."""
+        info = {
+            'total_steps': self.total_steps,
+            'episode_steps': self.step_counter,
+            'parameters': {}
+        }
+        
+        for param, gen in self.drift_generators.items():
+            info['parameters'][param] = gen.get_drift_info(self.total_steps)
+        
+        return info
+    
+    def set_total_steps(self, steps: int):
+        """
+        Manually set the total step counter.
+        Useful for evaluation at specific drift points.
+        """
+        self.total_steps = steps
+        self._update_physics()
+
+
+class NonStationaryWrapper(gym.Wrapper):
+    """
+    Generic non-stationary wrapper for any Gym environment.
+    
+    This wrapper can drift arbitrary environment attributes.
+    Use with caution - not all attributes can be safely modified.
+    """
+    
+    def __init__(
+        self,
+        env: gym.Env,
+        drift_conf: Union[Dict[str, Any], List[Dict[str, Any]]],
+        seed: Optional[int] = None
+    ):
+        super().__init__(env)
+        
+        if isinstance(drift_conf, dict):
+            drift_conf = [drift_conf]
+        
+        self.drift_configs = drift_conf
+        self.step_counter = 0
+        self.total_steps = 0
+        
+        # Store original values
+        self.original_params = {}
+        self.drift_generators: Dict[str, DriftGenerator] = {}
+        
+        for conf in self.drift_configs:
+            param = conf.get('parameter')
+            if param is None:
+                raise ValueError("Each drift config must specify a 'parameter'")
+            
+            # Try to get original value from unwrapped env
+            try:
+                original_val = getattr(self.unwrapped, param)
+                self.original_params[param] = original_val
+                
+                if 'base_value' not in conf:
+                    conf['base_value'] = float(original_val)
+                    
+            except AttributeError:
+                raise ValueError(f"Environment does not have attribute '{param}'")
+            
+            self.drift_generators[param] = create_drift_generator(conf, seed=seed)
+        
+        print(f">>> [Wrapper] Initialized Non-Stationary Environment")
+        for param, gen in self.drift_generators.items():
+            print(f"    - {param}: {gen.config.drift_type}")
+
+    def step(self, action):
+        self._update_physics()
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        
+        info['drift/step'] = self.total_steps
+        info['drift/params'] = {}
+        
+        for param, gen in self.drift_generators.items():
+            current_val = getattr(self.unwrapped, param)
+            info['drift/params'][param] = {
+                'current': current_val,
+                'base': self.original_params[param],
+            }
+        
+        self.step_counter += 1
+        self.total_steps += 1
+        
+        return obs, reward, terminated, truncated, info
+
+    def reset(self, **kwargs):
+        self.step_counter = 0
+        self._update_physics()
+        return self.env.reset(**kwargs)
+
+    def _update_physics(self):
+        for param, gen in self.drift_generators.items():
+            new_value = gen.get_value(self.total_steps)
+            setattr(self.unwrapped, param, new_value)

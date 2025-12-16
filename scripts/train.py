@@ -20,16 +20,33 @@ def load_config(config_path):
     with open(config_path, 'r') as f:
         return yaml.safe_load(f)
 
-def make_env(config, log_dir=None):
+def make_env(config, log_dir=None, seed=None):
+    """
+    Create a non-stationary environment based on config.
+    
+    Args:
+        config: Configuration dictionary
+        log_dir: Optional log directory for Monitor wrapper
+        seed: Random seed for reproducibility
+    """
     env = gym.make(config['env_id'])
-    # Wrap Non-Stationary
-    env = NonStationaryCartPoleWrapper(
-        env, 
-        drift_type=config['env']['drift_type'], 
-        change_period=config['env']['change_period']
-    )
+    
+    # Build drift configuration from YAML
+    drift_conf = {
+        'parameter': config['env'].get('parameter', 'gravity'),
+        'drift_type': config['env'].get('drift_type', 'static'),
+        'magnitude': config['env'].get('magnitude', 0.0),
+        'period': config['env'].get('period', 10000),
+        'sigma': config['env'].get('sigma', 0.1),
+        'bounds': config['env'].get('bounds', [0.0, 20.0]),
+    }
+    
+    # Wrap with Non-Stationary wrapper
+    env = NonStationaryCartPoleWrapper(env, drift_conf, seed=seed)
+    
     if log_dir:
         env = Monitor(env, log_dir, allow_early_resets=True)
+    
     return env
 
 def main():
@@ -110,11 +127,11 @@ def main():
     # >>> CALLBACK 2: Custom Drift Logic
     if cfg['adaptive']['enabled']:
         drift_callback = DriftAdaptiveCallback(
-            check_freq=cfg['adaptive']['check_freq'],
+            target_param=cfg['env'].get('parameter', 'gravity'),
+            base_value=9.8,  # Will be updated from env
+            scale_factor=cfg['adaptive'].get('scale_factor', 0.1),
             verbose=1
         )
-        drift_callback.adaptive_lr = cfg['adaptive']['adaptive_lr']
-        drift_callback.adaptation_steps = cfg['adaptive']['adaptation_steps']
         callbacks.append(drift_callback)
 
     # 5. Train
