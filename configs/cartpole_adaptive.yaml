@@ -18,7 +18,7 @@ env:
 wandb:
   project: "CartPole_Drift_Research"
   entity: null
-  tags: ["baseline", "jump_gravity"]
+  tags: ["adaptive", "jump_gravity"]
   mode: "online"             # Set 'disabled' for local debugging
 
 # 3. PPO Training Hyperparameters (Stationary Baseline)
@@ -31,8 +31,8 @@ train:
 
 # 4. Adaptive Mechanism Configuration (Ours)
 adaptive:
-  enabled: false              # Toggle the DriftAdaptiveCallback
-  scale_factor: 0.1          # Sensitivity of LR adaptation to drift
+  enabled: true              # Toggle the DriftAdaptiveCallback
+  scale_factor: 2.0          # Sensitivity of LR adaptation to drift
 
 # 5. Paths
 paths:

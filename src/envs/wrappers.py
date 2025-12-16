@@ -15,6 +15,7 @@ class NonStationaryCartPoleWrapper(gym.Wrapper):
         super().__init__(env)
         self.drift_conf = drift_conf
         self.step_counter = 0
+        self.global_step_counter = 0
         
         # Store original parameters for reference
         self.original_params = {
@@ -42,7 +43,7 @@ class NonStationaryCartPoleWrapper(gym.Wrapper):
         current_val = getattr(self.unwrapped, self.target_param)
         info['drift/current_value'] = current_val
         info['drift/step'] = self.step_counter
-        
+        self.global_step_counter += 1
         self.step_counter += 1
         return obs, reward, terminated, truncated, info
 
@@ -57,7 +58,7 @@ class NonStationaryCartPoleWrapper(gym.Wrapper):
         Calculates the new parameter value based on the configured drift pattern.
         Corresponds to the "Drift patterns" in Sec 8.1.
         """
-        t = self.step_counter
+        t = self.global_step_counter
         mode = self.drift_conf['drift_type']
         
         # Drift configuration
