@@ -1,9 +1,31 @@
+# configs/cartpole_adaptive.yaml
+
+project_name: "NonStationary-RL"
 env_id: "CartPole-v1"
-drift_type: "jump"
-total_timesteps: 100000
-algo:
+
+# Env parameters
+env:
+  drift_type: "jump"      # jump, sine, ramp
+  change_period: 5000
+
+# Train parameters
+train:
+  total_timesteps: 100000
   learning_rate: 0.0003
-  clip_range: 0.2
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+
+# Adaptive algorithm configuration
 adaptive:
-  enabled: true
-  sensitivity: 0.5
+  enabled: true           # Enable/Disable adaptive mechanism
+  check_freq: 1000        # Check for drift every N steps
+  threshold: 0.3          # Reward drop threshold to trigger adaptation (30%)
+  adaptive_lr: 0.001      # Learning rate during adaptation
+  adaptation_steps: 3000  # Duration to maintain adaptation
+
+# Storage paths
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"
