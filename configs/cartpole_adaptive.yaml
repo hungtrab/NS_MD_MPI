@@ -70,7 +70,7 @@ env:
 wandb:
   project: "CartPole_Drift_Research"
   entity: null                       # Your W&B username (null = default)
-  tags: ["baseline", "jump_gravity"] # Tags for filtering runs
+  tags: ["adaptive", "jump_gravity"] # Tags for filtering runs
   mode: "online"                     # "online", "offline", or "disabled"
 
 # 3. PPO Training Hyperparameters
@@ -90,7 +90,7 @@ train:
 # This implements the "follow the drift" principle from the paper.
 # -------------------------------------------------------------------------
 adaptive:
-  enabled: false                     # true = Adaptive, false = Baseline
+  enabled: true                     # true = Adaptive, false = Baseline
   scale_factor: 0.1                  # c₁: Sensitivity to drift (try 0.05-0.5)
   min_lr_multiplier: 0.5             # LR won't go below base_lr × 0.5
   max_lr_multiplier: 3.0             # LR won't go above base_lr × 3.0

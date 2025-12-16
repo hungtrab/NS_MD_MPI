@@ -52,6 +52,7 @@ def make_env(config, log_dir=None, seed=None):
 def main():
     parser = argparse.ArgumentParser(description="Insert config path")
     parser.add_argument("--config", type=str, default="configs/cartpole_adaptive.yaml", help="Path to the config file")
+    parser.add_argument("--exp_name", type=str, default=None, help="Override run name for easier filtering")
     args = parser.parse_args()
 
     # 1. Load Config
@@ -59,11 +60,14 @@ def main():
     cfg = load_config(config_path)
     
     # Unique run name
-    run_name = f"{cfg['env_id']}_{cfg['env']['drift_type']}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
-    if cfg['adaptive']['enabled']:
-        run_name += "_Adaptive"
+    if args.exp_name:
+        run_name = args.exp_name
     else:
-        run_name += "_Baseline"
+        run_name = f"{cfg['env_id']}_{cfg['env']['drift_type']}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        if cfg['adaptive']['enabled']:
+            run_name += "_Adaptive"
+        else:
+            run_name += "_Baseline"
 
     # Create folders
     log_path = os.path.join(cfg['paths']['log_dir'], run_name)
