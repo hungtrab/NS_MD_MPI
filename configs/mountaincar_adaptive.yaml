@@ -1,0 +1,102 @@
+# ============================================================================
+# CONFIGURATION: Non-Stationary MountainCar Experiments
+# ============================================================================
+#
+# MountainCar: A car must build momentum to climb a hill
+# Drifting gravity or force makes this task harder/easier dynamically
+#
+# ============================================================================
+
+env_id: "MountainCar-v0"
+
+env:
+  # -------------------------------------------------------------------------
+  # PARAMETER TO DRIFT
+  # -------------------------------------------------------------------------
+  # Options:
+  #   - "gravity"       : Gravitational pull (default=0.0025). Higher = harder
+  #   - "force"         : Engine power (default=0.001). Higher = easier
+  #   - "goal_position" : Goal x-position (default=0.5)
+  parameter: "gravity"
+  
+  # -------------------------------------------------------------------------
+  # DRIFT PATTERN
+  # -------------------------------------------------------------------------
+  drift_type: "linear"           # static, jump, linear, sine, random_walk
+  
+  # -------------------------------------------------------------------------
+  # DRIFT DYNAMICS
+  # -------------------------------------------------------------------------
+  # For gravity (base=0.0025):
+  #   magnitude=0.001 → varies from 0.0015 to 0.0035
+  magnitude: 0.001
+  period: 20000
+
+  # Random walk settings (if drift_type: random_walk)
+  sigma: 0.0001
+  bounds: [0.001, 0.005]
+
+# Weights & Biases
+wandb:
+  project: "Static_MountainCar_Drift_Research"
+  tags: ["mountaincar", "gravity"]
+  mode: "online"
+
+# Training
+train:
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 5000000      # MountainCar needs more steps
+  seed: 42
+
+# Adaptive - Algorithm-Specific Hyperparameter Adaptation
+# -------------------------------------------------------------------------
+# When enabled, hyperparameters adjust based on detected drift magnitude.
+# Each algorithm has different hyperparameters adapted:
+#   - PPO: learning_rate, clip_range, ent_coef
+#   - SAC: learning_rate, ent_coef (temperature)
+#   - TRPO: learning_rate, target_kl
+# -------------------------------------------------------------------------
+adaptive:
+  enabled: false
+  
+  # --- Learning Rate Adaptation (All Algorithms) ---
+  # Formula: η_t = η_0 * (1 + scale_factor * drift_magnitude)
+  scale_factor: 0.1              # Sensitivity to drift (try 0.05-0.5)
+  min_lr_multiplier: 0.5         # LR won't go below base_lr × 0.5
+  max_lr_multiplier: 3.0         # LR won't go above base_lr × 3.0
+  
+  # --- PPO: Clip Range Adaptation ---
+  # Formula: ε_t = ε_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Smaller trust region when env is changing
+  adapt_clip_range: true
+  base_clip_range: 0.2           # PPO default
+  min_clip_range: 0.05           # Most conservative
+  max_clip_range: 0.4            # Most aggressive
+  
+  # --- PPO/SAC: Entropy Coefficient Adaptation ---
+  # Formula: α_t = α_0 * (1 + scale_factor * drift_magnitude)
+  # Rationale: More exploration when env is drifting
+  adapt_entropy: true
+  base_ent_coef: 0.0             # 0 = auto-detect from model
+  min_ent_coef: 0.0
+  max_ent_coef: 0.1
+  
+  # --- TRPO: Target KL Adaptation ---
+  # Formula: KL_t = KL_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Stricter constraint when env is unstable
+  adapt_target_kl: false
+  base_target_kl: 0.01           # TRPO default
+  min_target_kl: 0.001
+  max_target_kl: 0.05
+  
+  # Logging frequency
+  log_freq: 100
+
+# Paths
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

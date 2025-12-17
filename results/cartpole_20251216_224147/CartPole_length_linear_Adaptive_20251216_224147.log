@@ -1,0 +1,1673 @@
+wandb: Currently logged in as: hungtrab (hungtrab-hanoi-university-of-science-and-technology) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run kil15b7d
+wandb: Tracking run with wandb version 0.23.1
+wandb: Run data is saved locally in logs/CartPole_length_linear_Adaptive_20251216_224147/wandb/run-20251216_225434-kil15b7d
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run CartPole_length_linear_Adaptive_20251216_224147
+wandb: ⭐️ View project at https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research
+wandb: 🚀 View run at https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research/runs/kil15b7d
+Warning: sb3-contrib not installed. TRPO unavailable. Install with: pip install sb3-contrib
+--- Training Start: CartPole_length_linear_Adaptive_20251216_224147 ---
+>>> [Wrapper] Initialized Non-Stationary CartPole
+    - length: linear (magnitude=0.3, period=25000)
+>>> Initializing PPO with kwargs: ['policy', 'env', 'learning_rate', 'gamma', 'verbose', 'tensorboard_log', 'n_steps', 'batch_size']
+Using cuda device
+Wrapping the env in a DummyVecEnv.
+Logging to logs/CartPole_length_linear_Adaptive_20251216_224147_0
+>>> [DriftAdaptiveCallback] Training Started
+    Algorithm: PPO
+    Target Param: length (base=0.5)
+    Scale Factor: 0.1
+    
+    Adaptive Hyperparameters:
+      - Learning Rate: 0.000300
+      - Clip Range: 0.200 (adapt=True)
+      - Entropy Coef: 0.0000 (adapt=True)
+-----------------------------------
+| adaptive/            |          |
+|    adaptation_factor | 1        |
+|    algorithm         | PPO      |
+|    base_clip_range   | 0.2      |
+|    base_lr           | 0.0003   |
+|    clip_range        | 0.199    |
+|    drift_magnitude   | 0.048    |
+|    ent_coef          | 0        |
+|    learning_rate     | 0.000301 |
+| env/                 |          |
+|    base_value        | 0.5      |
+|    length            | 0.524    |
+| rollout/             |          |
+|    ep_len_mean       | 22       |
+|    ep_rew_mean       | 22       |
+| time/                |          |
+|    fps               | 1207     |
+|    iterations        | 1        |
+|    time_elapsed      | 1        |
+|    total_timesteps   | 2048     |
+-----------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.01        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.198       |
+|    drift_magnitude      | 0.096       |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000303    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.548       |
+| rollout/                |             |
+|    ep_len_mean          | 26.2        |
+|    ep_rew_mean          | 26.2        |
+| time/                   |             |
+|    fps                  | 1047        |
+|    iterations           | 2           |
+|    time_elapsed         | 3           |
+|    total_timesteps      | 4096        |
+| train/                  |             |
+|    approx_kl            | 0.008709351 |
+|    clip_fraction        | 0.106       |
+|    clip_range           | 0.199       |
+|    entropy_loss         | -0.686      |
+|    explained_variance   | 0.007982075 |
+|    learning_rate        | 0.0003      |
+|    loss                 | 6.84        |
+|    n_updates            | 10          |
+|    policy_gradient_loss | -0.0161     |
+|    value_loss           | 52.6        |
+-----------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.01        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.197       |
+|    drift_magnitude      | 0.146       |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000304    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.573       |
+| rollout/                |             |
+|    ep_len_mean          | 32.8        |
+|    ep_rew_mean          | 32.8        |
+| time/                   |             |
+|    fps                  | 1028        |
+|    iterations           | 3           |
+|    time_elapsed         | 5           |
+|    total_timesteps      | 6144        |
+| train/                  |             |
+|    approx_kl            | 0.009953827 |
+|    clip_fraction        | 0.0756      |
+|    clip_range           | 0.198       |
+|    entropy_loss         | -0.668      |
+|    explained_variance   | 0.06908023  |
+|    learning_rate        | 0.0003      |
+|    loss                 | 11.9        |
+|    n_updates            | 20          |
+|    policy_gradient_loss | -0.0182     |
+|    value_loss           | 32.2        |
+-----------------------------------------
+----------------------------------------
+| adaptive/               |            |
+|    adaptation_factor    | 1.02       |
+|    algorithm            | PPO        |
+|    base_clip_range      | 0.2        |
+|    base_lr              | 0.0003     |
+|    clip_range           | 0.196      |
+|    drift_magnitude      | 0.194      |
+|    ent_coef             | 0          |
+|    learning_rate        | 0.000306   |
+| env/                    |            |
+|    base_value           | 0.5        |
+|    length               | 0.597      |
+| rollout/                |            |
+|    ep_len_mean          | 43.8       |
+|    ep_rew_mean          | 43.8       |
+| time/                   |            |
+|    fps                  | 1015       |
+|    iterations           | 4          |
+|    time_elapsed         | 8          |
+|    total_timesteps      | 8192       |
+| train/                  |            |
+|    approx_kl            | 0.00852585 |
+|    clip_fraction        | 0.111      |
+|    clip_range           | 0.197      |
+|    entropy_loss         | -0.638     |
+|    explained_variance   | 0.2814588  |
+|    learning_rate        | 0.0003     |
+|    loss                 | 20.7       |
+|    n_updates            | 30         |
+|    policy_gradient_loss | -0.021     |
+|    value_loss           | 48.3       |
+----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.02         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.195        |
+|    drift_magnitude      | 0.245        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000307     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.622        |
+| rollout/                |              |
+|    ep_len_mean          | 60.5         |
+|    ep_rew_mean          | 60.5         |
+| time/                   |              |
+|    fps                  | 1000         |
+|    iterations           | 5            |
+|    time_elapsed         | 10           |
+|    total_timesteps      | 10240        |
+| train/                  |              |
+|    approx_kl            | 0.0070178937 |
+|    clip_fraction        | 0.0668       |
+|    clip_range           | 0.196        |
+|    entropy_loss         | -0.621       |
+|    explained_variance   | 0.3046745    |
+|    learning_rate        | 0.0003       |
+|    loss                 | 20.8         |
+|    n_updates            | 40           |
+|    policy_gradient_loss | -0.016       |
+|    value_loss           | 61.4         |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.03         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.194        |
+|    drift_magnitude      | 0.293        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000309     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.646        |
+| rollout/                |              |
+|    ep_len_mean          | 75.3         |
+|    ep_rew_mean          | 75.3         |
+| time/                   |              |
+|    fps                  | 996          |
+|    iterations           | 6            |
+|    time_elapsed         | 12           |
+|    total_timesteps      | 12288        |
+| train/                  |              |
+|    approx_kl            | 0.0075729312 |
+|    clip_fraction        | 0.0561       |
+|    clip_range           | 0.195        |
+|    entropy_loss         | -0.606       |
+|    explained_variance   | 0.49400622   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 21.6         |
+|    n_updates            | 50           |
+|    policy_gradient_loss | -0.0135      |
+|    value_loss           | 57.1         |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.06         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.189        |
+|    drift_magnitude      | 0.557        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000317     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.778        |
+| rollout/                |              |
+|    ep_len_mean          | 92.9         |
+|    ep_rew_mean          | 92.9         |
+| time/                   |              |
+|    fps                  | 993          |
+|    iterations           | 7            |
+|    time_elapsed         | 14           |
+|    total_timesteps      | 14336        |
+| train/                  |              |
+|    approx_kl            | 0.0077196993 |
+|    clip_fraction        | 0.103        |
+|    clip_range           | 0.194        |
+|    entropy_loss         | -0.607       |
+|    explained_variance   | 0.70592284   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 8.73         |
+|    n_updates            | 60           |
+|    policy_gradient_loss | -0.0145      |
+|    value_loss           | 40.3         |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.19         |
+|    drift_magnitude      | 0.509        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000315     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.754        |
+| rollout/                |              |
+|    ep_len_mean          | 109          |
+|    ep_rew_mean          | 109          |
+| time/                   |              |
+|    fps                  | 991          |
+|    iterations           | 8            |
+|    time_elapsed         | 16           |
+|    total_timesteps      | 16384        |
+| train/                  |              |
+|    approx_kl            | 0.0031097403 |
+|    clip_fraction        | 0.0188       |
+|    clip_range           | 0.189        |
+|    entropy_loss         | -0.614       |
+|    explained_variance   | 0.3791567    |
+|    learning_rate        | 0.0003       |
+|    loss                 | 32.1         |
+|    n_updates            | 70           |
+|    policy_gradient_loss | -0.00574     |
+|    value_loss           | 71.8         |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.191        |
+|    drift_magnitude      | 0.458        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000314     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.729        |
+| rollout/                |              |
+|    ep_len_mean          | 125          |
+|    ep_rew_mean          | 125          |
+| time/                   |              |
+|    fps                  | 992          |
+|    iterations           | 9            |
+|    time_elapsed         | 18           |
+|    total_timesteps      | 18432        |
+| train/                  |              |
+|    approx_kl            | 0.0041563264 |
+|    clip_fraction        | 0.028        |
+|    clip_range           | 0.19         |
+|    entropy_loss         | -0.596       |
+|    explained_variance   | 0.546143     |
+|    learning_rate        | 0.0003       |
+|    loss                 | 40.1         |
+|    n_updates            | 80           |
+|    policy_gradient_loss | -0.00537     |
+|    value_loss           | 63.2         |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.04         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.192        |
+|    drift_magnitude      | 0.41         |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000312     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.705        |
+| rollout/                |              |
+|    ep_len_mean          | 145          |
+|    ep_rew_mean          | 145          |
+| time/                   |              |
+|    fps                  | 991          |
+|    iterations           | 10           |
+|    time_elapsed         | 20           |
+|    total_timesteps      | 20480        |
+| train/                  |              |
+|    approx_kl            | 0.0023718788 |
+|    clip_fraction        | 0.0131       |
+|    clip_range           | 0.191        |
+|    entropy_loss         | -0.594       |
+|    explained_variance   | 0.7706742    |
+|    learning_rate        | 0.0003       |
+|    loss                 | 3.43         |
+|    n_updates            | 90           |
+|    policy_gradient_loss | -0.00485     |
+|    value_loss           | 35.4         |
+------------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.04        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.193       |
+|    drift_magnitude      | 0.36        |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000311    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.68        |
+| rollout/                |             |
+|    ep_len_mean          | 163         |
+|    ep_rew_mean          | 163         |
+| time/                   |             |
+|    fps                  | 992         |
+|    iterations           | 11          |
+|    time_elapsed         | 22          |
+|    total_timesteps      | 22528       |
+| train/                  |             |
+|    approx_kl            | 0.007016407 |
+|    clip_fraction        | 0.0524      |
+|    clip_range           | 0.192       |
+|    entropy_loss         | -0.592      |
+|    explained_variance   | 0.81430775  |
+|    learning_rate        | 0.0003      |
+|    loss                 | 5.8         |
+|    n_updates            | 100         |
+|    policy_gradient_loss | -0.00742    |
+|    value_loss           | 25.7        |
+-----------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.03        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.194       |
+|    drift_magnitude      | 0.312       |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000309    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.656       |
+| rollout/                |             |
+|    ep_len_mean          | 185         |
+|    ep_rew_mean          | 185         |
+| time/                   |             |
+|    fps                  | 991         |
+|    iterations           | 12          |
+|    time_elapsed         | 24          |
+|    total_timesteps      | 24576       |
+| train/                  |             |
+|    approx_kl            | 0.005436202 |
+|    clip_fraction        | 0.0537      |
+|    clip_range           | 0.193       |
+|    entropy_loss         | -0.578      |
+|    explained_variance   | 0.108766735 |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.306       |
+|    n_updates            | 110         |
+|    policy_gradient_loss | -0.00449    |
+|    value_loss           | 7.25        |
+-----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1            |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.199        |
+|    drift_magnitude      | 0.0384       |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000301     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.519        |
+| rollout/                |              |
+|    ep_len_mean          | 204          |
+|    ep_rew_mean          | 204          |
+| time/                   |              |
+|    fps                  | 989          |
+|    iterations           | 13           |
+|    time_elapsed         | 26           |
+|    total_timesteps      | 26624        |
+| train/                  |              |
+|    approx_kl            | 0.0006444581 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.194        |
+|    entropy_loss         | -0.58        |
+|    explained_variance   | 0.015171945  |
+|    learning_rate        | 0.0003       |
+|    loss                 | 11.7         |
+|    n_updates            | 120          |
+|    policy_gradient_loss | 0.000347     |
+|    value_loss           | 23           |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.01         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.198        |
+|    drift_magnitude      | 0.0864       |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000303     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.543        |
+| rollout/                |              |
+|    ep_len_mean          | 220          |
+|    ep_rew_mean          | 220          |
+| time/                   |              |
+|    fps                  | 987          |
+|    iterations           | 14           |
+|    time_elapsed         | 29           |
+|    total_timesteps      | 28672        |
+| train/                  |              |
+|    approx_kl            | 0.0033361954 |
+|    clip_fraction        | 0.0196       |
+|    clip_range           | 0.199        |
+|    entropy_loss         | -0.53        |
+|    explained_variance   | -0.8242495   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.289        |
+|    n_updates            | 130          |
+|    policy_gradient_loss | -0.000921    |
+|    value_loss           | 3.11         |
+------------------------------------------
+----------------------------------------
+| adaptive/               |            |
+|    adaptation_factor    | 1.01       |
+|    algorithm            | PPO        |
+|    base_clip_range      | 0.2        |
+|    base_lr              | 0.0003     |
+|    clip_range           | 0.197      |
+|    drift_magnitude      | 0.137      |
+|    ent_coef             | 0          |
+|    learning_rate        | 0.000304   |
+| env/                    |            |
+|    base_value           | 0.5        |
+|    length               | 0.568      |
+| rollout/                |            |
+|    ep_len_mean          | 239        |
+|    ep_rew_mean          | 239        |
+| time/                   |            |
+|    fps                  | 986        |
+|    iterations           | 15         |
+|    time_elapsed         | 31         |
+|    total_timesteps      | 30720      |
+| train/                  |            |
+|    approx_kl            | 0.00870527 |
+|    clip_fraction        | 0.0492     |
+|    clip_range           | 0.198      |
+|    entropy_loss         | -0.527     |
+|    explained_variance   | 0.18388861 |
+|    learning_rate        | 0.0003     |
+|    loss                 | 0.0772     |
+|    n_updates            | 140        |
+|    policy_gradient_loss | -0.00169   |
+|    value_loss           | 1.9        |
+----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.02         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.196        |
+|    drift_magnitude      | 0.185        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000306     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.592        |
+| rollout/                |              |
+|    ep_len_mean          | 256          |
+|    ep_rew_mean          | 256          |
+| time/                   |              |
+|    fps                  | 987          |
+|    iterations           | 16           |
+|    time_elapsed         | 33           |
+|    total_timesteps      | 32768        |
+| train/                  |              |
+|    approx_kl            | 0.0027036571 |
+|    clip_fraction        | 0.0132       |
+|    clip_range           | 0.197        |
+|    entropy_loss         | -0.517       |
+|    explained_variance   | 0.009613395  |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0529       |
+|    n_updates            | 150          |
+|    policy_gradient_loss | -0.0004      |
+|    value_loss           | 1.19         |
+------------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.02        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.195       |
+|    drift_magnitude      | 0.235       |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000307    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.618       |
+| rollout/                |             |
+|    ep_len_mean          | 273         |
+|    ep_rew_mean          | 273         |
+| time/                   |             |
+|    fps                  | 986         |
+|    iterations           | 17          |
+|    time_elapsed         | 35          |
+|    total_timesteps      | 34816       |
+| train/                  |             |
+|    approx_kl            | 0.005446555 |
+|    clip_fraction        | 0.0178      |
+|    clip_range           | 0.196       |
+|    entropy_loss         | -0.515      |
+|    explained_variance   | 0.08021563  |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.068       |
+|    n_updates            | 160         |
+|    policy_gradient_loss | 0.000121    |
+|    value_loss           | 0.713       |
+-----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.03         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.194        |
+|    drift_magnitude      | 0.283        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000308     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.642        |
+| rollout/                |              |
+|    ep_len_mean          | 291          |
+|    ep_rew_mean          | 291          |
+| time/                   |              |
+|    fps                  | 985          |
+|    iterations           | 18           |
+|    time_elapsed         | 37           |
+|    total_timesteps      | 36864        |
+| train/                  |              |
+|    approx_kl            | 0.0039438894 |
+|    clip_fraction        | 0.017        |
+|    clip_range           | 0.195        |
+|    entropy_loss         | -0.525       |
+|    explained_variance   | 0.17284536   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0533       |
+|    n_updates            | 170          |
+|    policy_gradient_loss | -8.14e-05    |
+|    value_loss           | 0.456        |
+------------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.06        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.189       |
+|    drift_magnitude      | 0.566       |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000317    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.783       |
+| rollout/                |             |
+|    ep_len_mean          | 309         |
+|    ep_rew_mean          | 309         |
+| time/                   |             |
+|    fps                  | 984         |
+|    iterations           | 19          |
+|    time_elapsed         | 39          |
+|    total_timesteps      | 38912       |
+| train/                  |             |
+|    approx_kl            | 0.005316955 |
+|    clip_fraction        | 0.0297      |
+|    clip_range           | 0.194       |
+|    entropy_loss         | -0.5        |
+|    explained_variance   | 0.33982992  |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.0419      |
+|    n_updates            | 180         |
+|    policy_gradient_loss | -0.00193    |
+|    value_loss           | 0.286       |
+-----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.19         |
+|    drift_magnitude      | 0.518        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000316     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.759        |
+| rollout/                |              |
+|    ep_len_mean          | 327          |
+|    ep_rew_mean          | 327          |
+| time/                   |              |
+|    fps                  | 984          |
+|    iterations           | 20           |
+|    time_elapsed         | 41           |
+|    total_timesteps      | 40960        |
+| train/                  |              |
+|    approx_kl            | 0.0012680041 |
+|    clip_fraction        | 0.016        |
+|    clip_range           | 0.189        |
+|    entropy_loss         | -0.52        |
+|    explained_variance   | 0.33321708   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0137       |
+|    n_updates            | 190          |
+|    policy_gradient_loss | -0.000137    |
+|    value_loss           | 0.179        |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.191        |
+|    drift_magnitude      | 0.468        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000314     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.734        |
+| rollout/                |              |
+|    ep_len_mean          | 341          |
+|    ep_rew_mean          | 341          |
+| time/                   |              |
+|    fps                  | 983          |
+|    iterations           | 21           |
+|    time_elapsed         | 43           |
+|    total_timesteps      | 43008        |
+| train/                  |              |
+|    approx_kl            | 0.0060020983 |
+|    clip_fraction        | 0.0604       |
+|    clip_range           | 0.19         |
+|    entropy_loss         | -0.521       |
+|    explained_variance   | 0.29662675   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.000873     |
+|    n_updates            | 200          |
+|    policy_gradient_loss | -0.00343     |
+|    value_loss           | 0.101        |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.04         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.192        |
+|    drift_magnitude      | 0.42         |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000313     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.71         |
+| rollout/                |              |
+|    ep_len_mean          | 356          |
+|    ep_rew_mean          | 356          |
+| time/                   |              |
+|    fps                  | 982          |
+|    iterations           | 22           |
+|    time_elapsed         | 45           |
+|    total_timesteps      | 45056        |
+| train/                  |              |
+|    approx_kl            | 0.0045177024 |
+|    clip_fraction        | 0.0248       |
+|    clip_range           | 0.191        |
+|    entropy_loss         | -0.518       |
+|    explained_variance   | 0.038009465  |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.0102      |
+|    n_updates            | 210          |
+|    policy_gradient_loss | -0.000327    |
+|    value_loss           | 0.0635       |
+------------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.04        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.193       |
+|    drift_magnitude      | 0.37        |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000311    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.685       |
+| rollout/                |             |
+|    ep_len_mean          | 376         |
+|    ep_rew_mean          | 376         |
+| time/                   |             |
+|    fps                  | 983         |
+|    iterations           | 23          |
+|    time_elapsed         | 47          |
+|    total_timesteps      | 47104       |
+| train/                  |             |
+|    approx_kl            | 0.004547875 |
+|    clip_fraction        | 0.0435      |
+|    clip_range           | 0.192       |
+|    entropy_loss         | -0.523      |
+|    explained_variance   | 0.059034646 |
+|    learning_rate        | 0.0003      |
+|    loss                 | -0.00992    |
+|    n_updates            | 220         |
+|    policy_gradient_loss | -0.00189    |
+|    value_loss           | 0.0421      |
+-----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.03         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.194        |
+|    drift_magnitude      | 0.322        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.00031      |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.661        |
+| rollout/                |              |
+|    ep_len_mean          | 390          |
+|    ep_rew_mean          | 390          |
+| time/                   |              |
+|    fps                  | 984          |
+|    iterations           | 24           |
+|    time_elapsed         | 49           |
+|    total_timesteps      | 49152        |
+| train/                  |              |
+|    approx_kl            | 0.0016392748 |
+|    clip_fraction        | 0.00981      |
+|    clip_range           | 0.193        |
+|    entropy_loss         | -0.519       |
+|    explained_variance   | -0.019796848 |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0173       |
+|    n_updates            | 230          |
+|    policy_gradient_loss | -0.000175    |
+|    value_loss           | 0.0265       |
+------------------------------------------
+-------------------------------------------
+| adaptive/               |               |
+|    adaptation_factor    | 1             |
+|    algorithm            | PPO           |
+|    base_clip_range      | 0.2           |
+|    base_lr              | 0.0003        |
+|    clip_range           | 0.199         |
+|    drift_magnitude      | 0.0288        |
+|    ent_coef             | 0             |
+|    learning_rate        | 0.000301      |
+| env/                    |               |
+|    base_value           | 0.5           |
+|    length               | 0.514         |
+| rollout/                |               |
+|    ep_len_mean          | 405           |
+|    ep_rew_mean          | 405           |
+| time/                   |               |
+|    fps                  | 984           |
+|    iterations           | 25            |
+|    time_elapsed         | 51            |
+|    total_timesteps      | 51200         |
+| train/                  |               |
+|    approx_kl            | 0.00083751976 |
+|    clip_fraction        | 0.00464       |
+|    clip_range           | 0.194         |
+|    entropy_loss         | -0.501        |
+|    explained_variance   | 0.07974982    |
+|    learning_rate        | 0.0003        |
+|    loss                 | 0.0037        |
+|    n_updates            | 240           |
+|    policy_gradient_loss | -9.77e-06     |
+|    value_loss           | 0.0165        |
+-------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.01         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.198        |
+|    drift_magnitude      | 0.0768       |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000302     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.538        |
+| rollout/                |              |
+|    ep_len_mean          | 418          |
+|    ep_rew_mean          | 418          |
+| time/                   |              |
+|    fps                  | 982          |
+|    iterations           | 26           |
+|    time_elapsed         | 54           |
+|    total_timesteps      | 53248        |
+| train/                  |              |
+|    approx_kl            | 0.003543764  |
+|    clip_fraction        | 0.0361       |
+|    clip_range           | 0.199        |
+|    entropy_loss         | -0.463       |
+|    explained_variance   | -0.068385124 |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.0122      |
+|    n_updates            | 250          |
+|    policy_gradient_loss | -0.000897    |
+|    value_loss           | 0.0105       |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.01         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.198        |
+|    drift_magnitude      | 0.125        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000304     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.562        |
+| rollout/                |              |
+|    ep_len_mean          | 431          |
+|    ep_rew_mean          | 431          |
+| time/                   |              |
+|    fps                  | 977          |
+|    iterations           | 27           |
+|    time_elapsed         | 56           |
+|    total_timesteps      | 55296        |
+| train/                  |              |
+|    approx_kl            | 0.0038048418 |
+|    clip_fraction        | 0.0272       |
+|    clip_range           | 0.198        |
+|    entropy_loss         | -0.454       |
+|    explained_variance   | 0.10318297   |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.00462     |
+|    n_updates            | 260          |
+|    policy_gradient_loss | -0.00115     |
+|    value_loss           | 0.00681      |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.02         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.197        |
+|    drift_magnitude      | 0.175        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000305     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.588        |
+| rollout/                |              |
+|    ep_len_mean          | 444          |
+|    ep_rew_mean          | 444          |
+| time/                   |              |
+|    fps                  | 975          |
+|    iterations           | 28           |
+|    time_elapsed         | 58           |
+|    total_timesteps      | 57344        |
+| train/                  |              |
+|    approx_kl            | 0.0022976769 |
+|    clip_fraction        | 0.0107       |
+|    clip_range           | 0.197        |
+|    entropy_loss         | -0.461       |
+|    explained_variance   | -0.026186585 |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0187       |
+|    n_updates            | 270          |
+|    policy_gradient_loss | -0.000428    |
+|    value_loss           | 0.00451      |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.02         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.196        |
+|    drift_magnitude      | 0.223        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000307     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.612        |
+| rollout/                |              |
+|    ep_len_mean          | 457          |
+|    ep_rew_mean          | 457          |
+| time/                   |              |
+|    fps                  | 976          |
+|    iterations           | 29           |
+|    time_elapsed         | 60           |
+|    total_timesteps      | 59392        |
+| train/                  |              |
+|    approx_kl            | 0.0044494355 |
+|    clip_fraction        | 0.0365       |
+|    clip_range           | 0.197        |
+|    entropy_loss         | -0.453       |
+|    explained_variance   | 0.027041495  |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.00206     |
+|    n_updates            | 280          |
+|    policy_gradient_loss | -0.000756    |
+|    value_loss           | 0.00293      |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.03         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.195        |
+|    drift_magnitude      | 0.274        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000308     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.637        |
+| rollout/                |              |
+|    ep_len_mean          | 467          |
+|    ep_rew_mean          | 467          |
+| time/                   |              |
+|    fps                  | 976          |
+|    iterations           | 30           |
+|    time_elapsed         | 62           |
+|    total_timesteps      | 61440        |
+| train/                  |              |
+|    approx_kl            | 0.0019404787 |
+|    clip_fraction        | 0.0204       |
+|    clip_range           | 0.196        |
+|    entropy_loss         | -0.451       |
+|    explained_variance   | -0.075597286 |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.00383      |
+|    n_updates            | 290          |
+|    policy_gradient_loss | -0.00139     |
+|    value_loss           | 0.00209      |
+------------------------------------------
+-------------------------------------------
+| adaptive/               |               |
+|    adaptation_factor    | 1.06          |
+|    algorithm            | PPO           |
+|    base_clip_range      | 0.2           |
+|    base_lr              | 0.0003        |
+|    clip_range           | 0.189         |
+|    drift_magnitude      | 0.578         |
+|    ent_coef             | 0             |
+|    learning_rate        | 0.000317      |
+| env/                    |               |
+|    base_value           | 0.5           |
+|    length               | 0.789         |
+| rollout/                |               |
+|    ep_len_mean          | 480           |
+|    ep_rew_mean          | 480           |
+| time/                   |               |
+|    fps                  | 975           |
+|    iterations           | 31            |
+|    time_elapsed         | 65            |
+|    total_timesteps      | 63488         |
+| train/                  |               |
+|    approx_kl            | 0.00069724955 |
+|    clip_fraction        | 0.00591       |
+|    clip_range           | 0.195         |
+|    entropy_loss         | -0.476        |
+|    explained_variance   | -0.031024694  |
+|    learning_rate        | 0.0003        |
+|    loss                 | 6.18e-05      |
+|    n_updates            | 300           |
+|    policy_gradient_loss | 0.000413      |
+|    value_loss           | 0.00136       |
+-------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.19         |
+|    drift_magnitude      | 0.528        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000316     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.764        |
+| rollout/                |              |
+|    ep_len_mean          | 487          |
+|    ep_rew_mean          | 487          |
+| time/                   |              |
+|    fps                  | 975          |
+|    iterations           | 32           |
+|    time_elapsed         | 67           |
+|    total_timesteps      | 65536        |
+| train/                  |              |
+|    approx_kl            | 0.0037811012 |
+|    clip_fraction        | 0.0393       |
+|    clip_range           | 0.189        |
+|    entropy_loss         | -0.495       |
+|    explained_variance   | 0.07635862   |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.0134      |
+|    n_updates            | 310          |
+|    policy_gradient_loss | -0.00324     |
+|    value_loss           | 0.000905     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.191        |
+|    drift_magnitude      | 0.48         |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000314     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.74         |
+| rollout/                |              |
+|    ep_len_mean          | 495          |
+|    ep_rew_mean          | 495          |
+| time/                   |              |
+|    fps                  | 974          |
+|    iterations           | 33           |
+|    time_elapsed         | 69           |
+|    total_timesteps      | 67584        |
+| train/                  |              |
+|    approx_kl            | 0.0068174703 |
+|    clip_fraction        | 0.0698       |
+|    clip_range           | 0.19         |
+|    entropy_loss         | -0.51        |
+|    explained_variance   | 0.14540112   |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.000638    |
+|    n_updates            | 320          |
+|    policy_gradient_loss | -0.00392     |
+|    value_loss           | 0.000692     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.04         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.192        |
+|    drift_magnitude      | 0.43         |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000313     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.715        |
+| rollout/                |              |
+|    ep_len_mean          | 499          |
+|    ep_rew_mean          | 499          |
+| time/                   |              |
+|    fps                  | 973          |
+|    iterations           | 34           |
+|    time_elapsed         | 71           |
+|    total_timesteps      | 69632        |
+| train/                  |              |
+|    approx_kl            | 0.0034386525 |
+|    clip_fraction        | 0.00986      |
+|    clip_range           | 0.191        |
+|    entropy_loss         | -0.499       |
+|    explained_variance   | 0.08426368   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0128       |
+|    n_updates            | 330          |
+|    policy_gradient_loss | -0.00112     |
+|    value_loss           | 0.000501     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.04         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.193        |
+|    drift_magnitude      | 0.382        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000311     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.691        |
+| rollout/                |              |
+|    ep_len_mean          | 499          |
+|    ep_rew_mean          | 499          |
+| time/                   |              |
+|    fps                  | 972          |
+|    iterations           | 35           |
+|    time_elapsed         | 73           |
+|    total_timesteps      | 71680        |
+| train/                  |              |
+|    approx_kl            | 0.0033991004 |
+|    clip_fraction        | 0.0128       |
+|    clip_range           | 0.192        |
+|    entropy_loss         | -0.491       |
+|    explained_variance   | -0.10781741  |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.0132      |
+|    n_updates            | 340          |
+|    policy_gradient_loss | -0.000354    |
+|    value_loss           | 0.000309     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.03         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.194        |
+|    drift_magnitude      | 0.331        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.00031      |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.666        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 971          |
+|    iterations           | 36           |
+|    time_elapsed         | 75           |
+|    total_timesteps      | 73728        |
+| train/                  |              |
+|    approx_kl            | 0.0029383847 |
+|    clip_fraction        | 0.019        |
+|    clip_range           | 0.193        |
+|    entropy_loss         | -0.475       |
+|    explained_variance   | 0.11669922   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.00543      |
+|    n_updates            | 350          |
+|    policy_gradient_loss | -0.00188     |
+|    value_loss           | 0.000213     |
+------------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1           |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.2         |
+|    drift_magnitude      | 0.0168      |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000301    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.508       |
+| rollout/                |             |
+|    ep_len_mean          | 500         |
+|    ep_rew_mean          | 500         |
+| time/                   |             |
+|    fps                  | 970         |
+|    iterations           | 37          |
+|    time_elapsed         | 78          |
+|    total_timesteps      | 75776       |
+| train/                  |             |
+|    approx_kl            | 0.005073866 |
+|    clip_fraction        | 0.0408      |
+|    clip_range           | 0.194       |
+|    entropy_loss         | -0.464      |
+|    explained_variance   | 0.08192462  |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.0064      |
+|    n_updates            | 360         |
+|    policy_gradient_loss | -0.00119    |
+|    value_loss           | 0.00017     |
+-----------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.01        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.199       |
+|    drift_magnitude      | 0.0672      |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000302    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.534       |
+| rollout/                |             |
+|    ep_len_mean          | 500         |
+|    ep_rew_mean          | 500         |
+| time/                   |             |
+|    fps                  | 969         |
+|    iterations           | 38          |
+|    time_elapsed         | 80          |
+|    total_timesteps      | 77824       |
+| train/                  |             |
+|    approx_kl            | 0.006002403 |
+|    clip_fraction        | 0.0439      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -0.428      |
+|    explained_variance   | -0.0421201  |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.00502     |
+|    n_updates            | 370         |
+|    policy_gradient_loss | -0.000958   |
+|    value_loss           | 0.000116    |
+-----------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.01        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.198       |
+|    drift_magnitude      | 0.115       |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000303    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.558       |
+| rollout/                |             |
+|    ep_len_mean          | 500         |
+|    ep_rew_mean          | 500         |
+| time/                   |             |
+|    fps                  | 969         |
+|    iterations           | 39          |
+|    time_elapsed         | 82          |
+|    total_timesteps      | 79872       |
+| train/                  |             |
+|    approx_kl            | 0.005385194 |
+|    clip_fraction        | 0.0685      |
+|    clip_range           | 0.199       |
+|    entropy_loss         | -0.387      |
+|    explained_variance   | -0.16805434 |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.0127      |
+|    n_updates            | 380         |
+|    policy_gradient_loss | -0.00241    |
+|    value_loss           | 8.92e-05    |
+-----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.02         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.197        |
+|    drift_magnitude      | 0.166        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000305     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.583        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 969          |
+|    iterations           | 40           |
+|    time_elapsed         | 84           |
+|    total_timesteps      | 81920        |
+| train/                  |              |
+|    approx_kl            | 0.0024029578 |
+|    clip_fraction        | 0.0178       |
+|    clip_range           | 0.198        |
+|    entropy_loss         | -0.426       |
+|    explained_variance   | -0.049150944 |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.00581     |
+|    n_updates            | 390          |
+|    policy_gradient_loss | -0.00083     |
+|    value_loss           | 6.18e-05     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.02         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.196        |
+|    drift_magnitude      | 0.214        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000306     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.607        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 967          |
+|    iterations           | 41           |
+|    time_elapsed         | 86           |
+|    total_timesteps      | 83968        |
+| train/                  |              |
+|    approx_kl            | 0.0027465345 |
+|    clip_fraction        | 0.0267       |
+|    clip_range           | 0.197        |
+|    entropy_loss         | -0.407       |
+|    explained_variance   | -0.11204207  |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.00111      |
+|    n_updates            | 400          |
+|    policy_gradient_loss | -0.00259     |
+|    value_loss           | 4.48e-05     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.03         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.195        |
+|    drift_magnitude      | 0.264        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000308     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.632        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 967          |
+|    iterations           | 42           |
+|    time_elapsed         | 88           |
+|    total_timesteps      | 86016        |
+| train/                  |              |
+|    approx_kl            | 0.0047349683 |
+|    clip_fraction        | 0.0566       |
+|    clip_range           | 0.196        |
+|    entropy_loss         | -0.415       |
+|    explained_variance   | -0.048825264 |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.0117      |
+|    n_updates            | 410          |
+|    policy_gradient_loss | -0.00185     |
+|    value_loss           | 2.84e-05     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.06         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.189        |
+|    drift_magnitude      | 0.588        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000318     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.794        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 968          |
+|    iterations           | 43           |
+|    time_elapsed         | 90           |
+|    total_timesteps      | 88064        |
+| train/                  |              |
+|    approx_kl            | 0.0026389756 |
+|    clip_fraction        | 0.0112       |
+|    clip_range           | 0.195        |
+|    entropy_loss         | -0.423       |
+|    explained_variance   | -0.08780956  |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.000627    |
+|    n_updates            | 420          |
+|    policy_gradient_loss | 0.000197     |
+|    value_loss           | 2.27e-05     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.19         |
+|    drift_magnitude      | 0.538        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000316     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.769        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 969          |
+|    iterations           | 44           |
+|    time_elapsed         | 92           |
+|    total_timesteps      | 90112        |
+| train/                  |              |
+|    approx_kl            | 0.0020778608 |
+|    clip_fraction        | 0.0184       |
+|    clip_range           | 0.189        |
+|    entropy_loss         | -0.431       |
+|    explained_variance   | -0.09122729  |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.00336      |
+|    n_updates            | 430          |
+|    policy_gradient_loss | -0.0013      |
+|    value_loss           | 1.6e-05      |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.05         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.191        |
+|    drift_magnitude      | 0.49         |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000315     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.745        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 969          |
+|    iterations           | 45           |
+|    time_elapsed         | 95           |
+|    total_timesteps      | 92160        |
+| train/                  |              |
+|    approx_kl            | 0.0034846454 |
+|    clip_fraction        | 0.0354       |
+|    clip_range           | 0.19         |
+|    entropy_loss         | -0.484       |
+|    explained_variance   | -0.23152852  |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.00254      |
+|    n_updates            | 440          |
+|    policy_gradient_loss | -0.000809    |
+|    value_loss           | 1.19e-05     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.04         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.192        |
+|    drift_magnitude      | 0.439        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.000313     |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.72         |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 970          |
+|    iterations           | 46           |
+|    time_elapsed         | 97           |
+|    total_timesteps      | 94208        |
+| train/                  |              |
+|    approx_kl            | 0.0071555637 |
+|    clip_fraction        | 0.0592       |
+|    clip_range           | 0.191        |
+|    entropy_loss         | -0.471       |
+|    explained_variance   | -0.13510358  |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0135       |
+|    n_updates            | 450          |
+|    policy_gradient_loss | -0.00308     |
+|    value_loss           | 8.06e-06     |
+------------------------------------------
+-----------------------------------------
+| adaptive/               |             |
+|    adaptation_factor    | 1.04        |
+|    algorithm            | PPO         |
+|    base_clip_range      | 0.2         |
+|    base_lr              | 0.0003      |
+|    clip_range           | 0.192       |
+|    drift_magnitude      | 0.391       |
+|    ent_coef             | 0           |
+|    learning_rate        | 0.000312    |
+| env/                    |             |
+|    base_value           | 0.5         |
+|    length               | 0.696       |
+| rollout/                |             |
+|    ep_len_mean          | 500         |
+|    ep_rew_mean          | 500         |
+| time/                   |             |
+|    fps                  | 970         |
+|    iterations           | 47          |
+|    time_elapsed         | 99          |
+|    total_timesteps      | 96256       |
+| train/                  |             |
+|    approx_kl            | 0.002152627 |
+|    clip_fraction        | 0.0198      |
+|    clip_range           | 0.192       |
+|    entropy_loss         | -0.451      |
+|    explained_variance   | -0.07258487 |
+|    learning_rate        | 0.0003      |
+|    loss                 | -0.0108     |
+|    n_updates            | 460         |
+|    policy_gradient_loss | -0.00241    |
+|    value_loss           | 5.26e-06    |
+-----------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1.03         |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.193        |
+|    drift_magnitude      | 0.341        |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.00031      |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.67         |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 971          |
+|    iterations           | 48           |
+|    time_elapsed         | 101          |
+|    total_timesteps      | 98304        |
+| train/                  |              |
+|    approx_kl            | 0.0031311112 |
+|    clip_fraction        | 0.0232       |
+|    clip_range           | 0.192        |
+|    entropy_loss         | -0.416       |
+|    explained_variance   | -0.2502272   |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.000981     |
+|    n_updates            | 470          |
+|    policy_gradient_loss | -0.00152     |
+|    value_loss           | 8.85e-06     |
+------------------------------------------
+------------------------------------------
+| adaptive/               |              |
+|    adaptation_factor    | 1            |
+|    algorithm            | PPO          |
+|    base_clip_range      | 0.2          |
+|    base_lr              | 0.0003       |
+|    clip_range           | 0.2          |
+|    drift_magnitude      | 0.00718      |
+|    ent_coef             | 0            |
+|    learning_rate        | 0.0003       |
+| env/                    |              |
+|    base_value           | 0.5          |
+|    length               | 0.504        |
+| rollout/                |              |
+|    ep_len_mean          | 500          |
+|    ep_rew_mean          | 500          |
+| time/                   |              |
+|    fps                  | 973          |
+|    iterations           | 49           |
+|    time_elapsed         | 103          |
+|    total_timesteps      | 100352       |
+| train/                  |              |
+|    approx_kl            | 0.0057169897 |
+|    clip_fraction        | 0.0746       |
+|    clip_range           | 0.193        |
+|    entropy_loss         | -0.409       |
+|    explained_variance   | 0.21808869   |
+|    learning_rate        | 0.0003       |
+|    loss                 | -0.014       |
+|    n_updates            | 480          |
+|    policy_gradient_loss | -0.00327     |
+|    value_loss           | 3.28e-06     |
+------------------------------------------
+wandb: WARNING Symlinked 1 file into the W&B run directory; call wandb.save again to sync new files.
+wandb: updating run metadata
+wandb: uploading model.zip; uploading output.log; uploading wandb-summary.json; uploading history steps 831-1019, summary, console lines 1390-1625
+wandb: uploading model.zip; uploading output.log; uploading wandb-summary.json; uploading history steps 831-1019, summary, console lines 1390-1625; uploading config.yaml (+ 1 more)
+wandb: uploading output.log; uploading logs/CartPole_length_linear_Adaptive_20251216_224147_0/events.out.tfevents.1765900476.hungchan-Precision-7560.1162728.0
+wandb: uploading data
+wandb: 
+wandb: Run history:
+wandb: adaptive/adaptation_factor ▂▂▃▃▄█▇▇▆▅▁▂▃▃▄█▇▇▆▅▂▂▃▄▄█▇▆▆▅▂▂▃▄▄█▇▆▆▁
+wandb:   adaptive/base_clip_range ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           adaptive/base_lr ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        adaptive/clip_range ▇▇▆▆▅▁▂▂▃▄█▇▆▆▅▁▂▂▃▄█▇▇▆▅▁▂▂▃▃█▇▇▆▅▁▂▂▃█
+wandb:   adaptive/drift_magnitude ▂▂▃▃▄█▇▇▆▅▁▂▃▃▄█▇▇▆▆▂▂▃▄▄█▇▆▆▅▂▂▃▄▄█▇▆▆▁
+wandb:          adaptive/ent_coef ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:     adaptive/learning_rate ▁▂▃▃▄█▇▇▆▅▁▂▃▃▄█▇▇▆▅▁▂▂▃▄█▇▇▆▆▁▂▃▄▄█▇▆▆▁
+wandb:             env/base_value ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:                 env/length ▂▂▃▃▄█▇▇▆▅▁▂▃▃▄█▇▇▆▆▁▂▂▃▄█▇▆▆▅▂▂▃▄▄█▇▆▆▁
+wandb:                global_step ▁▁▂▂▂▂▂▂▃▃▃▃▄▄▄▅▅▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇▇▇██████
+wandb:                        +12 ...
+wandb: 
+wandb: Run summary:
+wandb: adaptive/adaptation_factor 1.00072
+wandb:   adaptive/base_clip_range 0.2
+wandb:           adaptive/base_lr 0.0003
+wandb:        adaptive/clip_range 0.19986
+wandb:   adaptive/drift_magnitude 0.00718
+wandb:          adaptive/ent_coef 0
+wandb:     adaptive/learning_rate 0.0003
+wandb:             env/base_value 0.5
+wandb:                 env/length 0.50359
+wandb:                global_step 100352
+wandb:                        +12 ...
+wandb: 
+wandb: 🚀 View run CartPole_length_linear_Adaptive_20251216_224147 at: https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research/runs/kil15b7d
+wandb: ⭐️ View project at: https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 2 other file(s)
+wandb: Find logs at: logs/CartPole_length_linear_Adaptive_20251216_224147/wandb/run-20251216_225434-kil15b7d/logs
+>>> [DriftAdaptiveCallback] Training Ended
+    Final LR: 0.000300
+    Last Drift Magnitude: 0.0084
+    Final Clip Range: 0.1998
+Model saved locally to: models/CartPole_length_linear_Adaptive_20251216_224147.zip

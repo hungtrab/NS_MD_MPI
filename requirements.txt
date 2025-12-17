@@ -3,7 +3,12 @@
 
 # Core RL
 stable-baselines3>=2.0.0
+sb3-contrib>=2.0.0  # For TRPO and other algorithms
 gymnasium>=0.29.0
+gymnasium[mujoco]>=0.29.0  # For HalfCheetah and other MuJoCo envs
+
+# MiniGrid (for grid-world environments)
+minigrid>=2.3.0
 
 # Logging
 wandb>=0.15.0

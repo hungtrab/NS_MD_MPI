@@ -1,0 +1,75 @@
+# ============================================================================
+# CONFIGURATION: Non-Stationary MiniGrid Experiments
+# ============================================================================
+#
+# MiniGrid: Grid-world navigation with partial observability
+# Drifting reward scale or step penalty changes optimal strategies
+#
+# Requires: pip install minigrid
+#
+# ============================================================================
+
+env_id: "MiniGrid-Empty-8x8-v0"
+
+env:
+  # -------------------------------------------------------------------------
+  # PARAMETER TO DRIFT
+  # -------------------------------------------------------------------------
+  # Options:
+  #   - "reward_scale" : Multiplier for rewards (default=1.0)
+  #   - "max_steps"    : Episode length limit (default varies by env)
+  #   - "step_penalty" : Penalty per step (default=0.0)
+  parameter: "reward_scale"
+  
+  # -------------------------------------------------------------------------
+  # DRIFT PATTERN
+  # -------------------------------------------------------------------------
+  drift_type: "sine"           # static, jump, linear, sine, random_walk
+  
+  # -------------------------------------------------------------------------
+  # DRIFT DYNAMICS
+  # -------------------------------------------------------------------------
+  # For reward_scale (base=1.0):
+  #   magnitude=0.5 → varies from 0.5 to 1.5
+  magnitude: 0.5
+  period: 15000
+
+  # Random walk settings
+  sigma: 0.05
+  bounds: [0.1, 2.0]
+
+# Weights & Biases
+wandb:
+  project: "MiniGrid_Drift_Research"
+  tags: ["minigrid", "reward_drift"]
+  mode: "online"
+
+# Training
+train:
+  learning_rate: 0.0003
+  n_steps: 512
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+# Adaptive
+adaptive:
+  enabled: false
+  scale_factor: 0.15
+  min_lr_multiplier: 0.5
+  max_lr_multiplier: 3.0
+  log_freq: 100
+
+# Paths
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"
+
+# Note: Other MiniGrid environments you can try:
+# - MiniGrid-Empty-5x5-v0
+# - MiniGrid-Empty-16x16-v0
+# - MiniGrid-FourRooms-v0
+# - MiniGrid-DoorKey-5x5-v0
+# - MiniGrid-Dynamic-Obstacles-5x5-v0

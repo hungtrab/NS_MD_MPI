@@ -1,0 +1,1487 @@
+wandb: Currently logged in as: hungtrab (hungtrab-hanoi-university-of-science-and-technology) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run gjt2oe18
+wandb: Tracking run with wandb version 0.23.1
+wandb: Run data is saved locally in logs/CartPole_masscart_random_walk_Adaptive_20251217_125255/wandb/run-20251217_130030-gjt2oe18
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run CartPole_masscart_random_walk_Adaptive_20251217_125255
+wandb: ⭐️ View project at https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research_TRPO
+wandb: 🚀 View run at https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research_TRPO/runs/gjt2oe18
+/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run TRPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+--- Training Start: CartPole_masscart_random_walk_Adaptive_20251217_125255 ---
+>>> [Wrapper] Initialized Non-Stationary CartPole
+    - masscart: random_walk (magnitude=0.5, period=10000)
+>>> Initializing TRPO with kwargs: ['policy', 'env', 'learning_rate', 'gamma', 'verbose', 'tensorboard_log', 'n_steps', 'batch_size']
+Using cuda device
+Wrapping the env in a DummyVecEnv.
+Logging to logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0
+>>> [DriftAdaptiveCallback] Training Started
+    Algorithm: TRPO
+    Target Param: masscart (base=0.9743523469729435)
+    Scale Factor: 0.1
+    
+    Adaptive Hyperparameters:
+      - Learning Rate: 0.000300
+      - Target KL: 0.0100 (adapt=True)
+-----------------------------------
+| adaptive/            |          |
+|    adaptation_factor | 1.72     |
+|    algorithm         | TRPO     |
+|    base_lr           | 0.0003   |
+|    base_target_kl    | 0.01     |
+|    drift_magnitude   | 7.18     |
+|    learning_rate     | 0.000515 |
+|    target_kl         | 0.00582  |
+| env/                 |          |
+|    base_value        | 0.974    |
+|    masscart          | 7.97     |
+| rollout/             |          |
+|    ep_len_mean       | 38.5     |
+|    ep_rew_mean       | 38.5     |
+| time/                |          |
+|    fps               | 1364     |
+|    iterations        | 1        |
+|    time_elapsed      | 1        |
+|    total_timesteps   | 2048     |
+-----------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 1.54     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 5.42     |
+|    learning_rate          | 0.000463 |
+|    target_kl              | 0.00649  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 6.25     |
+| rollout/                  |          |
+|    ep_len_mean            | 41.3     |
+|    ep_rew_mean            | 41.3     |
+| time/                     |          |
+|    fps                    | 1309     |
+|    iterations             | 2        |
+|    time_elapsed           | 3        |
+|    total_timesteps        | 4096     |
+| train/                    |          |
+|    explained_variance     | -0.00194 |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00445  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 1        |
+|    policy_objective       | 0.00625  |
+|    value_loss             | 71.4     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 1.75     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 7.45     |
+|    learning_rate          | 0.000524 |
+|    target_kl              | 0.00573  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 8.23     |
+| rollout/                  |          |
+|    ep_len_mean            | 43.5     |
+|    ep_rew_mean            | 43.5     |
+| time/                     |          |
+|    fps                    | 1310     |
+|    iterations             | 3        |
+|    time_elapsed           | 4        |
+|    total_timesteps        | 6144     |
+| train/                    |          |
+|    explained_variance     | 0.0213   |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00401  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 2        |
+|    policy_objective       | 0.00921  |
+|    value_loss             | 42.8     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 1.92     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 9.24     |
+|    learning_rate          | 0.000577 |
+|    target_kl              | 0.0052   |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 9.97     |
+| rollout/                  |          |
+|    ep_len_mean            | 44.3     |
+|    ep_rew_mean            | 44.3     |
+| time/                     |          |
+|    fps                    | 1313     |
+|    iterations             | 4        |
+|    time_elapsed           | 6        |
+|    total_timesteps        | 8192     |
+| train/                    |          |
+|    explained_variance     | 0.346    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00505  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 3        |
+|    policy_objective       | 0.0056   |
+|    value_loss             | 46       |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.1      |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 11       |
+|    learning_rate          | 0.000629 |
+|    target_kl              | 0.00477  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 11.7     |
+| rollout/                  |          |
+|    ep_len_mean            | 45.5     |
+|    ep_rew_mean            | 45.5     |
+| time/                     |          |
+|    fps                    | 1300     |
+|    iterations             | 5        |
+|    time_elapsed           | 7        |
+|    total_timesteps        | 10240    |
+| train/                    |          |
+|    explained_variance     | 0.278    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00391  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 4        |
+|    policy_objective       | 0.00359  |
+|    value_loss             | 66       |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.19     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 11.9     |
+|    learning_rate          | 0.000656 |
+|    target_kl              | 0.00457  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 12.6     |
+| rollout/                  |          |
+|    ep_len_mean            | 46.7     |
+|    ep_rew_mean            | 46.7     |
+| time/                     |          |
+|    fps                    | 1282     |
+|    iterations             | 6        |
+|    time_elapsed           | 9        |
+|    total_timesteps        | 12288    |
+| train/                    |          |
+|    explained_variance     | 0.439    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00332  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 5        |
+|    policy_objective       | 0.00465  |
+|    value_loss             | 60.5     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.17     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 11.7     |
+|    learning_rate          | 0.000651 |
+|    target_kl              | 0.00461  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 12.4     |
+| rollout/                  |          |
+|    ep_len_mean            | 44.5     |
+|    ep_rew_mean            | 44.5     |
+| time/                     |          |
+|    fps                    | 1272     |
+|    iterations             | 7        |
+|    time_elapsed           | 11       |
+|    total_timesteps        | 14336    |
+| train/                    |          |
+|    explained_variance     | 0.381    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00218  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 6        |
+|    policy_objective       | 0.00281  |
+|    value_loss             | 71.2     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 1.68     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 6.8      |
+|    learning_rate          | 0.000504 |
+|    target_kl              | 0.00595  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 7.6      |
+| rollout/                  |          |
+|    ep_len_mean            | 44.4     |
+|    ep_rew_mean            | 44.4     |
+| time/                     |          |
+|    fps                    | 1262     |
+|    iterations             | 8        |
+|    time_elapsed           | 12       |
+|    total_timesteps        | 16384    |
+| train/                    |          |
+|    explained_variance     | 0.315    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00313  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 7        |
+|    policy_objective       | 0.0038   |
+|    value_loss             | 80.9     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.01     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 10.1     |
+|    learning_rate          | 0.000604 |
+|    target_kl              | 0.00497  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 10.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 46       |
+|    ep_rew_mean            | 46       |
+| time/                     |          |
+|    fps                    | 1259     |
+|    iterations             | 9        |
+|    time_elapsed           | 14       |
+|    total_timesteps        | 18432    |
+| train/                    |          |
+|    explained_variance     | 0.346    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00417  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 8        |
+|    policy_objective       | 0.00501  |
+|    value_loss             | 74.1     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.72     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 17.2     |
+|    learning_rate          | 0.000815 |
+|    target_kl              | 0.00368  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 17.7     |
+| rollout/                  |          |
+|    ep_len_mean            | 45.1     |
+|    ep_rew_mean            | 45.1     |
+| time/                     |          |
+|    fps                    | 1263     |
+|    iterations             | 10       |
+|    time_elapsed           | 16       |
+|    total_timesteps        | 20480    |
+| train/                    |          |
+|    explained_variance     | 0.289    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00375  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 9        |
+|    policy_objective       | 0.00309  |
+|    value_loss             | 82.7     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.93     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.3     |
+|    learning_rate          | 0.00088  |
+|    target_kl              | 0.00341  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 19.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 46.8     |
+|    ep_rew_mean            | 46.8     |
+| time/                     |          |
+|    fps                    | 1265     |
+|    iterations             | 11       |
+|    time_elapsed           | 17       |
+|    total_timesteps        | 22528    |
+| train/                    |          |
+|    explained_variance     | 0.247    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00258  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 10       |
+|    policy_objective       | 0.00241  |
+|    value_loss             | 87.1     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.38     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 13.8     |
+|    learning_rate          | 0.000715 |
+|    target_kl              | 0.00419  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 14.5     |
+| rollout/                  |          |
+|    ep_len_mean            | 45.6     |
+|    ep_rew_mean            | 45.6     |
+| time/                     |          |
+|    fps                    | 1266     |
+|    iterations             | 12       |
+|    time_elapsed           | 19       |
+|    total_timesteps        | 24576    |
+| train/                    |          |
+|    explained_variance     | 0.489    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00241  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 11       |
+|    policy_objective       | 0.00261  |
+|    value_loss             | 62.2     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.95     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.5     |
+|    learning_rate          | 0.000884 |
+|    target_kl              | 0.00339  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 20       |
+| rollout/                  |          |
+|    ep_len_mean            | 42.4     |
+|    ep_rew_mean            | 42.4     |
+| time/                     |          |
+|    fps                    | 1267     |
+|    iterations             | 13       |
+|    time_elapsed           | 21       |
+|    total_timesteps        | 26624    |
+| train/                    |          |
+|    explained_variance     | 0.212    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00336  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 12       |
+|    policy_objective       | 0.00189  |
+|    value_loss             | 96.1     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.61     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 16.1     |
+|    learning_rate          | 0.000783 |
+|    target_kl              | 0.00383  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 16.7     |
+| rollout/                  |          |
+|    ep_len_mean            | 42       |
+|    ep_rew_mean            | 42       |
+| time/                     |          |
+|    fps                    | 1269     |
+|    iterations             | 14       |
+|    time_elapsed           | 22       |
+|    total_timesteps        | 28672    |
+| train/                    |          |
+|    explained_variance     | 0.333    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00179  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 13       |
+|    policy_objective       | 0.00118  |
+|    value_loss             | 74.5     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.63     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 16.3     |
+|    learning_rate          | 0.000789 |
+|    target_kl              | 0.0038   |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 16.9     |
+| rollout/                  |          |
+|    ep_len_mean            | 43.7     |
+|    ep_rew_mean            | 43.7     |
+| time/                     |          |
+|    fps                    | 1271     |
+|    iterations             | 15       |
+|    time_elapsed           | 24       |
+|    total_timesteps        | 30720    |
+| train/                    |          |
+|    explained_variance     | 0.326    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00305  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 14       |
+|    policy_objective       | 0.00381  |
+|    value_loss             | 72.9     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.85     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 18.5     |
+|    learning_rate          | 0.000856 |
+|    target_kl              | 0.0035   |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 19       |
+| rollout/                  |          |
+|    ep_len_mean            | 42.9     |
+|    ep_rew_mean            | 42.9     |
+| time/                     |          |
+|    fps                    | 1271     |
+|    iterations             | 16       |
+|    time_elapsed           | 25       |
+|    total_timesteps        | 32768    |
+| train/                    |          |
+|    explained_variance     | 0.291    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00264  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 15       |
+|    policy_objective       | 0.00199  |
+|    value_loss             | 78.5     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.53     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 15.3     |
+|    learning_rate          | 0.000758 |
+|    target_kl              | 0.00396  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 15.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 43.8     |
+|    ep_rew_mean            | 43.8     |
+| time/                     |          |
+|    fps                    | 1274     |
+|    iterations             | 17       |
+|    time_elapsed           | 27       |
+|    total_timesteps        | 34816    |
+| train/                    |          |
+|    explained_variance     | 0.25     |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00132  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 16       |
+|    policy_objective       | 0.000595 |
+|    value_loss             | 81.1     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 20.3     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 20.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 44.5     |
+|    ep_rew_mean            | 44.5     |
+| time/                     |          |
+|    fps                    | 1273     |
+|    iterations             | 18       |
+|    time_elapsed           | 28       |
+|    total_timesteps        | 36864    |
+| train/                    |          |
+|    explained_variance     | 0.259    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00348  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 17       |
+|    policy_objective       | 0.00374  |
+|    value_loss             | 77.6     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 23       |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 23.4     |
+| rollout/                  |          |
+|    ep_len_mean            | 47.7     |
+|    ep_rew_mean            | 47.7     |
+| time/                     |          |
+|    fps                    | 1271     |
+|    iterations             | 19       |
+|    time_elapsed           | 30       |
+|    total_timesteps        | 38912    |
+| train/                    |          |
+|    explained_variance     | 0.299    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.0025   |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 18       |
+|    policy_objective       | 0.00409  |
+|    value_loss             | 78.3     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 23.5     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 23.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 48.5     |
+|    ep_rew_mean            | 48.5     |
+| time/                     |          |
+|    fps                    | 1272     |
+|    iterations             | 20       |
+|    time_elapsed           | 32       |
+|    total_timesteps        | 40960    |
+| train/                    |          |
+|    explained_variance     | 0.392    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00219  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 19       |
+|    policy_objective       | 0.0035   |
+|    value_loss             | 72.4     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.89     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 18.9     |
+|    learning_rate          | 0.000868 |
+|    target_kl              | 0.00346  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 19.4     |
+| rollout/                  |          |
+|    ep_len_mean            | 45.6     |
+|    ep_rew_mean            | 45.6     |
+| time/                     |          |
+|    fps                    | 1272     |
+|    iterations             | 21       |
+|    time_elapsed           | 33       |
+|    total_timesteps        | 43008    |
+| train/                    |          |
+|    explained_variance     | 0.386    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00232  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 20       |
+|    policy_objective       | 0.00274  |
+|    value_loss             | 76.8     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.92     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.2     |
+|    learning_rate          | 0.000876 |
+|    target_kl              | 0.00342  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 19.7     |
+| rollout/                  |          |
+|    ep_len_mean            | 43.7     |
+|    ep_rew_mean            | 43.7     |
+| time/                     |          |
+|    fps                    | 1273     |
+|    iterations             | 22       |
+|    time_elapsed           | 35       |
+|    total_timesteps        | 45056    |
+| train/                    |          |
+|    explained_variance     | 0.291    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00273  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 21       |
+|    policy_objective       | 0.00517  |
+|    value_loss             | 83.8     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 20.5     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 21       |
+| rollout/                  |          |
+|    ep_len_mean            | 45.2     |
+|    ep_rew_mean            | 45.2     |
+| time/                     |          |
+|    fps                    | 1274     |
+|    iterations             | 23       |
+|    time_elapsed           | 36       |
+|    total_timesteps        | 47104    |
+| train/                    |          |
+|    explained_variance     | 0.244    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00308  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 22       |
+|    policy_objective       | 0.00522  |
+|    value_loss             | 87.6     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 21.8     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 22.2     |
+| rollout/                  |          |
+|    ep_len_mean            | 46.1     |
+|    ep_rew_mean            | 46.1     |
+| time/                     |          |
+|    fps                    | 1271     |
+|    iterations             | 24       |
+|    time_elapsed           | 38       |
+|    total_timesteps        | 49152    |
+| train/                    |          |
+|    explained_variance     | 0.291    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00207  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 23       |
+|    policy_objective       | 0.00241  |
+|    value_loss             | 84.1     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 23.8     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 24.2     |
+| rollout/                  |          |
+|    ep_len_mean            | 46.5     |
+|    ep_rew_mean            | 46.5     |
+| time/                     |          |
+|    fps                    | 1272     |
+|    iterations             | 25       |
+|    time_elapsed           | 40       |
+|    total_timesteps        | 51200    |
+| train/                    |          |
+|    explained_variance     | 0.226    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00246  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 24       |
+|    policy_objective       | 0.00404  |
+|    value_loss             | 89.8     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.96     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.6     |
+|    learning_rate          | 0.000889 |
+|    target_kl              | 0.00337  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 20.1     |
+| rollout/                  |          |
+|    ep_len_mean            | 47.4     |
+|    ep_rew_mean            | 47.4     |
+| time/                     |          |
+|    fps                    | 1269     |
+|    iterations             | 26       |
+|    time_elapsed           | 41       |
+|    total_timesteps        | 53248    |
+| train/                    |          |
+|    explained_variance     | 0.328    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00132  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 25       |
+|    policy_objective       | 0.0019   |
+|    value_loss             | 80.7     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 24.2     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 24.5     |
+| rollout/                  |          |
+|    ep_len_mean            | 48.4     |
+|    ep_rew_mean            | 48.4     |
+| time/                     |          |
+|    fps                    | 1265     |
+|    iterations             | 27       |
+|    time_elapsed           | 43       |
+|    total_timesteps        | 55296    |
+| train/                    |          |
+|    explained_variance     | 0.189    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00262  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 26       |
+|    policy_objective       | 0.00402  |
+|    value_loss             | 95.4     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 20.1     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 20.5     |
+| rollout/                  |          |
+|    ep_len_mean            | 47.3     |
+|    ep_rew_mean            | 47.3     |
+| time/                     |          |
+|    fps                    | 1264     |
+|    iterations             | 28       |
+|    time_elapsed           | 45       |
+|    total_timesteps        | 57344    |
+| train/                    |          |
+|    explained_variance     | 0.353    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00224  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 27       |
+|    policy_objective       | 0.00121  |
+|    value_loss             | 79.6     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.53     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 15.3     |
+|    learning_rate          | 0.000758 |
+|    target_kl              | 0.00396  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 15.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 47.4     |
+|    ep_rew_mean            | 47.4     |
+| time/                     |          |
+|    fps                    | 1263     |
+|    iterations             | 29       |
+|    time_elapsed           | 46       |
+|    total_timesteps        | 59392    |
+| train/                    |          |
+|    explained_variance     | 0.321    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00256  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 28       |
+|    policy_objective       | 0.00294  |
+|    value_loss             | 82.5     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 22.1     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 22.5     |
+| rollout/                  |          |
+|    ep_len_mean            | 50.9     |
+|    ep_rew_mean            | 50.9     |
+| time/                     |          |
+|    fps                    | 1260     |
+|    iterations             | 30       |
+|    time_elapsed           | 48       |
+|    total_timesteps        | 61440    |
+| train/                    |          |
+|    explained_variance     | 0.274    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.0025   |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 29       |
+|    policy_objective       | 0.00392  |
+|    value_loss             | 88.6     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.83     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 18.3     |
+|    learning_rate          | 0.000849 |
+|    target_kl              | 0.00353  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 18.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 47.5     |
+|    ep_rew_mean            | 47.5     |
+| time/                     |          |
+|    fps                    | 1259     |
+|    iterations             | 31       |
+|    time_elapsed           | 50       |
+|    total_timesteps        | 63488    |
+| train/                    |          |
+|    explained_variance     | 0.173    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00207  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 30       |
+|    policy_objective       | 0.00258  |
+|    value_loss             | 101      |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.15     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 11.5     |
+|    learning_rate          | 0.000645 |
+|    target_kl              | 0.00465  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 12.2     |
+| rollout/                  |          |
+|    ep_len_mean            | 53.4     |
+|    ep_rew_mean            | 53.4     |
+| time/                     |          |
+|    fps                    | 1260     |
+|    iterations             | 32       |
+|    time_elapsed           | 52       |
+|    total_timesteps        | 65536    |
+| train/                    |          |
+|    explained_variance     | 0.188    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00292  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 31       |
+|    policy_objective       | 0.00413  |
+|    value_loss             | 99.1     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.72     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 17.2     |
+|    learning_rate          | 0.000815 |
+|    target_kl              | 0.00368  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 17.7     |
+| rollout/                  |          |
+|    ep_len_mean            | 56.1     |
+|    ep_rew_mean            | 56.1     |
+| time/                     |          |
+|    fps                    | 1261     |
+|    iterations             | 33       |
+|    time_elapsed           | 53       |
+|    total_timesteps        | 67584    |
+| train/                    |          |
+|    explained_variance     | 0.253    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00395  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 32       |
+|    policy_objective       | 0.00328  |
+|    value_loss             | 90.5     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.83     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 18.3     |
+|    learning_rate          | 0.000848 |
+|    target_kl              | 0.00354  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 18.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 58.5     |
+|    ep_rew_mean            | 58.5     |
+| time/                     |          |
+|    fps                    | 1261     |
+|    iterations             | 34       |
+|    time_elapsed           | 55       |
+|    total_timesteps        | 69632    |
+| train/                    |          |
+|    explained_variance     | 0.287    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00195  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 33       |
+|    policy_objective       | 0.00443  |
+|    value_loss             | 97.8     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.97     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.7     |
+|    learning_rate          | 0.000891 |
+|    target_kl              | 0.00337  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 20.2     |
+| rollout/                  |          |
+|    ep_len_mean            | 53.9     |
+|    ep_rew_mean            | 53.9     |
+| time/                     |          |
+|    fps                    | 1259     |
+|    iterations             | 35       |
+|    time_elapsed           | 56       |
+|    total_timesteps        | 71680    |
+| train/                    |          |
+|    explained_variance     | 0.271    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00175  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 34       |
+|    policy_objective       | 0.0017   |
+|    value_loss             | 103      |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 20.7     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 21.1     |
+| rollout/                  |          |
+|    ep_len_mean            | 54.8     |
+|    ep_rew_mean            | 54.8     |
+| time/                     |          |
+|    fps                    | 1260     |
+|    iterations             | 36       |
+|    time_elapsed           | 58       |
+|    total_timesteps        | 73728    |
+| train/                    |          |
+|    explained_variance     | 0.129    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00232  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 35       |
+|    policy_objective       | 0.00183  |
+|    value_loss             | 122      |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 23.2     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 23.6     |
+| rollout/                  |          |
+|    ep_len_mean            | 55.7     |
+|    ep_rew_mean            | 55.7     |
+| time/                     |          |
+|    fps                    | 1260     |
+|    iterations             | 37       |
+|    time_elapsed           | 60       |
+|    total_timesteps        | 75776    |
+| train/                    |          |
+|    explained_variance     | 0.306    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00145  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 36       |
+|    policy_objective       | 0.00138  |
+|    value_loss             | 96.3     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.94     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.4     |
+|    learning_rate          | 0.000881 |
+|    target_kl              | 0.00341  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 19.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 58.5     |
+|    ep_rew_mean            | 58.5     |
+| time/                     |          |
+|    fps                    | 1260     |
+|    iterations             | 38       |
+|    time_elapsed           | 61       |
+|    total_timesteps        | 77824    |
+| train/                    |          |
+|    explained_variance     | 0.419    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00187  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 37       |
+|    policy_objective       | 0.00239  |
+|    value_loss             | 86.3     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.73     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 17.3     |
+|    learning_rate          | 0.000818 |
+|    target_kl              | 0.00367  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 17.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 60.3     |
+|    ep_rew_mean            | 60.3     |
+| time/                     |          |
+|    fps                    | 1261     |
+|    iterations             | 39       |
+|    time_elapsed           | 63       |
+|    total_timesteps        | 79872    |
+| train/                    |          |
+|    explained_variance     | 0.361    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00227  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 38       |
+|    policy_objective       | 0.00227  |
+|    value_loss             | 96.6     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.97     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.7     |
+|    learning_rate          | 0.000891 |
+|    target_kl              | 0.00337  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 20.2     |
+| rollout/                  |          |
+|    ep_len_mean            | 62.8     |
+|    ep_rew_mean            | 62.8     |
+| time/                     |          |
+|    fps                    | 1261     |
+|    iterations             | 40       |
+|    time_elapsed           | 64       |
+|    total_timesteps        | 81920    |
+| train/                    |          |
+|    explained_variance     | 0.17     |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00183  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 39       |
+|    policy_objective       | 0.00175  |
+|    value_loss             | 121      |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.52     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 15.2     |
+|    learning_rate          | 0.000757 |
+|    target_kl              | 0.00396  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 15.8     |
+| rollout/                  |          |
+|    ep_len_mean            | 64.4     |
+|    ep_rew_mean            | 64.4     |
+| time/                     |          |
+|    fps                    | 1262     |
+|    iterations             | 41       |
+|    time_elapsed           | 66       |
+|    total_timesteps        | 83968    |
+| train/                    |          |
+|    explained_variance     | 0.118    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00191  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 40       |
+|    policy_objective       | 0.00203  |
+|    value_loss             | 126      |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.38     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 13.8     |
+|    learning_rate          | 0.000714 |
+|    target_kl              | 0.0042   |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 14.4     |
+| rollout/                  |          |
+|    ep_len_mean            | 65.3     |
+|    ep_rew_mean            | 65.3     |
+| time/                     |          |
+|    fps                    | 1262     |
+|    iterations             | 42       |
+|    time_elapsed           | 68       |
+|    total_timesteps        | 86016    |
+| train/                    |          |
+|    explained_variance     | 0.0189   |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00141  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 41       |
+|    policy_objective       | 0.00201  |
+|    value_loss             | 138      |
+----------------------------------------
+-----------------------------------------
+| adaptive/                 |           |
+|    adaptation_factor      | 1.95      |
+|    algorithm              | TRPO      |
+|    base_lr                | 0.0003    |
+|    base_target_kl         | 0.01      |
+|    drift_magnitude        | 9.47      |
+|    learning_rate          | 0.000584  |
+|    target_kl              | 0.00514   |
+| env/                      |           |
+|    base_value             | 0.974     |
+|    masscart               | 10.2      |
+| rollout/                  |           |
+|    ep_len_mean            | 66.3      |
+|    ep_rew_mean            | 66.3      |
+| time/                     |           |
+|    fps                    | 1261      |
+|    iterations             | 43        |
+|    time_elapsed           | 69        |
+|    total_timesteps        | 88064     |
+| train/                    |           |
+|    explained_variance     | -2.52e-05 |
+|    is_line_search_success | 1         |
+|    kl_divergence_loss     | 0.00165   |
+|    learning_rate          | 0.0003    |
+|    n_updates              | 42        |
+|    policy_objective       | 0.000805  |
+|    value_loss             | 133       |
+-----------------------------------------
+-----------------------------------------
+| adaptive/                 |           |
+|    adaptation_factor      | 2.02      |
+|    algorithm              | TRPO      |
+|    base_lr                | 0.0003    |
+|    base_target_kl         | 0.01      |
+|    drift_magnitude        | 10.2      |
+|    learning_rate          | 0.000606  |
+|    target_kl              | 0.00495   |
+| env/                      |           |
+|    base_value             | 0.974     |
+|    masscart               | 10.9      |
+| rollout/                  |           |
+|    ep_len_mean            | 80.1      |
+|    ep_rew_mean            | 80.1      |
+| time/                     |           |
+|    fps                    | 1261      |
+|    iterations             | 44        |
+|    time_elapsed           | 71        |
+|    total_timesteps        | 90112     |
+| train/                    |           |
+|    explained_variance     | -3.81e-06 |
+|    is_line_search_success | 1         |
+|    kl_divergence_loss     | 0.00238   |
+|    learning_rate          | 0.0003    |
+|    n_updates              | 43        |
+|    policy_objective       | 0.00162   |
+|    value_loss             | 131       |
+-----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 1.68     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 6.8      |
+|    learning_rate          | 0.000504 |
+|    target_kl              | 0.00595  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 7.6      |
+| rollout/                  |          |
+|    ep_len_mean            | 87.7     |
+|    ep_rew_mean            | 87.7     |
+| time/                     |          |
+|    fps                    | 1262     |
+|    iterations             | 45       |
+|    time_elapsed           | 73       |
+|    total_timesteps        | 92160    |
+| train/                    |          |
+|    explained_variance     | 0.00968  |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00316  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 44       |
+|    policy_objective       | 0.00475  |
+|    value_loss             | 51.4     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.48     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 14.8     |
+|    learning_rate          | 0.000744 |
+|    target_kl              | 0.00403  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 15.4     |
+| rollout/                  |          |
+|    ep_len_mean            | 95.1     |
+|    ep_rew_mean            | 95.1     |
+| time/                     |          |
+|    fps                    | 1262     |
+|    iterations             | 46       |
+|    time_elapsed           | 74       |
+|    total_timesteps        | 94208    |
+| train/                    |          |
+|    explained_variance     | 0.353    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00354  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 45       |
+|    policy_objective       | 0.00215  |
+|    value_loss             | 84.7     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 22       |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 22.4     |
+| rollout/                  |          |
+|    ep_len_mean            | 96.5     |
+|    ep_rew_mean            | 96.5     |
+| time/                     |          |
+|    fps                    | 1262     |
+|    iterations             | 47       |
+|    time_elapsed           | 76       |
+|    total_timesteps        | 96256    |
+| train/                    |          |
+|    explained_variance     | 0.696    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00292  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 46       |
+|    policy_objective       | 0.00346  |
+|    value_loss             | 19.6     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 3        |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 22.7     |
+|    learning_rate          | 0.0009   |
+|    target_kl              | 0.00333  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 23       |
+| rollout/                  |          |
+|    ep_len_mean            | 80.3     |
+|    ep_rew_mean            | 80.3     |
+| time/                     |          |
+|    fps                    | 1263     |
+|    iterations             | 48       |
+|    time_elapsed           | 77       |
+|    total_timesteps        | 98304    |
+| train/                    |          |
+|    explained_variance     | 0.864    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.0027   |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 47       |
+|    policy_objective       | 0.00344  |
+|    value_loss             | 13.1     |
+----------------------------------------
+----------------------------------------
+| adaptive/                 |          |
+|    adaptation_factor      | 2.92     |
+|    algorithm              | TRPO     |
+|    base_lr                | 0.0003   |
+|    base_target_kl         | 0.01     |
+|    drift_magnitude        | 19.2     |
+|    learning_rate          | 0.000876 |
+|    target_kl              | 0.00343  |
+| env/                      |          |
+|    base_value             | 0.974    |
+|    masscart               | 19.7     |
+| rollout/                  |          |
+|    ep_len_mean            | 70.6     |
+|    ep_rew_mean            | 70.6     |
+| time/                     |          |
+|    fps                    | 1263     |
+|    iterations             | 49       |
+|    time_elapsed           | 79       |
+|    total_timesteps        | 100352   |
+| train/                    |          |
+|    explained_variance     | 0.915    |
+|    is_line_search_success | 1        |
+|    kl_divergence_loss     | 0.00303  |
+|    learning_rate          | 0.0003   |
+|    n_updates              | 48       |
+|    policy_objective       | 0.00988  |
+|    value_loss             | 11.9     |
+----------------------------------------
+wandb: WARNING Symlinked 1 file into the W&B run directory; call wandb.save again to sync new files.
+wandb: updating run metadata
+wandb: updating run metadata; uploading model.zip; uploading output.log; uploading wandb-summary.json
+wandb: uploading model.zip; uploading output.log; uploading wandb-summary.json; uploading config.yaml
+wandb: uploading model.zip; uploading output.log; uploading wandb-summary.json; uploading config.yaml; uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0
+wandb: uploading model.zip; uploading output.log; uploading wandb-summary.json; uploading config.yaml; uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0 (+ 1 more)
+wandb: uploading model.zip; uploading output.log; uploading wandb-summary.json; uploading config.yaml; uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0
+wandb: uploading model.zip; uploading output.log; uploading config.yaml; uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0
+wandb: uploading model.zip; uploading output.log; uploading config.yaml; uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0; uploading data
+wandb: uploading model.zip; uploading output.log; uploading config.yaml; uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0
+wandb: uploading model.zip; uploading config.yaml; uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0; uploading data
+wandb: uploading logs/CartPole_masscart_random_walk_Adaptive_20251217_125255_0/events.out.tfevents.1765951232.hungchan-Precision-7560.42801.0
+wandb: uploading data
+wandb: 
+wandb: Run history:
+wandb: adaptive/adaptation_factor ▂▁▂▃▄▄▂▃▇██▆▇▆██▇██████▆█▄▇▇███▇█▆▅▃▂▆██
+wandb:           adaptive/base_lr ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:    adaptive/base_target_kl ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:   adaptive/drift_magnitude ▂▁▂▂▃▃▂▃▅▆▆▅▅▆▅██▆▆▇█▆█▆▅▃▅▆▆▇▆▅▆▅▄▃▂▅▇▆
+wandb:     adaptive/learning_rate ▂▁▂▃▄▄▂▃▇██▆▆▇▆██▇██████▆▄▇▇███▇█▆▅▃▂▆██
+wandb:         adaptive/target_kl ▇█▆▅▄▄▇▅▂▁▁▂▂▁▂▁▁▁▁▁▁▁▁▁▁▄▂▁▁▁▁▂▁▂▃▅▇▃▁▁
+wandb:             env/base_value ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:               env/masscart ▂▁▂▂▃▃▂▃▅▆▆▅▅▆▅██▆▆▇█▆█▆▅▆▃▅▆▆█▆▅▆▅▃▂▅▇▆
+wandb:                global_step ▁▁▁▁▁▂▂▂▂▂▃▃▃▃▄▄▄▄▄▅▅▆▆▆▆▆▆▆▆▆▇▇▇▇▇▇▇▇██
+wandb:        rollout/ep_len_mean ▁▁▂▂▂▂▂▂▂▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▆▇██▅
+wandb:                         +8 ...
+wandb: 
+wandb: Run summary:
+wandb: adaptive/adaptation_factor 2.91864
+wandb:           adaptive/base_lr 0.0003
+wandb:    adaptive/base_target_kl 0.01
+wandb:   adaptive/drift_magnitude 19.18638
+wandb:     adaptive/learning_rate 0.00088
+wandb:         adaptive/target_kl 0.00343
+wandb:             env/base_value 0.97435
+wandb:               env/masscart 19.66864
+wandb:                global_step 100352
+wandb:        rollout/ep_len_mean 70.56
+wandb:                         +8 ...
+wandb: 
+wandb: 🚀 View run CartPole_masscart_random_walk_Adaptive_20251217_125255 at: https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research_TRPO/runs/gjt2oe18
+wandb: ⭐️ View project at: https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/CartPole_Drift_Research_TRPO
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 2 other file(s)
+wandb: Find logs at: logs/CartPole_masscart_random_walk_Adaptive_20251217_125255/wandb/run-20251217_130030-gjt2oe18/logs
+>>> [DriftAdaptiveCallback] Training Ended
+    Final LR: 0.000877
+    Last Drift Magnitude: 19.2285
+    Final Target KL: 0.0034
+Model saved locally to: models/CartPole_masscart_random_walk_Adaptive_20251217_125255.zip

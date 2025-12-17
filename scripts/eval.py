@@ -5,6 +5,7 @@ Supports:
 - Standard policy evaluation
 - Oracle baseline computation
 - Dynamic regret calculation
+- Multiple environments (CartPole, MountainCar, FrozenLake, MiniGrid, HalfCheetah)
 """
 
 import sys
@@ -15,12 +16,19 @@ import numpy as np
 import gymnasium as gym
 from pathlib import Path
 
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.evaluation import evaluate_policy
+
+# TRPO from sb3-contrib (optional)
+try:
+    from sb3_contrib import TRPO
+    TRPO_AVAILABLE = True
+except ImportError:
+    TRPO_AVAILABLE = False
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from src.envs.wrappers import NonStationaryCartPoleWrapper
+from src.envs import make_nonstationary_env, get_wrapper_for_env
 from src.evaluation import (
     OracleEvaluator, 
     OracleConfig,
@@ -47,9 +55,48 @@ def build_drift_conf(cfg: dict) -> dict:
     }
 
 
+def load_model(model_path: str, algo: str = "auto", env=None):
+    """
+    Load a trained model with automatic algorithm detection.
+    
+    Args:
+        model_path: Path to saved model
+        algo: Algorithm name ("PPO", "SAC", "TRPO", or "auto" for auto-detect)
+        env: Optional environment to attach
+        
+    Returns:
+        Loaded model
+    """
+    algo = algo.upper()
+    
+    # Auto-detect from model path
+    if algo == "AUTO":
+        path_upper = model_path.upper()
+        if "SAC" in path_upper:
+            algo = "SAC"
+        elif "TRPO" in path_upper:
+            algo = "TRPO"
+        else:
+            algo = "PPO"  # Default
+    
+    print(f"Loading {algo} model from: {model_path}")
+    
+    if algo == "PPO":
+        return PPO.load(model_path, env=env)
+    elif algo == "SAC":
+        return SAC.load(model_path, env=env)
+    elif algo == "TRPO":
+        if not TRPO_AVAILABLE:
+            raise ImportError("TRPO requires sb3-contrib. Install with: pip install sb3-contrib")
+        return TRPO.load(model_path, env=env)
+    else:
+        raise ValueError(f"Unknown algorithm: {algo}. Supported: PPO, SAC, TRPO")
+
+
 def evaluate_model(
     model_path: str,
     config_path: str,
+    algo: str = "auto",
     n_episodes: int = 20,
     deterministic: bool = True,
 ) -> tuple:
@@ -59,6 +106,7 @@ def evaluate_model(
     Args:
         model_path: Path to saved model
         config_path: Path to config YAML
+        algo: Algorithm name ("PPO", "SAC", "TRPO", or "auto")
         n_episodes: Number of evaluation episodes
         deterministic: Whether to use deterministic actions
         
@@ -68,13 +116,11 @@ def evaluate_model(
     cfg = load_config(config_path)
     drift_conf = build_drift_conf(cfg)
     
-    # Create environment
-    env = gym.make(cfg['env_id'])
-    env = NonStationaryCartPoleWrapper(env, drift_conf)
+    # Create environment using factory
+    env = make_nonstationary_env(cfg['env_id'], drift_conf)
     
-    # Load model
-    print(f"Loading model from: {model_path}")
-    model = PPO.load(model_path, env=env)
+    # Load model with algorithm detection
+    model = load_model(model_path, algo=algo, env=env)
     
     # Evaluate
     print(f"Evaluating over {n_episodes} episodes...")
@@ -91,6 +137,7 @@ def evaluate_model(
 def compute_dynamic_regret(
     model_path: str,
     config_path: str,
+    algo: str = "auto",
     eval_interval: int = 5000,
     oracle_train_steps: int = 50000,
     n_eval_episodes: int = 10,
@@ -101,6 +148,7 @@ def compute_dynamic_regret(
     Args:
         model_path: Path to saved model
         config_path: Path to config YAML
+        algo: Algorithm name ("PPO", "SAC", "TRPO", or "auto")
         eval_interval: Steps between evaluations
         oracle_train_steps: Steps to train each oracle
         n_eval_episodes: Episodes per evaluation point
@@ -127,9 +175,8 @@ def compute_dynamic_regret(
     )
     oracle = OracleEvaluator(oracle_config)
     
-    # Create wrapped env to get drift trajectory
-    env = gym.make(cfg['env_id'])
-    wrapped_env = NonStationaryCartPoleWrapper(env, drift_conf)
+    # Create wrapped env using factory to get drift trajectory
+    wrapped_env = make_nonstationary_env(cfg['env_id'], drift_conf)
     
     eval_points = list(range(0, total_timesteps, eval_interval))
     oracle_values = oracle.evaluate_at_timesteps(wrapped_env, eval_points)
@@ -137,7 +184,7 @@ def compute_dynamic_regret(
     
     # 2. Evaluate policy at each point
     print("\n[2/3] Evaluating policy at each timestep...")
-    model = PPO.load(model_path)
+    model = load_model(model_path, algo=algo)
     
     regret_calc = DynamicRegretCalculator(RegretConfig(
         weighting="uniform",
@@ -177,6 +224,7 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate trained models")
     parser.add_argument("--model", type=str, required=True, help="Path to model file")
     parser.add_argument("--config", type=str, default="configs/cartpole_adaptive.yaml", help="Path to config")
+    parser.add_argument("--algo", type=str, default="auto", help="Algorithm (PPO, SAC, TRPO, or auto)")
     parser.add_argument("--episodes", type=int, default=20, help="Number of evaluation episodes")
     parser.add_argument("--regret", action="store_true", help="Compute dynamic regret")
     parser.add_argument("--oracle-steps", type=int, default=50000, help="Oracle training steps")
@@ -193,6 +241,7 @@ def main():
         summary = compute_dynamic_regret(
             model_path=args.model,
             config_path=args.config,
+            algo=args.algo,
             eval_interval=args.eval_interval,
             oracle_train_steps=args.oracle_steps,
             n_eval_episodes=args.episodes,
@@ -208,6 +257,7 @@ def main():
         mean_reward, std_reward = evaluate_model(
             model_path=args.model,
             config_path=args.config,
+            algo=args.algo,
             n_episodes=args.episodes,
         )
         

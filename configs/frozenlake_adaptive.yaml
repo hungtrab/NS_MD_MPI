@@ -1,0 +1,71 @@
+# ============================================================================
+# CONFIGURATION: Non-Stationary FrozenLake Experiments
+# ============================================================================
+#
+# FrozenLake: Navigate a frozen lake to reach the goal
+# Drifting slip probability simulates changing ice conditions
+#
+# ============================================================================
+
+env_id: "FrozenLake-v1"
+
+env:
+  # -------------------------------------------------------------------------
+  # PARAMETER TO DRIFT
+  # -------------------------------------------------------------------------
+  # Options:
+  #   - "slip_prob"    : Probability of slipping (base=0.67 if is_slippery=True)
+  #   - "reward_scale" : Multiplier for goal reward
+  parameter: "slip_prob"
+  
+  # -------------------------------------------------------------------------
+  # DRIFT PATTERN
+  # -------------------------------------------------------------------------
+  drift_type: "linear"         # static, jump, linear, sine, random_walk
+  
+  # -------------------------------------------------------------------------
+  # DRIFT DYNAMICS
+  # -------------------------------------------------------------------------
+  # For slip_prob (base=0.67):
+  #   magnitude=0.3 → varies from 0.37 to 0.97 (triangular wave)
+  # Negative magnitude makes it less slippery over time
+  magnitude: 0.2
+  period: 10000
+
+  # Random walk settings
+  sigma: 0.02
+  bounds: [0.0, 0.9]
+
+# Weights & Biases
+wandb:
+  project: "FrozenLake_Drift_Research"
+  tags: ["frozenlake", "slip_drift"]
+  mode: "online"
+
+# Training (DQN recommended for discrete action space)
+train:
+  learning_rate: 0.001
+  n_steps: 128                 # Shorter rollouts for sparse rewards
+  batch_size: 32
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+# Adaptive
+adaptive:
+  enabled: false
+  scale_factor: 0.2
+  min_lr_multiplier: 0.5
+  max_lr_multiplier: 3.0
+  log_freq: 50
+
+# Paths
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"
+
+# FrozenLake-specific options
+env_kwargs:
+  is_slippery: true            # Set false for deterministic baseline
+  map_name: "4x4"              # "4x4" or "8x8"

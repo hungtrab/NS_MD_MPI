@@ -84,17 +84,47 @@ train:
 
 # 4. Adaptive Mechanism Configuration (Ours)
 # -------------------------------------------------------------------------
-# When enabled, the learning rate adapts based on detected drift:
-#   η_t = η₀ × (1 + scale_factor × drift_magnitude)
-# 
-# This implements the "follow the drift" principle from the paper.
+# When enabled, hyperparameters adapt based on detected drift magnitude.
+# Each algorithm has different hyperparameters adapted:
+#   - PPO: learning_rate, clip_range, ent_coef
+#   - SAC: learning_rate, ent_coef (temperature)
+#   - TRPO: learning_rate, target_kl
 # -------------------------------------------------------------------------
 adaptive:
-  enabled: true                     # true = Adaptive, false = Baseline
-  scale_factor: 0.1                  # c₁: Sensitivity to drift (try 0.05-0.5)
+  enabled: false                      # true = Adaptive, false = Baseline
+  
+  # --- Learning Rate Adaptation (All Algorithms) ---
+  # Formula: η_t = η_0 * (1 + scale_factor * drift_magnitude)
+  scale_factor: 0                  # c₁: Sensitivity to drift (try 0.05-0.5)
   min_lr_multiplier: 0.5             # LR won't go below base_lr × 0.5
   max_lr_multiplier: 3.0             # LR won't go above base_lr × 3.0
-  log_freq: 100                      # Log metrics every N steps
+  
+  # --- PPO: Clip Range Adaptation ---
+  # Formula: ε_t = ε_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Smaller trust region when env is changing
+  adapt_clip_range: true
+  base_clip_range: 0.2               # PPO default
+  min_clip_range: 0.05               # Most conservative
+  max_clip_range: 0.4                # Most aggressive
+  
+  # --- PPO/SAC: Entropy Coefficient Adaptation ---
+  # Formula: α_t = α_0 * (1 + scale_factor * drift_magnitude)
+  # Rationale: More exploration when env is drifting
+  adapt_entropy: true
+  base_ent_coef: 0.0                 # 0 = auto-detect from model
+  min_ent_coef: 0.0
+  max_ent_coef: 0.1
+  
+  # --- TRPO: Target KL Adaptation ---
+  # Formula: KL_t = KL_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Stricter constraint when env is unstable
+  adapt_target_kl: true
+  base_target_kl: 0.01               # TRPO default
+  min_target_kl: 0.001
+  max_target_kl: 0.05
+  
+  # Logging frequency
+  log_freq: 100
 
 # 5. Paths
 paths:

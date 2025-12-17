@@ -1,0 +1,103 @@
+# ============================================================================
+# CONFIGURATION: Non-Stationary HalfCheetah (MuJoCo) Experiments
+# ============================================================================
+#
+# HalfCheetah: A 2D cheetah robot learning to run
+# Drifting friction or damping simulates terrain/mechanical changes
+#
+# Requires: pip install mujoco gymnasium[mujoco]
+#
+# ============================================================================
+
+env_id: "HalfCheetah-v4"
+
+env:
+  # -------------------------------------------------------------------------
+  # PARAMETER TO DRIFT
+  # -------------------------------------------------------------------------
+  # Options:
+  #   - "friction"   : Ground friction (default≈0.4). Lower = slippery
+  #   - "damping"    : Joint damping multiplier (default=1.0). Higher = stiffer
+  #   - "mass_scale" : Body mass multiplier (default=1.0). Higher = heavier
+  #   - "gravity"    : Gravity z-component (default=-9.81). More negative = stronger
+  parameter: "friction"
+  
+  # -------------------------------------------------------------------------
+  # DRIFT PATTERN
+  # -------------------------------------------------------------------------
+  drift_type: "jump"           # static, jump, linear, sine, random_walk
+  
+  # -------------------------------------------------------------------------
+  # DRIFT DYNAMICS
+  # -------------------------------------------------------------------------
+  # For friction (base≈0.4):
+  #   magnitude=0.3 → jumps from 0.4 to 0.7 (or down to 0.1 if negative)
+  magnitude: -0.2              # Negative = surface becomes slippery
+  period: 200000               # Change after 200k steps
+
+  # Random walk settings
+  sigma: 0.01
+  bounds: [0.1, 0.8]
+
+# Weights & Biases
+wandb:
+  project: "HalfCheetah_Drift_Research"
+  tags: ["mujoco", "halfcheetah", "friction_drift"]
+  mode: "online"
+
+# Training (SAC often works better for MuJoCo)
+train:
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 1000000     # MuJoCo needs more training
+  seed: 42
+
+# Adaptive
+adaptive:
+  enabled: false
+  scale_factor: 0.1
+  min_lr_multiplier: 0.5
+  max_lr_multiplier: 3.0
+  log_freq: 500
+
+# Paths
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"
+
+# ============================================================================
+# EXAMPLE EXPERIMENTS
+# ============================================================================
+#
+# --- Slippery Ground (Jump) ---
+# env:
+#   parameter: "friction"
+#   drift_type: "jump"
+#   magnitude: -0.25           # Friction drops from 0.4 to 0.15
+#   period: 250000
+#
+# --- Variable Terrain (Sine) ---
+# env:
+#   parameter: "friction"
+#   drift_type: "sine"
+#   magnitude: 0.15            # Friction oscillates 0.4 ± 0.15
+#   period: 100000
+#
+# --- Mechanical Wear (Linear damping increase) ---
+# env:
+#   parameter: "damping"
+#   drift_type: "linear"
+#   magnitude: 0.5             # Damping increases from 1.0 to 1.5
+#   period: 500000
+#
+# --- Weight Gain (Mass increase) ---
+# env:
+#   parameter: "mass_scale"
+#   drift_type: "linear"
+#   magnitude: 0.3             # Mass increases by 30%
+#   period: 400000
+#
+# ============================================================================
