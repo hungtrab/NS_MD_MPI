@@ -1,20 +1,33 @@
 # ============================================================================
-# CONFIGURATION: Non-Stationary HalfCheetah (MuJoCo) Experiments
+# CONFIGURATION GUIDE: Non-Stationary HalfCheetah (MuJoCo) Experiments
 # ============================================================================
+#
+# This file controls all aspects of the experiment. Below are the key settings
+# you'll want to modify for different experiments.
 #
 # HalfCheetah: A 2D cheetah robot learning to run
 # Drifting friction or damping simulates terrain/mechanical changes
 #
 # Requires: pip install mujoco gymnasium[mujoco]
 #
+# QUICK START - Common Experiments:
+# ---------------------------------
+# 1. Baseline (no drift):     Set drift_type: "static"
+# 2. Sudden change:           Set drift_type: "jump", magnitude: -0.2
+# 3. Gradual drift:           Set drift_type: "linear", magnitude: 0.2
+# 4. Periodic oscillation:    Set drift_type: "sine", magnitude: 0.15
+# 5. Enable adaptation:       Set adaptive.enabled: true
+#
 # ============================================================================
 
+# 1. Environment Configuration
 env_id: "HalfCheetah-v4"
 
 env:
   # -------------------------------------------------------------------------
   # PARAMETER TO DRIFT
   # -------------------------------------------------------------------------
+  # Which physics parameter should change over time?
   # Options:
   #   - "friction"   : Ground friction (default≈0.4). Lower = slippery
   #   - "damping"    : Joint damping multiplier (default=1.0). Higher = stiffer
@@ -25,79 +38,168 @@ env:
   # -------------------------------------------------------------------------
   # DRIFT PATTERN
   # -------------------------------------------------------------------------
-  drift_type: "jump"           # static, jump, linear, sine, random_walk
+  # How should the parameter change over time?
+  # Options:
+  #   - "static"      : No change (stationary baseline)
+  #   - "jump"        : Sudden regime shift after 'period' steps
+  #   - "linear"      : Gradual ramp up then down (triangular wave)
+  #   - "sine"        : Smooth oscillation (sinusoidal wave)
+  #   - "random_walk" : Stochastic drift (Brownian motion, bounded)
+  drift_type: "jump"
   
   # -------------------------------------------------------------------------
   # DRIFT DYNAMICS
   # -------------------------------------------------------------------------
-  # For friction (base≈0.4):
-  #   magnitude=0.3 → jumps from 0.4 to 0.7 (or down to 0.1 if negative)
-  magnitude: -0.2              # Negative = surface becomes slippery
-  period: 200000               # Change after 200k steps
-
-  # Random walk settings
+  # magnitude: How much the parameter changes from its base value
+  #   - For friction (base≈0.4): magnitude=-0.2 → drops to 0.2 (slippery)
+  #   - For damping (base=1.0): magnitude=0.5 → increases to 1.5 (stiffer)
+  #   - For mass_scale (base=1.0): magnitude=0.3 → increases by 30%
+  #   - Larger values = more non-stationarity = harder problem
+  magnitude: -0.2
+  
+  # period: Timing of drift changes (in environment steps)
+  #   - For "jump": parameter changes after this many steps
+  #   - For "linear"/"sine": one full cycle takes this many steps
+  #   - Smaller period = faster changes = harder to adapt
+  period: 200000
+  
+  # -------------------------------------------------------------------------
+  # RANDOM WALK ONLY (ignored for other drift types)
+  # -------------------------------------------------------------------------
+  # sigma: Step size standard deviation for random walk
   sigma: 0.01
+  
+  # bounds: [min, max] limits for random walk
   bounds: [0.1, 0.8]
 
-# Weights & Biases
+# 2. Weights & Biases Logging (Online)
 wandb:
   project: "HalfCheetah_Drift_Research"
-  tags: ["mujoco", "halfcheetah", "friction_drift"]
-  mode: "online"
+  entity: null                       # Your W&B username (null = default)
+  tags: ["mujoco", "halfcheetah", "friction_drift"]  # Tags for filtering runs
+  mode: "online"                     # "online", "offline", or "disabled"
 
-# Training (SAC often works better for MuJoCo)
+# 3. SAC Training Hyperparameters (recommended for MuJoCo)
 train:
-  learning_rate: 0.0003
-  n_steps: 2048
-  batch_size: 64
-  gamma: 0.99
-  total_timesteps: 1000000     # MuJoCo needs more training
-  seed: 42
+  learning_rate: 0.0003              # Base learning rate (η₀)
+  n_steps: 2048                      # Steps per rollout (for PPO/TRPO)
+  batch_size: 256                    # Minibatch size
+  gamma: 0.99                        # Discount factor
+  total_timesteps: 1000000           # Total training steps (MuJoCo needs more)
+  seed: 42                           # Random seed for reproducibility
+  # SAC-specific
+  buffer_size: 100000                # Replay buffer size
+  learning_starts: 1000              # Steps before learning begins
+  tau: 0.005                         # Soft update coefficient
 
-# Adaptive
+# 4. Adaptive Mechanism Configuration (Ours)
+# -------------------------------------------------------------------------
+# When enabled, hyperparameters adapt based on detected drift magnitude.
+# Each algorithm has different hyperparameters adapted:
+#   - PPO: learning_rate, clip_range, ent_coef
+#   - SAC: learning_rate, ent_coef (temperature)
+#   - TRPO: learning_rate, target_kl
+# -------------------------------------------------------------------------
 adaptive:
-  enabled: false
-  scale_factor: 0.1
-  min_lr_multiplier: 0.5
-  max_lr_multiplier: 3.0
+  enabled: false                     # true = Adaptive, false = Baseline
+  
+  # --- Learning Rate Adaptation (All Algorithms) ---
+  # Formula: η_t = η_0 * (1 + scale_factor * drift_magnitude)
+  scale_factor: 0.1                  # c₁: Sensitivity to drift (try 0.05-0.5)
+  min_lr_multiplier: 0.5             # LR won't go below base_lr × 0.5
+  max_lr_multiplier: 3.0             # LR won't go above base_lr × 3.0
+  
+  # --- PPO: Clip Range Adaptation ---
+  # Formula: ε_t = ε_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Smaller trust region when env is changing
+  adapt_clip_range: true
+  base_clip_range: 0.2               # PPO default
+  min_clip_range: 0.05               # Most conservative
+  max_clip_range: 0.4                # Most aggressive
+  
+  # --- PPO/SAC: Entropy Coefficient Adaptation ---
+  # Formula: α_t = α_0 * (1 + scale_factor * drift_magnitude)
+  # Rationale: More exploration when env is drifting
+  adapt_entropy: true
+  base_ent_coef: 0.0                 # 0 = auto-detect from model (SAC uses auto)
+  min_ent_coef: 0.0
+  max_ent_coef: 0.1
+  
+  # --- TRPO: Target KL Adaptation ---
+  # Formula: KL_t = KL_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Stricter constraint when env is unstable
+  adapt_target_kl: true
+  base_target_kl: 0.01               # TRPO default
+  min_target_kl: 0.001
+  max_target_kl: 0.05
+  
+  # Logging frequency
   log_freq: 500
 
-# Paths
+# 5. Paths
 paths:
   log_dir: "logs/"
   model_dir: "models/"
   video_dir: "videos/"
 
+
 # ============================================================================
-# EXAMPLE EXPERIMENTS
+# EXAMPLE CONFIGURATIONS
 # ============================================================================
 #
-# --- Slippery Ground (Jump) ---
+# --- EXPERIMENT 1: Stationary Baseline ---
+# env:
+#   parameter: "friction"
+#   drift_type: "static"
+#   magnitude: 0.0
+# adaptive:
+#   enabled: false
+#
+# --- EXPERIMENT 2: Slippery Ground (Sudden) ---
 # env:
 #   parameter: "friction"
 #   drift_type: "jump"
-#   magnitude: -0.25           # Friction drops from 0.4 to 0.15
-#   period: 250000
+#   magnitude: -0.25                 # Friction drops from 0.4 to 0.15
+#   period: 250000                   # After 250k steps
+# adaptive:
+#   enabled: false                   # Baseline (no adaptation)
 #
-# --- Variable Terrain (Sine) ---
+# --- EXPERIMENT 3: Adaptive Agent with Sine Friction ---
 # env:
 #   parameter: "friction"
 #   drift_type: "sine"
-#   magnitude: 0.15            # Friction oscillates 0.4 ± 0.15
-#   period: 100000
+#   magnitude: 0.15                  # Friction oscillates 0.4 ± 0.15
+#   period: 100000                   # Full cycle every 100k steps
+# adaptive:
+#   enabled: true                    # Enable LR adaptation
+#   scale_factor: 0.15               # Moderate sensitivity
 #
-# --- Mechanical Wear (Linear damping increase) ---
+# --- EXPERIMENT 4: Mechanical Wear (Linear damping increase) ---
 # env:
 #   parameter: "damping"
 #   drift_type: "linear"
-#   magnitude: 0.5             # Damping increases from 1.0 to 1.5
+#   magnitude: 0.5                   # Damping increases from 1.0 to 1.5
 #   period: 500000
+# adaptive:
+#   enabled: true
 #
-# --- Weight Gain (Mass increase) ---
+# --- EXPERIMENT 5: Weight Gain (Mass increase) ---
 # env:
 #   parameter: "mass_scale"
 #   drift_type: "linear"
-#   magnitude: 0.3             # Mass increases by 30%
+#   magnitude: 0.3                   # Mass increases by 30%
 #   period: 400000
+# adaptive:
+#   enabled: true
+#
+# --- EXPERIMENT 6: Terrain with Random Walk ---
+# env:
+#   parameter: "friction"
+#   drift_type: "random_walk"
+#   magnitude: 0.0                   # (not used for random walk)
+#   sigma: 0.01                      # Small random steps
+#   bounds: [0.1, 0.8]               # Friction stays in this range
+# adaptive:
+#   enabled: true
 #
 # ============================================================================

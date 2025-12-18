@@ -1,18 +1,22 @@
 #!/bin/bash
 # =============================================================================
-# CartPole: Baseline vs Adaptive Experiments
+# MountainCar: Baseline vs Adaptive Experiments
 # =============================================================================
 #
 # Runs systematic comparison between:
 #   - Baseline (fixed hyperparameters)
 #   - Adaptive (drift-aware hyperparameter scheduling)
 #
-# Across different drift patterns and parameters
+# MountainCar-specific drift experiments:
+#   - Gravity changes (harder/easier to climb)
+#   - Force changes (engine power variation)
+#   - Goal position changes (moving target)
+#
 # Includes video rendering after each experiment
 #
 # Usage:
-#   ./scripts/run_cartpole_experiments.sh           # Run all experiments
-#   ./scripts/run_cartpole_experiments.sh --quick   # Quick test (fewer steps)
+#   ./scripts/run_mountaincar_experiments.sh           # Run all experiments
+#   ./scripts/run_mountaincar_experiments.sh --quick   # Quick test (fewer steps)
 #
 # =============================================================================
 
@@ -27,18 +31,18 @@ NC='\033[0m'
 
 # Settings
 QUICK_MODE=false
-TIMESTEPS=100000
+TIMESTEPS=500000
 SEED=42
 ALGO="PPO"
 VIDEO_EPISODES=1
-VIDEO_LENGTH=500
+VIDEO_LENGTH=300
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --quick)
             QUICK_MODE=true
-            TIMESTEPS=20000
+            TIMESTEPS=100000
             shift
             ;;
         --steps)
@@ -59,7 +63,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
-            echo "  --quick       Quick mode with 20k steps"
+            echo "  --quick       Quick mode with 100k steps"
             echo "  --steps N     Set timesteps"
             echo "  --seed N      Set random seed"
             echo "  --algo NAME   Algorithm (PPO, TRPO)"
@@ -75,12 +79,12 @@ done
 cd "$(dirname "$0")/.."
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-RESULTS_DIR="results/cartpole_${TIMESTAMP}"
+RESULTS_DIR="results/mountaincar_${TIMESTAMP}"
 mkdir -p "$RESULTS_DIR"
 
-echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  CartPole: Baseline vs Adaptive ${ALGO}${NC}"
-echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}================================================${NC}"
+echo -e "${BLUE}  MountainCar: Baseline vs Adaptive ${ALGO}${NC}"
+echo -e "${BLUE}================================================${NC}"
 echo ""
 echo -e "Timesteps:    ${GREEN}${TIMESTEPS}${NC}"
 echo -e "Seed:         ${GREEN}${SEED}${NC}"
@@ -96,21 +100,24 @@ create_config() {
     local period=$4
     local adaptive=$5
     local output=$6
+    local sigma=${7:-0.0001}
+    local bounds_min=${8:-0.001}
+    local bounds_max=${9:-0.005}
     
     cat > "$output" << EOF
-env_id: "CartPole-v1"
+env_id: "MountainCar-v0"
 
 env:
   parameter: "$param"
   drift_type: "$drift"
   magnitude: $magnitude
   period: $period
-  sigma: 0.1
-  bounds: [0.0, 25.0]
+  sigma: $sigma
+  bounds: [$bounds_min, $bounds_max]
 
 wandb:
-  project: "CartPole_Drift_Research"
-  tags: ["cartpole", "$drift", "$param", "$([ "$adaptive" = "true" ] && echo "adaptive" || echo "baseline")"]
+  project: "MountainCar_Drift_Research"
+  tags: ["mountaincar", "$drift", "$param", "$([ "$adaptive" = "true" ] && echo "adaptive" || echo "baseline")"]
   mode: "online"
 
 train:
@@ -131,7 +138,7 @@ adaptive:
   min_clip_range: 0.05
   max_clip_range: 0.4
   adapt_entropy: true
-  base_ent_coef: 0.0
+  base_ent_coef: 0.01
   min_ent_coef: 0.0
   max_ent_coef: 0.1
   adapt_target_kl: true
@@ -154,15 +161,18 @@ run_experiment() {
     local magnitude=$3
     local period=$4
     local adaptive=$5
+    local sigma=${6:-0.0001}
+    local bounds_min=${7:-0.001}
+    local bounds_max=${8:-0.005}
     
     local mode_name=$([ "$adaptive" = "true" ] && echo "Adaptive" || echo "Baseline")
-    local exp_name="CartPole_${param}_${drift}_${mode_name}_${TIMESTAMP}"
+    local exp_name="MountainCar_${param}_${drift}_${mode_name}_${TIMESTAMP}"
     local temp_config="${RESULTS_DIR}/${exp_name}_config.yaml"
     
     echo -e "${YELLOW}>>> Running: ${exp_name}${NC}"
     echo -e "    Parameter: $param, Drift: $drift, Magnitude: $magnitude, Period: $period"
     
-    create_config "$param" "$drift" "$magnitude" "$period" "$adaptive" "$temp_config"
+    create_config "$param" "$drift" "$magnitude" "$period" "$adaptive" "$temp_config" "$sigma" "$bounds_min" "$bounds_max"
     
     # Train
     python scripts/train.py \
@@ -202,58 +212,61 @@ run_experiment() {
 # EXPERIMENT 1: Gravity Drift (Jump) - Sudden gravity increase
 # =============================================================================
 echo -e "${BLUE}--- Experiment 1: Gravity Jump Drift ---${NC}"
-echo "Simulates sudden gravity change (e.g., landing on different planet)"
-run_experiment "gravity" "jump" "10.0" "50000" "false"
-run_experiment "gravity" "jump" "10.0" "50000" "true"
+echo "Simulates sudden gravity change (harder to climb the hill)"
+echo "Base gravity=0.0025, jumps to 0.0035 (40% increase)"
+run_experiment "gravity" "jump" "0.001" "250000" "false"
+run_experiment "gravity" "jump" "0.001" "250000" "true"
 
 # =============================================================================
-# EXPERIMENT 2: Gravity Drift (Sine) - Periodic oscillation
+# EXPERIMENT 2: Gravity Drift (Sine) - Oscillating difficulty
 # =============================================================================
 echo -e "${BLUE}--- Experiment 2: Gravity Sine Drift ---${NC}"
-echo "Simulates periodic gravity changes (e.g., rotating space station)"
-run_experiment "gravity" "sine" "5.0" "20000" "false"
-run_experiment "gravity" "sine" "5.0" "20000" "true"
+echo "Simulates periodic gravity changes (varying hill steepness)"
+echo "Gravity oscillates: 0.0025 ± 0.0005"
+run_experiment "gravity" "sine" "0.0005" "100000" "false"
+run_experiment "gravity" "sine" "0.0005" "100000" "true"
 
 # =============================================================================
-# EXPERIMENT 3: Mass Cart Drift (Random Walk) - Stochastic changes
+# EXPERIMENT 3: Force Drift (Linear) - Engine power degradation
 # =============================================================================
-echo -e "${BLUE}--- Experiment 3: Mass Cart Random Walk ---${NC}"
-echo "Simulates gradual mass changes (e.g., loading/unloading cargo)"
-run_experiment "masscart" "random_walk" "0.5" "10000" "false"
-run_experiment "masscart" "random_walk" "0.5" "10000" "true"
+echo -e "${BLUE}--- Experiment 3: Force Linear Drift ---${NC}"
+echo "Simulates engine power degradation/improvement over time"
+echo "Force changes from 0.001 to 0.0015 (50% increase)"
+run_experiment "force" "linear" "0.0005" "200000" "false" "0.00005" "0.0005" "0.002"
+run_experiment "force" "linear" "0.0005" "200000" "true" "0.00005" "0.0005" "0.002"
 
 # =============================================================================
-# EXPERIMENT 4: Pole Length Drift (Linear) - Gradual change
+# EXPERIMENT 4: Gravity Random Walk - Unpredictable terrain
 # =============================================================================
-echo -e "${BLUE}--- Experiment 4: Pole Length Linear Drift ---${NC}"
-echo "Simulates extending pole (e.g., telescoping mechanism)"
-run_experiment "length" "linear" "0.3" "25000" "false"
-run_experiment "length" "linear" "0.3" "25000" "true"
+echo -e "${BLUE}--- Experiment 4: Gravity Random Walk ---${NC}"
+echo "Simulates unpredictable terrain changes"
+run_experiment "gravity" "random_walk" "0.0" "50000" "false" "0.0001" "0.001" "0.004"
+run_experiment "gravity" "random_walk" "0.0" "50000" "true" "0.0001" "0.001" "0.004"
 
 # =============================================================================
 # EXPERIMENT 5: Static Baseline (No Drift) - Control
 # =============================================================================
 echo -e "${BLUE}--- Experiment 5: Static (No Drift) ---${NC}"
-echo "Control experiment with no environmental changes"
-run_experiment "gravity" "static" "0.0" "10000" "false"
+echo "Control experiment with standard MountainCar"
+run_experiment "gravity" "static" "0.0" "100000" "false"
 
 # =============================================================================
 # Summary
 # =============================================================================
 echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}       All Experiments Complete!${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}================================================${NC}"
+echo -e "${GREEN}       All MountainCar Experiments Complete!${NC}"
+echo -e "${GREEN}================================================${NC}"
 echo ""
 echo "Results saved to: ${RESULTS_DIR}"
 echo "Videos saved to:  videos/"
 echo "View in WandB:    https://wandb.ai"
 echo ""
 echo "Experiments run:"
-echo "  1. Gravity Jump:        Baseline vs Adaptive"
-echo "  2. Gravity Sine:        Baseline vs Adaptive"
-echo "  3. MassCart Random:     Baseline vs Adaptive"
-echo "  4. Pole Length Linear:  Baseline vs Adaptive"
-echo "  5. Static (control):    Baseline only"
+echo "  1. Gravity Jump:      Baseline vs Adaptive (sudden change)"
+echo "  2. Gravity Sine:      Baseline vs Adaptive (periodic)"
+echo "  3. Force Linear:      Baseline vs Adaptive (engine power)"
+echo "  4. Gravity Random:    Baseline vs Adaptive (stochastic)"
+echo "  5. Static (control):  Baseline only"
 echo ""
 echo "Filter WandB by timestamp: $TIMESTAMP"

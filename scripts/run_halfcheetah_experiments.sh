@@ -1,18 +1,24 @@
 #!/bin/bash
 # =============================================================================
-# CartPole: Baseline vs Adaptive Experiments
+# HalfCheetah (MuJoCo): Baseline vs Adaptive Experiments
 # =============================================================================
 #
 # Runs systematic comparison between:
 #   - Baseline (fixed hyperparameters)
 #   - Adaptive (drift-aware hyperparameter scheduling)
 #
-# Across different drift patterns and parameters
+# HalfCheetah-specific drift experiments:
+#   - Friction changes (terrain/surface conditions)
+#   - Damping changes (mechanical wear)
+#   - Mass scale changes (weight variation)
+#
 # Includes video rendering after each experiment
 #
 # Usage:
-#   ./scripts/run_cartpole_experiments.sh           # Run all experiments
-#   ./scripts/run_cartpole_experiments.sh --quick   # Quick test (fewer steps)
+#   ./scripts/run_halfcheetah_experiments.sh           # Run all experiments
+#   ./scripts/run_halfcheetah_experiments.sh --quick   # Quick test (fewer steps)
+#
+# Requires: pip install mujoco gymnasium[mujoco]
 #
 # =============================================================================
 
@@ -27,18 +33,18 @@ NC='\033[0m'
 
 # Settings
 QUICK_MODE=false
-TIMESTEPS=100000
+TIMESTEPS=1000000
 SEED=42
-ALGO="PPO"
+ALGO="SAC"  # SAC recommended for continuous control
 VIDEO_EPISODES=1
-VIDEO_LENGTH=500
+VIDEO_LENGTH=1000
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --quick)
             QUICK_MODE=true
-            TIMESTEPS=20000
+            TIMESTEPS=200000
             shift
             ;;
         --steps)
@@ -59,10 +65,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
-            echo "  --quick       Quick mode with 20k steps"
+            echo "  --quick       Quick mode with 200k steps"
             echo "  --steps N     Set timesteps"
             echo "  --seed N      Set random seed"
-            echo "  --algo NAME   Algorithm (PPO, TRPO)"
+            echo "  --algo NAME   Algorithm (SAC, PPO)"
             echo "  --no-render   Skip video rendering"
             exit 0
             ;;
@@ -75,12 +81,12 @@ done
 cd "$(dirname "$0")/.."
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-RESULTS_DIR="results/cartpole_${TIMESTAMP}"
+RESULTS_DIR="results/halfcheetah_${TIMESTAMP}"
 mkdir -p "$RESULTS_DIR"
 
-echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  CartPole: Baseline vs Adaptive ${ALGO}${NC}"
-echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}================================================${NC}"
+echo -e "${BLUE}  HalfCheetah: Baseline vs Adaptive ${ALGO}${NC}"
+echo -e "${BLUE}================================================${NC}"
 echo ""
 echo -e "Timesteps:    ${GREEN}${TIMESTEPS}${NC}"
 echo -e "Seed:         ${GREEN}${SEED}${NC}"
@@ -96,30 +102,36 @@ create_config() {
     local period=$4
     local adaptive=$5
     local output=$6
+    local sigma=${7:-0.01}
+    local bounds_min=${8:-0.1}
+    local bounds_max=${9:-0.8}
     
     cat > "$output" << EOF
-env_id: "CartPole-v1"
+env_id: "HalfCheetah-v4"
 
 env:
   parameter: "$param"
   drift_type: "$drift"
   magnitude: $magnitude
   period: $period
-  sigma: 0.1
-  bounds: [0.0, 25.0]
+  sigma: $sigma
+  bounds: [$bounds_min, $bounds_max]
 
 wandb:
-  project: "CartPole_Drift_Research"
-  tags: ["cartpole", "$drift", "$param", "$([ "$adaptive" = "true" ] && echo "adaptive" || echo "baseline")"]
+  project: "HalfCheetah_Drift_Research"
+  tags: ["mujoco", "halfcheetah", "$drift", "$param", "$([ "$adaptive" = "true" ] && echo "adaptive" || echo "baseline")"]
   mode: "online"
 
 train:
   learning_rate: 0.0003
   n_steps: 2048
-  batch_size: 64
+  batch_size: 256
   gamma: 0.99
   total_timesteps: $TIMESTEPS
   seed: $SEED
+  buffer_size: 100000
+  learning_starts: 1000
+  tau: 0.005
 
 adaptive:
   enabled: $adaptive
@@ -138,7 +150,7 @@ adaptive:
   base_target_kl: 0.01
   min_target_kl: 0.001
   max_target_kl: 0.05
-  log_freq: 100
+  log_freq: 500
 
 paths:
   log_dir: "logs/"
@@ -154,15 +166,18 @@ run_experiment() {
     local magnitude=$3
     local period=$4
     local adaptive=$5
+    local sigma=${6:-0.01}
+    local bounds_min=${7:-0.1}
+    local bounds_max=${8:-0.8}
     
     local mode_name=$([ "$adaptive" = "true" ] && echo "Adaptive" || echo "Baseline")
-    local exp_name="CartPole_${param}_${drift}_${mode_name}_${TIMESTAMP}"
+    local exp_name="HalfCheetah_${param}_${drift}_${mode_name}_${TIMESTAMP}"
     local temp_config="${RESULTS_DIR}/${exp_name}_config.yaml"
     
     echo -e "${YELLOW}>>> Running: ${exp_name}${NC}"
     echo -e "    Parameter: $param, Drift: $drift, Magnitude: $magnitude, Period: $period"
     
-    create_config "$param" "$drift" "$magnitude" "$period" "$adaptive" "$temp_config"
+    create_config "$param" "$drift" "$magnitude" "$period" "$adaptive" "$temp_config" "$sigma" "$bounds_min" "$bounds_max"
     
     # Train
     python scripts/train.py \
@@ -199,61 +214,74 @@ run_experiment() {
 }
 
 # =============================================================================
-# EXPERIMENT 1: Gravity Drift (Jump) - Sudden gravity increase
+# EXPERIMENT 1: Friction Jump - Sudden terrain change
 # =============================================================================
-echo -e "${BLUE}--- Experiment 1: Gravity Jump Drift ---${NC}"
-echo "Simulates sudden gravity change (e.g., landing on different planet)"
-run_experiment "gravity" "jump" "10.0" "50000" "false"
-run_experiment "gravity" "jump" "10.0" "50000" "true"
+echo -e "${BLUE}--- Experiment 1: Friction Jump (Slippery Ground) ---${NC}"
+echo "Simulates sudden surface change (dry → icy)"
+echo "Friction drops from 0.4 to 0.15 (slippery)"
+run_experiment "friction" "jump" "-0.25" "500000" "false" "0.01" "0.1" "0.6"
+run_experiment "friction" "jump" "-0.25" "500000" "true" "0.01" "0.1" "0.6"
 
 # =============================================================================
-# EXPERIMENT 2: Gravity Drift (Sine) - Periodic oscillation
+# EXPERIMENT 2: Friction Sine - Variable terrain
 # =============================================================================
-echo -e "${BLUE}--- Experiment 2: Gravity Sine Drift ---${NC}"
-echo "Simulates periodic gravity changes (e.g., rotating space station)"
-run_experiment "gravity" "sine" "5.0" "20000" "false"
-run_experiment "gravity" "sine" "5.0" "20000" "true"
+echo -e "${BLUE}--- Experiment 2: Friction Sine (Variable Terrain) ---${NC}"
+echo "Simulates periodic surface changes (mud/dry cycles)"
+echo "Friction oscillates: 0.4 ± 0.15"
+run_experiment "friction" "sine" "0.15" "200000" "false" "0.01" "0.2" "0.6"
+run_experiment "friction" "sine" "0.15" "200000" "true" "0.01" "0.2" "0.6"
 
 # =============================================================================
-# EXPERIMENT 3: Mass Cart Drift (Random Walk) - Stochastic changes
+# EXPERIMENT 3: Damping Linear - Mechanical wear
 # =============================================================================
-echo -e "${BLUE}--- Experiment 3: Mass Cart Random Walk ---${NC}"
-echo "Simulates gradual mass changes (e.g., loading/unloading cargo)"
-run_experiment "masscart" "random_walk" "0.5" "10000" "false"
-run_experiment "masscart" "random_walk" "0.5" "10000" "true"
+echo -e "${BLUE}--- Experiment 3: Damping Linear (Mechanical Wear) ---${NC}"
+echo "Simulates joints wearing out over time"
+echo "Damping increases from 1.0 to 1.5 (50% stiffer)"
+run_experiment "damping" "linear" "0.5" "400000" "false" "0.02" "0.5" "2.0"
+run_experiment "damping" "linear" "0.5" "400000" "true" "0.02" "0.5" "2.0"
 
 # =============================================================================
-# EXPERIMENT 4: Pole Length Drift (Linear) - Gradual change
+# EXPERIMENT 4: Mass Scale Linear - Weight change
 # =============================================================================
-echo -e "${BLUE}--- Experiment 4: Pole Length Linear Drift ---${NC}"
-echo "Simulates extending pole (e.g., telescoping mechanism)"
-run_experiment "length" "linear" "0.3" "25000" "false"
-run_experiment "length" "linear" "0.3" "25000" "true"
+echo -e "${BLUE}--- Experiment 4: Mass Scale Linear (Weight Gain) ---${NC}"
+echo "Simulates robot carrying increasing load"
+echo "Mass increases by 30%"
+run_experiment "mass_scale" "linear" "0.3" "300000" "false" "0.02" "0.8" "1.5"
+run_experiment "mass_scale" "linear" "0.3" "300000" "true" "0.02" "0.8" "1.5"
 
 # =============================================================================
-# EXPERIMENT 5: Static Baseline (No Drift) - Control
+# EXPERIMENT 5: Friction Random Walk - Unpredictable terrain
 # =============================================================================
-echo -e "${BLUE}--- Experiment 5: Static (No Drift) ---${NC}"
-echo "Control experiment with no environmental changes"
-run_experiment "gravity" "static" "0.0" "10000" "false"
+echo -e "${BLUE}--- Experiment 5: Friction Random Walk (Unpredictable) ---${NC}"
+echo "Simulates unpredictable terrain variations"
+run_experiment "friction" "random_walk" "0.0" "150000" "false" "0.01" "0.15" "0.6"
+run_experiment "friction" "random_walk" "0.0" "150000" "true" "0.01" "0.15" "0.6"
+
+# =============================================================================
+# EXPERIMENT 6: Static Baseline (No Drift) - Control
+# =============================================================================
+echo -e "${BLUE}--- Experiment 6: Static (No Drift) ---${NC}"
+echo "Control experiment with standard HalfCheetah"
+run_experiment "friction" "static" "0.0" "200000" "false"
 
 # =============================================================================
 # Summary
 # =============================================================================
 echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}       All Experiments Complete!${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}================================================${NC}"
+echo -e "${GREEN}       All HalfCheetah Experiments Complete!${NC}"
+echo -e "${GREEN}================================================${NC}"
 echo ""
 echo "Results saved to: ${RESULTS_DIR}"
 echo "Videos saved to:  videos/"
 echo "View in WandB:    https://wandb.ai"
 echo ""
 echo "Experiments run:"
-echo "  1. Gravity Jump:        Baseline vs Adaptive"
-echo "  2. Gravity Sine:        Baseline vs Adaptive"
-echo "  3. MassCart Random:     Baseline vs Adaptive"
-echo "  4. Pole Length Linear:  Baseline vs Adaptive"
-echo "  5. Static (control):    Baseline only"
+echo "  1. Friction Jump:       Baseline vs Adaptive (slippery ground)"
+echo "  2. Friction Sine:       Baseline vs Adaptive (variable terrain)"
+echo "  3. Damping Linear:      Baseline vs Adaptive (mechanical wear)"
+echo "  4. Mass Scale Linear:   Baseline vs Adaptive (weight gain)"
+echo "  5. Friction Random:     Baseline vs Adaptive (unpredictable)"
+echo "  6. Static (control):    Baseline only"
 echo ""
 echo "Filter WandB by timestamp: $TIMESTAMP"

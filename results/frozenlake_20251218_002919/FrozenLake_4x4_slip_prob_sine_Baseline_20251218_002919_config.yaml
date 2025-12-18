@@ -1,0 +1,50 @@
+env_id: "FrozenLake-v1"
+
+env:
+  parameter: "slip_prob"
+  drift_type: "sine"
+  magnitude: 0.15
+  period: 20000
+  sigma: 0.02
+  bounds: [0.1, 0.9]
+
+wandb:
+  project: "FrozenLake_Drift_Research"
+  tags: ["frozenlake", "sine", "slip_prob", "baseline", "4x4"]
+  mode: "online"
+
+train:
+  learning_rate: 0.001
+  n_steps: 128
+  batch_size: 32
+  gamma: 0.99
+  total_timesteps: 50000
+  seed: 123
+
+adaptive:
+  enabled: false
+  scale_factor: 0.2
+  min_lr_multiplier: 0.5
+  max_lr_multiplier: 3.0
+  adapt_clip_range: true
+  base_clip_range: 0.2
+  min_clip_range: 0.05
+  max_clip_range: 0.4
+  adapt_entropy: true
+  base_ent_coef: 0.01
+  min_ent_coef: 0.0
+  max_ent_coef: 0.1
+  adapt_target_kl: true
+  base_target_kl: 0.01
+  min_target_kl: 0.001
+  max_target_kl: 0.05
+  log_freq: 50
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"
+
+env_kwargs:
+  is_slippery: true
+  map_name: "4x4"

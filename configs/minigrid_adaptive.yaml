@@ -1,20 +1,33 @@
 # ============================================================================
-# CONFIGURATION: Non-Stationary MiniGrid Experiments
+# CONFIGURATION GUIDE: Non-Stationary MiniGrid Experiments
 # ============================================================================
+#
+# This file controls all aspects of the experiment. Below are the key settings
+# you'll want to modify for different experiments.
 #
 # MiniGrid: Grid-world navigation with partial observability
 # Drifting reward scale or step penalty changes optimal strategies
 #
 # Requires: pip install minigrid
 #
+# QUICK START - Common Experiments:
+# ---------------------------------
+# 1. Baseline (no drift):     Set drift_type: "static"
+# 2. Sudden change:           Set drift_type: "jump", magnitude: 0.5
+# 3. Gradual drift:           Set drift_type: "linear", magnitude: 0.5
+# 4. Periodic oscillation:    Set drift_type: "sine", magnitude: 0.3
+# 5. Enable adaptation:       Set adaptive.enabled: true
+#
 # ============================================================================
 
+# 1. Environment Configuration
 env_id: "MiniGrid-Empty-8x8-v0"
 
 env:
   # -------------------------------------------------------------------------
   # PARAMETER TO DRIFT
   # -------------------------------------------------------------------------
+  # Which environment parameter should change over time?
   # Options:
   #   - "reward_scale" : Multiplier for rewards (default=1.0)
   #   - "max_steps"    : Episode length limit (default varies by env)
@@ -24,52 +37,152 @@ env:
   # -------------------------------------------------------------------------
   # DRIFT PATTERN
   # -------------------------------------------------------------------------
-  drift_type: "sine"           # static, jump, linear, sine, random_walk
+  # How should the parameter change over time?
+  # Options:
+  #   - "static"      : No change (stationary baseline)
+  #   - "jump"        : Sudden regime shift after 'period' steps
+  #   - "linear"      : Gradual ramp up then down (triangular wave)
+  #   - "sine"        : Smooth oscillation (sinusoidal wave)
+  #   - "random_walk" : Stochastic drift (Brownian motion, bounded)
+  drift_type: "sine"
   
   # -------------------------------------------------------------------------
   # DRIFT DYNAMICS
   # -------------------------------------------------------------------------
-  # For reward_scale (base=1.0):
-  #   magnitude=0.5 → varies from 0.5 to 1.5
+  # magnitude: How much the parameter changes from its base value
+  #   - For reward_scale (base=1.0): magnitude=0.5 → varies from 0.5 to 1.5
+  #   - For step_penalty (base=0.0): magnitude=0.01 → varies from -0.01 to 0.01
+  #   - Larger values = more non-stationarity = harder problem
   magnitude: 0.5
+  
+  # period: Timing of drift changes (in environment steps)
+  #   - For "jump": parameter changes after this many steps
+  #   - For "linear"/"sine": one full cycle takes this many steps
+  #   - Smaller period = faster changes = harder to adapt
   period: 15000
-
-  # Random walk settings
+  
+  # -------------------------------------------------------------------------
+  # RANDOM WALK ONLY (ignored for other drift types)
+  # -------------------------------------------------------------------------
+  # sigma: Step size standard deviation for random walk
   sigma: 0.05
+  
+  # bounds: [min, max] limits for random walk
   bounds: [0.1, 2.0]
 
-# Weights & Biases
+# 2. Weights & Biases Logging (Online)
 wandb:
   project: "MiniGrid_Drift_Research"
-  tags: ["minigrid", "reward_drift"]
-  mode: "online"
+  entity: null                       # Your W&B username (null = default)
+  tags: ["minigrid", "reward_drift"] # Tags for filtering runs
+  mode: "online"                     # "online", "offline", or "disabled"
 
-# Training
+# 3. PPO Training Hyperparameters
 train:
-  learning_rate: 0.0003
-  n_steps: 512
-  batch_size: 64
-  gamma: 0.99
-  total_timesteps: 100000
-  seed: 42
+  learning_rate: 0.0003              # Base learning rate (η₀)
+  n_steps: 512                       # Steps per rollout
+  batch_size: 64                     # Minibatch size
+  gamma: 0.99                        # Discount factor
+  total_timesteps: 100000            # Total training steps
+  seed: 42                           # Random seed for reproducibility
 
-# Adaptive
+# 4. Adaptive Mechanism Configuration (Ours)
+# -------------------------------------------------------------------------
+# When enabled, hyperparameters adapt based on detected drift magnitude.
+# Each algorithm has different hyperparameters adapted:
+#   - PPO: learning_rate, clip_range, ent_coef
+#   - SAC: learning_rate, ent_coef (temperature)
+#   - TRPO: learning_rate, target_kl
+# -------------------------------------------------------------------------
 adaptive:
-  enabled: false
-  scale_factor: 0.15
-  min_lr_multiplier: 0.5
-  max_lr_multiplier: 3.0
+  enabled: false                     # true = Adaptive, false = Baseline
+  
+  # --- Learning Rate Adaptation (All Algorithms) ---
+  # Formula: η_t = η_0 * (1 + scale_factor * drift_magnitude)
+  scale_factor: 0.15                 # c₁: Sensitivity to drift (try 0.05-0.5)
+  min_lr_multiplier: 0.5             # LR won't go below base_lr × 0.5
+  max_lr_multiplier: 3.0             # LR won't go above base_lr × 3.0
+  
+  # --- PPO: Clip Range Adaptation ---
+  # Formula: ε_t = ε_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Smaller trust region when env is changing
+  adapt_clip_range: true
+  base_clip_range: 0.2               # PPO default
+  min_clip_range: 0.05               # Most conservative
+  max_clip_range: 0.4                # Most aggressive
+  
+  # --- PPO/SAC: Entropy Coefficient Adaptation ---
+  # Formula: α_t = α_0 * (1 + scale_factor * drift_magnitude)
+  # Rationale: More exploration when env is drifting
+  adapt_entropy: true
+  base_ent_coef: 0.0                 # 0 = auto-detect from model
+  min_ent_coef: 0.0
+  max_ent_coef: 0.1
+  
+  # --- TRPO: Target KL Adaptation ---
+  # Formula: KL_t = KL_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Stricter constraint when env is unstable
+  adapt_target_kl: true
+  base_target_kl: 0.01               # TRPO default
+  min_target_kl: 0.001
+  max_target_kl: 0.05
+  
+  # Logging frequency
   log_freq: 100
 
-# Paths
+# 5. Paths
 paths:
   log_dir: "logs/"
   model_dir: "models/"
   video_dir: "videos/"
 
-# Note: Other MiniGrid environments you can try:
-# - MiniGrid-Empty-5x5-v0
-# - MiniGrid-Empty-16x16-v0
-# - MiniGrid-FourRooms-v0
-# - MiniGrid-DoorKey-5x5-v0
-# - MiniGrid-Dynamic-Obstacles-5x5-v0
+
+# ============================================================================
+# EXAMPLE CONFIGURATIONS
+# ============================================================================
+#
+# --- EXPERIMENT 1: Stationary Baseline ---
+# env:
+#   parameter: "reward_scale"
+#   drift_type: "static"
+#   magnitude: 0.0
+# adaptive:
+#   enabled: false
+#
+# --- EXPERIMENT 2: Sudden Reward Drop ---
+# env:
+#   parameter: "reward_scale"
+#   drift_type: "jump"
+#   magnitude: -0.5                  # Reward scale drops from 1.0 to 0.5
+#   period: 50000                    # After 50k steps
+# adaptive:
+#   enabled: false                   # Baseline (no adaptation)
+#
+# --- EXPERIMENT 3: Adaptive Agent with Sine Drift ---
+# env:
+#   parameter: "reward_scale"
+#   drift_type: "sine"
+#   magnitude: 0.3                   # Reward scale oscillates 1.0 ± 0.3
+#   period: 20000                    # Full cycle every 20k steps
+# adaptive:
+#   enabled: true                    # Enable LR adaptation
+#   scale_factor: 0.2                # Moderate sensitivity
+#
+# --- EXPERIMENT 4: Step Penalty with Random Walk ---
+# env:
+#   parameter: "step_penalty"
+#   drift_type: "random_walk"
+#   magnitude: 0.0                   # (not used for random walk)
+#   sigma: 0.005                     # Small random steps
+#   bounds: [0.0, 0.05]              # Penalty stays in this range
+# adaptive:
+#   enabled: true
+#
+# --- EXPERIMENT 5: Different Environments ---
+# env_id: "MiniGrid-Empty-5x5-v0"    # Easier
+# env_id: "MiniGrid-Empty-16x16-v0"  # Harder
+# env_id: "MiniGrid-FourRooms-v0"    # More complex layout
+# env_id: "MiniGrid-DoorKey-5x5-v0"  # Requires key to open door
+# env_id: "MiniGrid-Dynamic-Obstacles-5x5-v0"  # Moving obstacles
+#
+# ============================================================================

@@ -855,6 +855,26 @@ def make_nonstationary_env(
             {'parameter': 'gravity', 'drift_type': 'sine', 'magnitude': 5.0, 'period': 10000}
         )
     """
+    # MiniGrid environments require importing minigrid to register them
+    # and need observation wrapper for SB3 compatibility (Dict space -> Box space)
+    if 'MiniGrid' in env_id:
+        try:
+            import minigrid
+            from minigrid.wrappers import ImgObsWrapper
+        except ImportError:
+            raise ImportError(
+                "MiniGrid environments require the 'minigrid' package. "
+                "Install with: pip install minigrid"
+            )
+        
+        base_env = gym.make(env_id, **env_kwargs)
+        # Wrap with ImgObsWrapper to extract just the image observation
+        # This converts Dict({'image': Box, 'direction': Discrete, 'mission': MissionSpace})
+        # to just Box (the image), which SB3 can handle
+        base_env = ImgObsWrapper(base_env)
+        wrapper_class = get_wrapper_for_env(env_id)
+        return wrapper_class(base_env, drift_conf, seed=seed)
+    
     base_env = gym.make(env_id, **env_kwargs)
     wrapper_class = get_wrapper_for_env(env_id)
     return wrapper_class(base_env, drift_conf, seed=seed)

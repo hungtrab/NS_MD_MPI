@@ -1,18 +1,21 @@
 #!/bin/bash
 # =============================================================================
-# CartPole: Baseline vs Adaptive Experiments
+# FrozenLake: Baseline vs Adaptive Experiments
 # =============================================================================
 #
 # Runs systematic comparison between:
 #   - Baseline (fixed hyperparameters)
 #   - Adaptive (drift-aware hyperparameter scheduling)
 #
-# Across different drift patterns and parameters
+# FrozenLake-specific drift experiments:
+#   - Slip probability changes (ice conditions)
+#   - Reward scale changes (goal value)
+#
 # Includes video rendering after each experiment
 #
 # Usage:
-#   ./scripts/run_cartpole_experiments.sh           # Run all experiments
-#   ./scripts/run_cartpole_experiments.sh --quick   # Quick test (fewer steps)
+#   ./scripts/run_frozenlake_experiments.sh           # Run all experiments
+#   ./scripts/run_frozenlake_experiments.sh --quick   # Quick test (fewer steps)
 #
 # =============================================================================
 
@@ -31,14 +34,14 @@ TIMESTEPS=100000
 SEED=42
 ALGO="PPO"
 VIDEO_EPISODES=1
-VIDEO_LENGTH=500
+VIDEO_LENGTH=200
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --quick)
             QUICK_MODE=true
-            TIMESTEPS=20000
+            TIMESTEPS=30000
             shift
             ;;
         --steps)
@@ -59,7 +62,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
-            echo "  --quick       Quick mode with 20k steps"
+            echo "  --quick       Quick mode with 30k steps"
             echo "  --steps N     Set timesteps"
             echo "  --seed N      Set random seed"
             echo "  --algo NAME   Algorithm (PPO, TRPO)"
@@ -75,12 +78,12 @@ done
 cd "$(dirname "$0")/.."
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-RESULTS_DIR="results/cartpole_${TIMESTAMP}"
+RESULTS_DIR="results/frozenlake_${TIMESTAMP}"
 mkdir -p "$RESULTS_DIR"
 
-echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  CartPole: Baseline vs Adaptive ${ALGO}${NC}"
-echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}================================================${NC}"
+echo -e "${BLUE}  FrozenLake: Baseline vs Adaptive ${ALGO}${NC}"
+echo -e "${BLUE}================================================${NC}"
 echo ""
 echo -e "Timesteps:    ${GREEN}${TIMESTEPS}${NC}"
 echo -e "Seed:         ${GREEN}${SEED}${NC}"
@@ -96,34 +99,35 @@ create_config() {
     local period=$4
     local adaptive=$5
     local output=$6
+    local map_name=${7:-"4x4"}
     
     cat > "$output" << EOF
-env_id: "CartPole-v1"
+env_id: "FrozenLake-v1"
 
 env:
   parameter: "$param"
   drift_type: "$drift"
   magnitude: $magnitude
   period: $period
-  sigma: 0.1
-  bounds: [0.0, 25.0]
+  sigma: 0.02
+  bounds: [0.1, 0.9]
 
 wandb:
-  project: "CartPole_Drift_Research"
-  tags: ["cartpole", "$drift", "$param", "$([ "$adaptive" = "true" ] && echo "adaptive" || echo "baseline")"]
+  project: "FrozenLake_Drift_Research"
+  tags: ["frozenlake", "$drift", "$param", "$([ "$adaptive" = "true" ] && echo "adaptive" || echo "baseline")", "$map_name"]
   mode: "online"
 
 train:
-  learning_rate: 0.0003
-  n_steps: 2048
-  batch_size: 64
+  learning_rate: 0.001
+  n_steps: 128
+  batch_size: 32
   gamma: 0.99
   total_timesteps: $TIMESTEPS
   seed: $SEED
 
 adaptive:
   enabled: $adaptive
-  scale_factor: 0.1
+  scale_factor: 0.2
   min_lr_multiplier: 0.5
   max_lr_multiplier: 3.0
   adapt_clip_range: true
@@ -131,19 +135,23 @@ adaptive:
   min_clip_range: 0.05
   max_clip_range: 0.4
   adapt_entropy: true
-  base_ent_coef: 0.0
+  base_ent_coef: 0.01
   min_ent_coef: 0.0
   max_ent_coef: 0.1
   adapt_target_kl: true
   base_target_kl: 0.01
   min_target_kl: 0.001
   max_target_kl: 0.05
-  log_freq: 100
+  log_freq: 50
 
 paths:
   log_dir: "logs/"
   model_dir: "models/"
   video_dir: "videos/"
+
+env_kwargs:
+  is_slippery: true
+  map_name: "$map_name"
 EOF
 }
 
@@ -154,15 +162,16 @@ run_experiment() {
     local magnitude=$3
     local period=$4
     local adaptive=$5
+    local map_name=${6:-"4x4"}
     
     local mode_name=$([ "$adaptive" = "true" ] && echo "Adaptive" || echo "Baseline")
-    local exp_name="CartPole_${param}_${drift}_${mode_name}_${TIMESTAMP}"
+    local exp_name="FrozenLake_${map_name}_${param}_${drift}_${mode_name}_${TIMESTAMP}"
     local temp_config="${RESULTS_DIR}/${exp_name}_config.yaml"
     
     echo -e "${YELLOW}>>> Running: ${exp_name}${NC}"
-    echo -e "    Parameter: $param, Drift: $drift, Magnitude: $magnitude, Period: $period"
+    echo -e "    Parameter: $param, Drift: $drift, Magnitude: $magnitude, Map: $map_name"
     
-    create_config "$param" "$drift" "$magnitude" "$period" "$adaptive" "$temp_config"
+    create_config "$param" "$drift" "$magnitude" "$period" "$adaptive" "$temp_config" "$map_name"
     
     # Train
     python scripts/train.py \
@@ -199,61 +208,72 @@ run_experiment() {
 }
 
 # =============================================================================
-# EXPERIMENT 1: Gravity Drift (Jump) - Sudden gravity increase
+# EXPERIMENT 1: Slip Probability Jump - Sudden ice change
 # =============================================================================
-echo -e "${BLUE}--- Experiment 1: Gravity Jump Drift ---${NC}"
-echo "Simulates sudden gravity change (e.g., landing on different planet)"
-run_experiment "gravity" "jump" "10.0" "50000" "false"
-run_experiment "gravity" "jump" "10.0" "50000" "true"
+echo -e "${BLUE}--- Experiment 1: Slip Probability Jump ---${NC}"
+echo "Simulates sudden ice condition change (freeze/thaw)"
+echo "Slip prob jumps from 0.67 to 0.87 (more slippery)"
+run_experiment "slip_prob" "jump" "0.2" "50000" "false" "4x4"
+run_experiment "slip_prob" "jump" "0.2" "50000" "true" "4x4"
 
 # =============================================================================
-# EXPERIMENT 2: Gravity Drift (Sine) - Periodic oscillation
+# EXPERIMENT 2: Slip Probability Sine - Seasonal ice changes
 # =============================================================================
-echo -e "${BLUE}--- Experiment 2: Gravity Sine Drift ---${NC}"
-echo "Simulates periodic gravity changes (e.g., rotating space station)"
-run_experiment "gravity" "sine" "5.0" "20000" "false"
-run_experiment "gravity" "sine" "5.0" "20000" "true"
+echo -e "${BLUE}--- Experiment 2: Slip Probability Sine ---${NC}"
+echo "Simulates seasonal ice changes (oscillating conditions)"
+echo "Slip prob oscillates: 0.67 ± 0.15"
+run_experiment "slip_prob" "sine" "0.15" "20000" "false" "4x4"
+run_experiment "slip_prob" "sine" "0.15" "20000" "true" "4x4"
 
 # =============================================================================
-# EXPERIMENT 3: Mass Cart Drift (Random Walk) - Stochastic changes
+# EXPERIMENT 3: Slip Probability Linear - Gradual thaw
 # =============================================================================
-echo -e "${BLUE}--- Experiment 3: Mass Cart Random Walk ---${NC}"
-echo "Simulates gradual mass changes (e.g., loading/unloading cargo)"
-run_experiment "masscart" "random_walk" "0.5" "10000" "false"
-run_experiment "masscart" "random_walk" "0.5" "10000" "true"
+echo -e "${BLUE}--- Experiment 3: Slip Probability Linear ---${NC}"
+echo "Simulates gradual ice melting (becoming more slippery)"
+run_experiment "slip_prob" "linear" "0.2" "30000" "false" "4x4"
+run_experiment "slip_prob" "linear" "0.2" "30000" "true" "4x4"
 
 # =============================================================================
-# EXPERIMENT 4: Pole Length Drift (Linear) - Gradual change
+# EXPERIMENT 4: Slip Random Walk - Weather variability
 # =============================================================================
-echo -e "${BLUE}--- Experiment 4: Pole Length Linear Drift ---${NC}"
-echo "Simulates extending pole (e.g., telescoping mechanism)"
-run_experiment "length" "linear" "0.3" "25000" "false"
-run_experiment "length" "linear" "0.3" "25000" "true"
+echo -e "${BLUE}--- Experiment 4: Slip Probability Random Walk ---${NC}"
+echo "Simulates unpredictable weather affecting ice"
+run_experiment "slip_prob" "random_walk" "0.0" "10000" "false" "4x4"
+run_experiment "slip_prob" "random_walk" "0.0" "10000" "true" "4x4"
 
 # =============================================================================
-# EXPERIMENT 5: Static Baseline (No Drift) - Control
+# EXPERIMENT 5: 8x8 Map with Slip Drift - Harder environment
 # =============================================================================
-echo -e "${BLUE}--- Experiment 5: Static (No Drift) ---${NC}"
-echo "Control experiment with no environmental changes"
-run_experiment "gravity" "static" "0.0" "10000" "false"
+echo -e "${BLUE}--- Experiment 5: 8x8 Map with Slip Drift ---${NC}"
+echo "Larger map with drifting slip probability"
+run_experiment "slip_prob" "sine" "0.15" "30000" "false" "8x8"
+run_experiment "slip_prob" "sine" "0.15" "30000" "true" "8x8"
+
+# =============================================================================
+# EXPERIMENT 6: Static Baseline (No Drift) - Control
+# =============================================================================
+echo -e "${BLUE}--- Experiment 6: Static (No Drift) ---${NC}"
+echo "Control experiment with standard FrozenLake"
+run_experiment "slip_prob" "static" "0.0" "10000" "false" "4x4"
 
 # =============================================================================
 # Summary
 # =============================================================================
 echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}       All Experiments Complete!${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}================================================${NC}"
+echo -e "${GREEN}       All FrozenLake Experiments Complete!${NC}"
+echo -e "${GREEN}================================================${NC}"
 echo ""
 echo "Results saved to: ${RESULTS_DIR}"
 echo "Videos saved to:  videos/"
 echo "View in WandB:    https://wandb.ai"
 echo ""
 echo "Experiments run:"
-echo "  1. Gravity Jump:        Baseline vs Adaptive"
-echo "  2. Gravity Sine:        Baseline vs Adaptive"
-echo "  3. MassCart Random:     Baseline vs Adaptive"
-echo "  4. Pole Length Linear:  Baseline vs Adaptive"
-echo "  5. Static (control):    Baseline only"
+echo "  1. Slip Jump (4x4):     Baseline vs Adaptive (sudden ice)"
+echo "  2. Slip Sine (4x4):     Baseline vs Adaptive (seasonal)"
+echo "  3. Slip Linear (4x4):   Baseline vs Adaptive (melting)"
+echo "  4. Slip Random (4x4):   Baseline vs Adaptive (weather)"
+echo "  5. Slip Sine (8x8):     Baseline vs Adaptive (harder map)"
+echo "  6. Static (control):    Baseline only"
 echo ""
 echo "Filter WandB by timestamp: $TIMESTAMP"

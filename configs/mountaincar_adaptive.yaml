@@ -1,18 +1,31 @@
 # ============================================================================
-# CONFIGURATION: Non-Stationary MountainCar Experiments
+# CONFIGURATION GUIDE: Non-Stationary MountainCar Experiments
 # ============================================================================
+#
+# This file controls all aspects of the experiment. Below are the key settings
+# you'll want to modify for different experiments.
 #
 # MountainCar: A car must build momentum to climb a hill
 # Drifting gravity or force makes this task harder/easier dynamically
 #
+# QUICK START - Common Experiments:
+# ---------------------------------
+# 1. Baseline (no drift):     Set drift_type: "static"
+# 2. Sudden change:           Set drift_type: "jump", magnitude: 0.001
+# 3. Gradual drift:           Set drift_type: "linear", magnitude: 0.001
+# 4. Periodic oscillation:    Set drift_type: "sine", magnitude: 0.0005
+# 5. Enable adaptation:       Set adaptive.enabled: true
+#
 # ============================================================================
 
+# 1. Environment Configuration
 env_id: "MountainCar-v0"
 
 env:
   # -------------------------------------------------------------------------
   # PARAMETER TO DRIFT
   # -------------------------------------------------------------------------
+  # Which physics parameter should change over time?
   # Options:
   #   - "gravity"       : Gravitational pull (default=0.0025). Higher = harder
   #   - "force"         : Engine power (default=0.001). Higher = easier
@@ -22,81 +35,145 @@ env:
   # -------------------------------------------------------------------------
   # DRIFT PATTERN
   # -------------------------------------------------------------------------
-  drift_type: "linear"           # static, jump, linear, sine, random_walk
+  # How should the parameter change over time?
+  # Options:
+  #   - "static"      : No change (stationary baseline)
+  #   - "jump"        : Sudden regime shift after 'period' steps
+  #   - "linear"      : Gradual ramp up then down (triangular wave)
+  #   - "sine"        : Smooth oscillation (sinusoidal wave)
+  #   - "random_walk" : Stochastic drift (Brownian motion, bounded)
+  drift_type: "linear"
   
   # -------------------------------------------------------------------------
   # DRIFT DYNAMICS
   # -------------------------------------------------------------------------
-  # For gravity (base=0.0025):
-  #   magnitude=0.001 → varies from 0.0015 to 0.0035
+  # magnitude: How much the parameter changes from its base value
+  #   - For gravity (base=0.0025): magnitude=0.001 → varies from 0.0015 to 0.0035
+  #   - For force (base=0.001): magnitude=0.0005 → varies from 0.0005 to 0.0015
+  #   - Larger values = more non-stationarity = harder problem
   magnitude: 0.001
+  
+  # period: Timing of drift changes (in environment steps)
+  #   - For "jump": parameter changes after this many steps
+  #   - For "linear"/"sine": one full cycle takes this many steps
+  #   - Smaller period = faster changes = harder to adapt
   period: 20000
-
-  # Random walk settings (if drift_type: random_walk)
+  
+  # -------------------------------------------------------------------------
+  # RANDOM WALK ONLY (ignored for other drift types)
+  # -------------------------------------------------------------------------
+  # sigma: Step size standard deviation for random walk
   sigma: 0.0001
+  
+  # bounds: [min, max] limits for random walk
   bounds: [0.001, 0.005]
 
-# Weights & Biases
+# 2. Weights & Biases Logging (Online)
 wandb:
-  project: "Static_MountainCar_Drift_Research"
-  tags: ["mountaincar", "gravity"]
-  mode: "online"
+  project: "MountainCar_Drift_Research"
+  entity: null                       # Your W&B username (null = default)
+  tags: ["mountaincar", "gravity"]   # Tags for filtering runs
+  mode: "online"                     # "online", "offline", or "disabled"
 
-# Training
+# 3. PPO Training Hyperparameters
 train:
-  learning_rate: 0.0003
-  n_steps: 2048
-  batch_size: 64
-  gamma: 0.99
-  total_timesteps: 5000000      # MountainCar needs more steps
-  seed: 42
+  learning_rate: 0.0003              # Base learning rate (η₀)
+  n_steps: 2048                      # Steps per rollout
+  batch_size: 64                     # Minibatch size
+  gamma: 0.99                        # Discount factor
+  total_timesteps: 5000000            # Total training steps (MountainCar needs more)
+  seed: 42                           # Random seed for reproducibility
 
-# Adaptive - Algorithm-Specific Hyperparameter Adaptation
+# 4. Adaptive Mechanism Configuration (Ours)
 # -------------------------------------------------------------------------
-# When enabled, hyperparameters adjust based on detected drift magnitude.
+# When enabled, hyperparameters adapt based on detected drift magnitude.
 # Each algorithm has different hyperparameters adapted:
 #   - PPO: learning_rate, clip_range, ent_coef
 #   - SAC: learning_rate, ent_coef (temperature)
 #   - TRPO: learning_rate, target_kl
 # -------------------------------------------------------------------------
 adaptive:
-  enabled: false
+  enabled: false                     # true = Adaptive, false = Baseline
   
   # --- Learning Rate Adaptation (All Algorithms) ---
   # Formula: η_t = η_0 * (1 + scale_factor * drift_magnitude)
-  scale_factor: 0.1              # Sensitivity to drift (try 0.05-0.5)
-  min_lr_multiplier: 0.5         # LR won't go below base_lr × 0.5
-  max_lr_multiplier: 3.0         # LR won't go above base_lr × 3.0
+  scale_factor: 0.1                  # c₁: Sensitivity to drift (try 0.05-0.5)
+  min_lr_multiplier: 0.5             # LR won't go below base_lr × 0.5
+  max_lr_multiplier: 3.0             # LR won't go above base_lr × 3.0
   
   # --- PPO: Clip Range Adaptation ---
   # Formula: ε_t = ε_0 / (1 + scale_factor * drift_magnitude)
   # Rationale: Smaller trust region when env is changing
   adapt_clip_range: true
-  base_clip_range: 0.2           # PPO default
-  min_clip_range: 0.05           # Most conservative
-  max_clip_range: 0.4            # Most aggressive
+  base_clip_range: 0.2               # PPO default
+  min_clip_range: 0.05               # Most conservative
+  max_clip_range: 0.4                # Most aggressive
   
   # --- PPO/SAC: Entropy Coefficient Adaptation ---
   # Formula: α_t = α_0 * (1 + scale_factor * drift_magnitude)
   # Rationale: More exploration when env is drifting
   adapt_entropy: true
-  base_ent_coef: 0.0             # 0 = auto-detect from model
+  base_ent_coef: 0.0                 # 0 = auto-detect from model
   min_ent_coef: 0.0
   max_ent_coef: 0.1
   
   # --- TRPO: Target KL Adaptation ---
   # Formula: KL_t = KL_0 / (1 + scale_factor * drift_magnitude)
   # Rationale: Stricter constraint when env is unstable
-  adapt_target_kl: false
-  base_target_kl: 0.01           # TRPO default
+  adapt_target_kl: true
+  base_target_kl: 0.01               # TRPO default
   min_target_kl: 0.001
   max_target_kl: 0.05
   
   # Logging frequency
   log_freq: 100
 
-# Paths
+# 5. Paths
 paths:
   log_dir: "logs/"
   model_dir: "models/"
   video_dir: "videos/"
+
+
+# ============================================================================
+# EXAMPLE CONFIGURATIONS
+# ============================================================================
+#
+# --- EXPERIMENT 1: Stationary Baseline ---
+# env:
+#   parameter: "gravity"
+#   drift_type: "static"
+#   magnitude: 0.0
+# adaptive:
+#   enabled: false
+#
+# --- EXPERIMENT 2: Sudden Gravity Increase ---
+# env:
+#   parameter: "gravity"
+#   drift_type: "jump"
+#   magnitude: 0.001             # Gravity jumps from 0.0025 to 0.0035
+#   period: 100000               # After 100k steps
+# adaptive:
+#   enabled: false               # Baseline (no adaptation)
+#
+# --- EXPERIMENT 3: Adaptive Agent with Sine Drift ---
+# env:
+#   parameter: "gravity"
+#   drift_type: "sine"
+#   magnitude: 0.0005            # Gravity oscillates 0.0025 ± 0.0005
+#   period: 50000                # Full cycle every 50k steps
+# adaptive:
+#   enabled: true                # Enable LR adaptation
+#   scale_factor: 0.2            # Moderate sensitivity
+#
+# --- EXPERIMENT 4: Force Drift with Random Walk ---
+# env:
+#   parameter: "force"
+#   drift_type: "random_walk"
+#   magnitude: 0.0               # (not used for random walk)
+#   sigma: 0.0001                # Small random steps
+#   bounds: [0.0005, 0.002]      # Force stays in this range
+# adaptive:
+#   enabled: true
+#
+# ============================================================================

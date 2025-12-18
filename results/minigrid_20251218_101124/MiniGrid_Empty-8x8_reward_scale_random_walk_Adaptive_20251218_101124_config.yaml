@@ -1,0 +1,46 @@
+env_id: "MiniGrid-Empty-8x8-v0"
+
+env:
+  parameter: "reward_scale"
+  drift_type: "random_walk"
+  magnitude: 0.0
+  period: 15000
+  sigma: 0.05
+  bounds: [0.1, 2.0]
+
+wandb:
+  project: "MiniGrid_Drift_Research"
+  tags: ["minigrid", "random_walk", "reward_scale", "adaptive"]
+  mode: "online"
+
+train:
+  learning_rate: 0.0003
+  n_steps: 512
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+adaptive:
+  enabled: true
+  scale_factor: 0.15
+  min_lr_multiplier: 0.5
+  max_lr_multiplier: 3.0
+  adapt_clip_range: true
+  base_clip_range: 0.2
+  min_clip_range: 0.05
+  max_clip_range: 0.4
+  adapt_entropy: true
+  base_ent_coef: 0.01
+  min_ent_coef: 0.0
+  max_ent_coef: 0.1
+  adapt_target_kl: true
+  base_target_kl: 0.01
+  min_target_kl: 0.001
+  max_target_kl: 0.05
+  log_freq: 100
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

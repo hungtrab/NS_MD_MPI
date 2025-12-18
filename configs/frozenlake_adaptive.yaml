@@ -1,71 +1,191 @@
 # ============================================================================
-# CONFIGURATION: Non-Stationary FrozenLake Experiments
+# CONFIGURATION GUIDE: Non-Stationary FrozenLake Experiments
 # ============================================================================
+#
+# This file controls all aspects of the experiment. Below are the key settings
+# you'll want to modify for different experiments.
 #
 # FrozenLake: Navigate a frozen lake to reach the goal
 # Drifting slip probability simulates changing ice conditions
 #
+# QUICK START - Common Experiments:
+# ---------------------------------
+# 1. Baseline (no drift):     Set drift_type: "static"
+# 2. Sudden change:           Set drift_type: "jump", magnitude: 0.2
+# 3. Gradual drift:           Set drift_type: "linear", magnitude: 0.2
+# 4. Periodic oscillation:    Set drift_type: "sine", magnitude: 0.15
+# 5. Enable adaptation:       Set adaptive.enabled: true
+#
 # ============================================================================
 
+# 1. Environment Configuration
 env_id: "FrozenLake-v1"
 
 env:
   # -------------------------------------------------------------------------
   # PARAMETER TO DRIFT
   # -------------------------------------------------------------------------
+  # Which environment parameter should change over time?
   # Options:
   #   - "slip_prob"    : Probability of slipping (base=0.67 if is_slippery=True)
-  #   - "reward_scale" : Multiplier for goal reward
+  #   - "reward_scale" : Multiplier for goal reward (base=1.0)
   parameter: "slip_prob"
   
   # -------------------------------------------------------------------------
   # DRIFT PATTERN
   # -------------------------------------------------------------------------
-  drift_type: "linear"         # static, jump, linear, sine, random_walk
+  # How should the parameter change over time?
+  # Options:
+  #   - "static"      : No change (stationary baseline)
+  #   - "jump"        : Sudden regime shift after 'period' steps
+  #   - "linear"      : Gradual ramp up then down (triangular wave)
+  #   - "sine"        : Smooth oscillation (sinusoidal wave)
+  #   - "random_walk" : Stochastic drift (Brownian motion, bounded)
+  drift_type: "linear"
   
   # -------------------------------------------------------------------------
   # DRIFT DYNAMICS
   # -------------------------------------------------------------------------
-  # For slip_prob (base=0.67):
-  #   magnitude=0.3 → varies from 0.37 to 0.97 (triangular wave)
-  # Negative magnitude makes it less slippery over time
+  # magnitude: How much the parameter changes from its base value
+  #   - For slip_prob (base=0.67): magnitude=0.2 → varies from 0.47 to 0.87
+  #   - Negative magnitude makes it less slippery over time
+  #   - Larger values = more non-stationarity = harder problem
   magnitude: 0.2
+  
+  # period: Timing of drift changes (in environment steps)
+  #   - For "jump": parameter changes after this many steps
+  #   - For "linear"/"sine": one full cycle takes this many steps
+  #   - Smaller period = faster changes = harder to adapt
   period: 10000
-
-  # Random walk settings
+  
+  # -------------------------------------------------------------------------
+  # RANDOM WALK ONLY (ignored for other drift types)
+  # -------------------------------------------------------------------------
+  # sigma: Step size standard deviation for random walk
   sigma: 0.02
+  
+  # bounds: [min, max] limits for random walk
   bounds: [0.0, 0.9]
 
-# Weights & Biases
+# 2. Weights & Biases Logging (Online)
 wandb:
   project: "FrozenLake_Drift_Research"
-  tags: ["frozenlake", "slip_drift"]
-  mode: "online"
+  entity: null                       # Your W&B username (null = default)
+  tags: ["frozenlake", "slip_drift"] # Tags for filtering runs
+  mode: "online"                     # "online", "offline", or "disabled"
 
-# Training (DQN recommended for discrete action space)
+# 3. PPO Training Hyperparameters
 train:
-  learning_rate: 0.001
-  n_steps: 128                 # Shorter rollouts for sparse rewards
-  batch_size: 32
-  gamma: 0.99
-  total_timesteps: 100000
-  seed: 42
+  learning_rate: 0.001               # Base learning rate (η₀)
+  n_steps: 128                       # Steps per rollout (shorter for sparse rewards)
+  batch_size: 32                     # Minibatch size
+  gamma: 0.99                        # Discount factor
+  total_timesteps: 100000            # Total training steps
+  seed: 42                           # Random seed for reproducibility
 
-# Adaptive
+# 4. Adaptive Mechanism Configuration (Ours)
+# -------------------------------------------------------------------------
+# When enabled, hyperparameters adapt based on detected drift magnitude.
+# Each algorithm has different hyperparameters adapted:
+#   - PPO: learning_rate, clip_range, ent_coef
+#   - SAC: learning_rate, ent_coef (temperature)
+#   - TRPO: learning_rate, target_kl
+# -------------------------------------------------------------------------
 adaptive:
-  enabled: false
-  scale_factor: 0.2
-  min_lr_multiplier: 0.5
-  max_lr_multiplier: 3.0
+  enabled: false                     # true = Adaptive, false = Baseline
+  
+  # --- Learning Rate Adaptation (All Algorithms) ---
+  # Formula: η_t = η_0 * (1 + scale_factor * drift_magnitude)
+  scale_factor: 0.2                  # c₁: Sensitivity to drift (try 0.05-0.5)
+  min_lr_multiplier: 0.5             # LR won't go below base_lr × 0.5
+  max_lr_multiplier: 3.0             # LR won't go above base_lr × 3.0
+  
+  # --- PPO: Clip Range Adaptation ---
+  # Formula: ε_t = ε_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Smaller trust region when env is changing
+  adapt_clip_range: true
+  base_clip_range: 0.2               # PPO default
+  min_clip_range: 0.05               # Most conservative
+  max_clip_range: 0.4                # Most aggressive
+  
+  # --- PPO/SAC: Entropy Coefficient Adaptation ---
+  # Formula: α_t = α_0 * (1 + scale_factor * drift_magnitude)
+  # Rationale: More exploration when env is drifting
+  adapt_entropy: true
+  base_ent_coef: 0.0                 # 0 = auto-detect from model
+  min_ent_coef: 0.0
+  max_ent_coef: 0.1
+  
+  # --- TRPO: Target KL Adaptation ---
+  # Formula: KL_t = KL_0 / (1 + scale_factor * drift_magnitude)
+  # Rationale: Stricter constraint when env is unstable
+  adapt_target_kl: true
+  base_target_kl: 0.01               # TRPO default
+  min_target_kl: 0.001
+  max_target_kl: 0.05
+  
+  # Logging frequency
   log_freq: 50
 
-# Paths
+# 5. Paths
 paths:
   log_dir: "logs/"
   model_dir: "models/"
   video_dir: "videos/"
 
-# FrozenLake-specific options
+# 6. FrozenLake-specific options
 env_kwargs:
-  is_slippery: true            # Set false for deterministic baseline
-  map_name: "4x4"              # "4x4" or "8x8"
+  is_slippery: true                  # Set false for deterministic baseline
+  map_name: "4x4"                    # "4x4" or "8x8"
+
+
+# ============================================================================
+# EXAMPLE CONFIGURATIONS
+# ============================================================================
+#
+# --- EXPERIMENT 1: Stationary Baseline (No Slip) ---
+# env:
+#   parameter: "slip_prob"
+#   drift_type: "static"
+#   magnitude: 0.0
+# env_kwargs:
+#   is_slippery: false               # Deterministic transitions
+# adaptive:
+#   enabled: false
+#
+# --- EXPERIMENT 2: Sudden Ice Change ---
+# env:
+#   parameter: "slip_prob"
+#   drift_type: "jump"
+#   magnitude: 0.25                  # Slip prob jumps from 0.67 to 0.92
+#   period: 50000                    # After 50k steps
+# adaptive:
+#   enabled: false                   # Baseline (no adaptation)
+#
+# --- EXPERIMENT 3: Adaptive Agent with Sine Drift ---
+# env:
+#   parameter: "slip_prob"
+#   drift_type: "sine"
+#   magnitude: 0.15                  # Slip prob oscillates 0.67 ± 0.15
+#   period: 20000                    # Full cycle every 20k steps
+# adaptive:
+#   enabled: true                    # Enable LR adaptation
+#   scale_factor: 0.25               # Moderate sensitivity
+#
+# --- EXPERIMENT 4: Random Ice Conditions ---
+# env:
+#   parameter: "slip_prob"
+#   drift_type: "random_walk"
+#   magnitude: 0.0                   # (not used for random walk)
+#   sigma: 0.02                      # Small random steps
+#   bounds: [0.3, 0.9]               # Slip stays in this range
+# adaptive:
+#   enabled: true
+#
+# --- EXPERIMENT 5: 8x8 Map (Harder) ---
+# env_kwargs:
+#   map_name: "8x8"
+# train:
+#   total_timesteps: 200000          # More training needed
+#
+# ============================================================================

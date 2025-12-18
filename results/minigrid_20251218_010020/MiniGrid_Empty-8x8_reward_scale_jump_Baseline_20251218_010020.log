@@ -1,0 +1,52 @@
+wandb: Currently logged in as: hungtrab (hungtrab-hanoi-university-of-science-and-technology) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run 1g1m0uh3
+wandb: Tracking run with wandb version 0.23.1
+wandb: Run data is saved locally in logs/MiniGrid_Empty-8x8_reward_scale_jump_Baseline_20251218_010020/wandb/run-20251218_010023-1g1m0uh3
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run MiniGrid_Empty-8x8_reward_scale_jump_Baseline_20251218_010020
+wandb: ⭐️ View project at https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/MiniGrid_Drift_Research
+wandb: 🚀 View run at https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology/MiniGrid_Drift_Research/runs/1g1m0uh3
+--- Training Start: MiniGrid_Empty-8x8_reward_scale_jump_Baseline_20251218_010020 ---
+>>> [Wrapper] Initialized Non-Stationary MiniGrid
+    - reward_scale: jump
+>>> Initializing PPO with kwargs: ['policy', 'env', 'learning_rate', 'gamma', 'verbose', 'tensorboard_log', 'n_steps', 'batch_size']
+Using cuda device
+Wrapping the env in a DummyVecEnv.
+Traceback (most recent call last):
+  File "/home/hungchan/Work/Deep-RL/scripts/train.py", line 260, in <module>
+    main()
+  File "/home/hungchan/Work/Deep-RL/scripts/train.py", line 185, in main
+    model = AlgoClass(**model_kwargs)
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/ppo/ppo.py", line 109, in __init__
+    super().__init__(
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 86, in __init__
+    super().__init__(
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/base_class.py", line 170, in __init__
+    env = self._wrap_env(env, self.verbose, monitor_wrapper)
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/base_class.py", line 224, in _wrap_env
+    env = DummyVecEnv([lambda: env])  # type: ignore[list-item, return-value]
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 47, in __init__
+    self.buf_obs = OrderedDict([(k, np.zeros((self.num_envs, *tuple(shapes[k])), dtype=dtypes[k])) for k in self.keys])
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 47, in <listcomp>
+    self.buf_obs = OrderedDict([(k, np.zeros((self.num_envs, *tuple(shapes[k])), dtype=dtypes[k])) for k in self.keys])
+TypeError: 'NoneType' object is not iterable
+Traceback (most recent call last):
+  File "/home/hungchan/Work/Deep-RL/scripts/train.py", line 260, in <module>
+    main()
+  File "/home/hungchan/Work/Deep-RL/scripts/train.py", line 185, in main
+    model = AlgoClass(**model_kwargs)
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/ppo/ppo.py", line 109, in __init__
+    super().__init__(
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 86, in __init__
+    super().__init__(
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/base_class.py", line 170, in __init__
+    env = self._wrap_env(env, self.verbose, monitor_wrapper)
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/base_class.py", line 224, in _wrap_env
+    env = DummyVecEnv([lambda: env])  # type: ignore[list-item, return-value]
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 47, in __init__
+    self.buf_obs = OrderedDict([(k, np.zeros((self.num_envs, *tuple(shapes[k])), dtype=dtypes[k])) for k in self.keys])
+  File "/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 47, in <listcomp>
+    self.buf_obs = OrderedDict([(k, np.zeros((self.num_envs, *tuple(shapes[k])), dtype=dtypes[k])) for k in self.keys])
+TypeError: 'NoneType' object is not iterable
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mMiniGrid_Empty-8x8_reward_scale_jump_Baseline_20251218_010020[0m at: [34m[0m
