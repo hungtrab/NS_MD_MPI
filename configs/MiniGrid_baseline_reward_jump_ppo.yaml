@@ -1,0 +1,34 @@
+# MiniGrid Baseline - Jump Reward Drift - PPO
+env_id: "MiniGrid-Dynamic-Obstacles-8x8-v0"
+
+env:
+  parameter: "reward_scale"
+  drift_type: "jump"
+  magnitude: 0.7
+  period: 250000
+
+wandb:
+  project: "NS-MDP-Experiments"
+  entity: null
+  tags: ["minigrid", "baseline", "jump", "reward"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 128
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

@@ -1,0 +1,41 @@
+# CartPole Adaptive - Sine Gravity Drift - PPO
+env_id: "CartPole-v1"
+
+env:
+  parameter: "gravity"
+  drift_type: "sine"
+  magnitude: 5.0
+  period: 10000
+
+wandb:
+  project: "NS-MDP-Experiments"
+  entity: null
+  tags: ["cartpole", "adaptive", "sine", "gravity"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+adaptive:
+  enabled: true
+  scale_factor: 0.1
+  min_lr_multiplier: 0.5
+  max_lr_multiplier: 3.0
+  adapt_clip_range: true
+  base_clip_range: 0.2
+  adapt_entropy: true
+  base_ent_coef: 0.01
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

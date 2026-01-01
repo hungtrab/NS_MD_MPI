@@ -23,6 +23,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.envs import make_nonstationary_env, get_wrapper_for_env
 from src.callbacks.drift_callback import DriftAdaptiveCallback
+from src.callbacks.nsmdmpi_callback import NSMDMPICallback
 
 # Algorithm registry
 ALGORITHM_REGISTRY = {
@@ -64,7 +65,159 @@ def make_env(config, log_dir=None, seed=None):
     
     # Get additional env kwargs if specified
     env_kwargs = config.get('env_kwargs', {})
-    
+    if 'procgen' in env_id.lower():
+        try:
+            import numpy as np
+            
+            # Check NumPy version compatibility
+            numpy_version = tuple(map(int, np.__version__.split('.')[:2]))
+            if numpy_version >= (2, 0):
+                print("=" * 70)
+                print("ERROR: Procgen is incompatible with NumPy 2.0+")
+                print("=" * 70)
+                print(f"Current NumPy version: {np.__version__}")
+                print("\nOptions:")
+                print("  1. Downgrade NumPy: pip install 'numpy<2.0'")
+                print("  2. Use other environments: CartPole, MountainCar, FrozenLake, etc.")
+                print("=" * 70)
+                raise RuntimeError("NumPy version incompatibility with Procgen")
+            
+            from procgen import ProcgenEnv
+            from stable_baselines3.common.vec_env import VecMonitor
+            import gymnasium as gym
+            from gymnasium import spaces as gym_spaces
+            import gym as old_gym
+            from stable_baselines3.common.vec_env.base_vec_env import VecEnv, VecEnvWrapper
+            import numpy as np
+            
+            # Wrapper to convert gym spaces to gymnasium spaces
+            class GymToGymnasiumWrapper(VecEnvWrapper):
+                """Convert old gym spaces to gymnasium spaces for SB3 compatibility."""
+                
+                def __init__(self, venv):
+                    super().__init__(venv)
+                    
+                    # Convert observation space from gym to gymnasium
+                    old_obs_space = venv.observation_space
+                    
+                    # Handle Dict observation spaces (like Procgen's Dict with 'rgb' key)
+                    if isinstance(old_obs_space, old_gym.spaces.Dict):
+                        # Extract the 'rgb' observation if present
+                        if 'rgb' in old_obs_space.spaces:
+                            rgb_space = old_obs_space.spaces['rgb']
+                            self.observation_space = gym_spaces.Box(
+                                low=rgb_space.low,
+                                high=rgb_space.high,
+                                shape=rgb_space.shape,
+                                dtype=rgb_space.dtype
+                            )
+                            self._extract_rgb = True
+                        else:
+                            raise ValueError(f"Dict observation space doesn't contain 'rgb' key: {old_obs_space}")
+                    elif isinstance(old_obs_space, old_gym.spaces.Box):
+                        self.observation_space = gym_spaces.Box(
+                            low=old_obs_space.low,
+                            high=old_obs_space.high,
+                            shape=old_obs_space.shape,
+                            dtype=old_obs_space.dtype
+                        )
+                        self._extract_rgb = False
+                    elif isinstance(old_obs_space, old_gym.spaces.Discrete):
+                        self.observation_space = gym_spaces.Discrete(old_obs_space.n)
+                        self._extract_rgb = False
+                    else:
+                        # For other spaces, try to use them directly
+                        self.observation_space = old_obs_space
+                        self._extract_rgb = False
+                    
+                    # Convert action space
+                    old_act_space = venv.action_space
+                    if isinstance(old_act_space, old_gym.spaces.Discrete):
+                        self.action_space = gym_spaces.Discrete(old_act_space.n)
+                    elif isinstance(old_act_space, old_gym.spaces.Box):
+                        self.action_space = gym_spaces.Box(
+                            low=old_act_space.low,
+                            high=old_act_space.high,
+                            shape=old_act_space.shape,
+                            dtype=old_act_space.dtype
+                        )
+                    else:
+                        self.action_space = old_act_space
+                
+                def reset(self):
+                    obs = self.venv.reset()
+                    # Extract 'rgb' from Dict observations if needed
+                    if self._extract_rgb and isinstance(obs, dict):
+                        obs = obs['rgb']
+                    return obs
+                
+                def step_async(self, actions):
+                    self.venv.step_async(actions)
+                
+                def step_wait(self):
+                    obs, rewards, dones, infos = self.venv.step_wait()
+                    # Extract 'rgb' from Dict observations if needed
+                    if self._extract_rgb and isinstance(obs, dict):
+                        obs = obs['rgb']
+                    return obs, rewards, dones, infos
+                
+                def __getstate__(self):
+                    """Support for pickle serialization - exclude unpicklable venv."""
+                    state = self.__dict__.copy()
+                    # Remove the vectorized environment which contains thread locks
+                    if 'venv' in state:
+                        del state['venv']
+                    return state
+                
+                def __setstate__(self, state):
+                    """Support for pickle deserialization."""
+                    self.__dict__.update(state)
+                    # Note: venv will need to be recreated if loaded from pickle
+            # Procgen requires special configuration
+            env_name = env_id.split('-')[1] if '-' in env_id else env_id.replace('procgen', '')  # Extract game name
+            
+            # Get Procgen-specific config from env section
+            distribution_mode = config['env'].get('distribution_mode', 'easy')
+            num_levels = config['env'].get('num_levels', 500)
+            use_backgrounds = config['env'].get('use_backgrounds', True)
+            num_envs = config.get('num_envs', 1)
+            
+            print(f">>> [Procgen] Creating {env_name} environment")
+            print(f"    - distribution_mode: {distribution_mode}")
+            print(f"    - num_levels: {num_levels}")
+            print(f"    - num_envs: {num_envs}")
+            
+            env = ProcgenEnv(
+                num_envs=num_envs,
+                env_name=env_name,
+                distribution_mode=distribution_mode,
+                use_backgrounds=use_backgrounds,
+                restrict_themes=False,
+                start_level=0,
+                num_levels=num_levels,
+            )
+            
+            # Wrap with SB3-compatible wrappers
+            # First, add monitor for logging
+            if log_dir:
+                env = VecMonitor(env, log_dir)
+            
+            # Convert gym spaces to gymnasium spaces for SB3 compatibility
+            env = GymToGymnasiumWrapper(env)
+            
+            print(f">>> [Procgen] Environment created successfully (No physical drift injection)")
+            print(f"    - Observation space: {env.observation_space}")
+            print(f"    - Action space: {env.action_space}")
+            return env
+            
+        except ImportError as e:
+            print(f"Error: procgen package not installed. Install with: pip install procgen")
+            print(f"Details: {e}")
+            raise
+        except Exception as e:
+            print(f"Error creating Procgen environment: {e}")
+            raise
+
     # Create non-stationary environment using factory
     try:
         env = make_nonstationary_env(env_id, drift_conf, seed=seed, **env_kwargs)
@@ -118,6 +271,8 @@ def main():
         run_name = f"{cfg['env_id']}_{algo_name}_{cfg['env']['drift_type']}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         if cfg['adaptive']['enabled']:
             run_name += "_Adaptive"
+        elif cfg['nsmdmpi']['enabled']:
+            run_name += "_NSMDMPI"
         else:
             run_name += "_Baseline"
 
@@ -196,8 +351,54 @@ def main():
         )
     )
 
-    # >>> CALLBACK 2: Custom Drift Logic (Algorithm-Specific)
-    if cfg['adaptive']['enabled']:
+    # >>> CALLBACK 2: NS-MD-MPI or Adaptive Drift Logic
+    # Check if NS-MD-MPI is enabled (Algorithm 1 from paper)
+    if cfg.get('nsmdmpi', {}).get('enabled', False):
+        nsmdmpi_cfg = cfg['nsmdmpi']
+        nsmdmpi_callback = NSMDMPICallback(
+            # Variation budgets (V_R, V_P, V_π*)
+            V_R=nsmdmpi_cfg.get('V_R', 10.0),
+            V_P=nsmdmpi_cfg.get('V_P', 10.0),
+            V_pi_star=nsmdmpi_cfg.get('V_pi_star', 5.0),
+            auto_estimate_budgets=nsmdmpi_cfg.get('auto_estimate_budgets', False),
+            budget_scale_factor=nsmdmpi_cfg.get('budget_scale_factor', 1.5),
+            
+            # Trust region (κ_t)
+            kappa_base=nsmdmpi_cfg.get('kappa_base', 0.2),
+            kappa_min=nsmdmpi_cfg.get('kappa_min', 0.05),
+            kappa_max=nsmdmpi_cfg.get('kappa_max', 0.4),
+            kappa_adaptive=nsmdmpi_cfg.get('kappa_adaptive', True),
+            trust_region_sensitivity=nsmdmpi_cfg.get('trust_region_sensitivity', 5.0),
+            
+            # Regularization (λ_t)
+            lambda_base=nsmdmpi_cfg.get('lambda_base', 1.0),
+            lambda_min=nsmdmpi_cfg.get('lambda_min', 0.1),
+            lambda_max=nsmdmpi_cfg.get('lambda_max', 10.0),
+            lambda_adaptive=nsmdmpi_cfg.get('lambda_adaptive', True),
+            regularization_sensitivity=nsmdmpi_cfg.get('regularization_sensitivity', 2.0),
+            
+            # Drift estimation
+            drift_weights=tuple(nsmdmpi_cfg.get('drift_weights', {}).values()) or (1.0, 1.0, 0.5),
+            drift_window_size=nsmdmpi_cfg.get('drift_window_size', 1000),
+            drift_min_samples=nsmdmpi_cfg.get('drift_min_samples', 100),
+            
+            # Entropy adaptation
+            adapt_entropy=nsmdmpi_cfg.get('adapt_entropy', True),
+            base_ent_coef=nsmdmpi_cfg.get('base_ent_coef', 0.0),
+            min_ent_coef=nsmdmpi_cfg.get('min_ent_coef', 0.0),
+            max_ent_coef=nsmdmpi_cfg.get('max_ent_coef', 0.1),
+            
+            # Logging
+            log_freq=nsmdmpi_cfg.get('log_freq', 100),
+            save_budget_history=nsmdmpi_cfg.get('save_budget_history', True),
+            budget_save_dir=nsmdmpi_cfg.get('budget_save_dir', 'budgets/'),
+            verbose=nsmdmpi_cfg.get('verbose', 1),
+        )
+        callbacks.append(nsmdmpi_callback)
+        run_name += "_NSMDMPI"
+        
+    # Otherwise, check for baseline adaptive (heuristic method)
+    elif cfg.get('adaptive', {}).get('enabled', False):
         adaptive_cfg = cfg['adaptive']
         drift_callback = DriftAdaptiveCallback(
             # Environment parameter tracking
@@ -232,6 +433,7 @@ def main():
             verbose=1
         )
         callbacks.append(drift_callback)
+        run_name += "_Adaptive"
 
     # 5. Train
     try:

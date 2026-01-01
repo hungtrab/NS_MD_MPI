@@ -1,0 +1,34 @@
+# CartPole Baseline - Linear MassCart Drift - PPO
+env_id: "CartPole-v1"
+
+env:
+  parameter: "masscart"
+  drift_type: "linear"
+  magnitude: 0.5
+  period: 25000
+
+wandb:
+  project: "NS-MDP-Experiments"
+  entity: null
+  tags: ["cartpole", "baseline", "linear", "masscart"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

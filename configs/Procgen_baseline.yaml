@@ -1,0 +1,89 @@
+# Procgen CoinRun - NS-MD-MPI - Distribution Shift (Level Generation)
+# Lưu ý: Với Procgen, ta không tiêm "drift" vào vật lý (gravity/force).
+# Mà ta khai thác sự thay đổi ngẫu nhiên của layout qua 'num_levels'.
+
+env_id: "procgen-coinrun-v0"
+
+# --- Môi trường Procgen ---
+env:
+  # Các tham số này được dùng trong hàm make_env để config ProcgenEnv
+  # "distribution_mode" và "num_levels" là nguồn gây ra Non-Stationary ở đây.
+  parameter: "num_levels" # Chỉ là label để log, không dùng để tiêm drift vật lý
+  drift_type: "distribution" # Loại drift: Phân bố thay đổi giữa các level
+  
+  # Config Procgen
+  distribution_mode: "easy"   # easy/medium/hard (easy nhất cho demo)
+  num_levels: 500             # Số lượng level ngẫu nhiên (NS: 500 môi trường khác nhau)
+  use_backgrounds: true        # Bật background ngẫu nhiên (tăng sự thay đổi về vision)
+
+wandb:
+  project: "NS-MDP-Experiments"
+  entity: null
+  tags: ["procgen", "coinrun", "nsmdmpi", "distribution_shift", "vision"]
+  mode: "online"
+
+# --- Cấu hình Training (Procgen cần số lượng samples lớn hơn) ---
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0005       # Procgen thường học tốt với LR này
+  n_steps: 2048
+  batch_size: 2048            # Procgen cần batch size lớn để thu thập đa dạng data
+  gamma: 0.99
+  total_timesteps: 5000000     # Procgen cần nhiều step hơn để generalize
+  seed: 42
+
+# --- Tắt Heuristic Callback (Vì Procgen không có tham số vật lý đọc được) ---
+adaptive:
+  enabled: false
+
+# --- Cấu hình NS-MD-MPI (Phù hợp với sự thay đổi Layout) ---
+nsmdmpi:
+  enabled: false
+  
+  # Budgets: Cần LỚN HƠN MountainCar vì level thay đổi hoàn toàn mỗi lần reset
+  V_R: 100.0
+  V_P: 100.0
+  V_pi_star: 50.0
+  auto_estimate_budgets: false
+  budget_scale_factor: 2.0
+  
+  # Trust Region (kappa_t)
+  kappa_base: 0.2
+  kappa_min: 0.1             # Không để quá thấp vì Procgen cần thay đổi hành động nhanh
+  kappa_max: 0.5
+  kappa_adaptive: true
+  trust_region_sensitivity: 5.0 # Tăng độ nhạy để bám kịp các level mới
+  
+  # Regularization (lambda_t)
+  lambda_base: 1.0
+  lambda_min: 0.5
+  lambda_max: 5.0
+  lambda_adaptive: true
+  regularization_sensitivity: 2.0
+  
+  ema_tau: 0.1
+  gamma: 0.99
+  B_value_bound: 5.0          # Procgen reward scale lớn hơn
+  
+  drift_weights:
+    reward: 1.0
+    transition: 2.0          # Transition drift (layout) quan trọng nhất
+    commutator: 1.0
+  
+  drift_window_size: 2048     # Phải khớp với n_steps
+  drift_min_samples: 500
+  
+  adapt_entropy: true
+  base_ent_coef: 0.01        # Procgen cần entropy để khám phá nhiều level
+  min_ent_coef: 0.0
+  max_ent_coef: 0.05
+  
+  log_freq: 100
+  save_budget_history: true
+  budget_save_dir: "budgets/"
+  verbose: 1
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

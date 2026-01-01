@@ -165,6 +165,77 @@ class DynamicRegretCalculator:
         
         return timesteps, regrets
     
+    def compute_regret_decomposition(self, budget_tracker) -> Dict[str, float]:
+        """
+        Decompose regret into budget-related components.
+        
+        This method analyzes how regret relates to variation budget consumption,
+        providing insights into:
+        - How efficiently budgets were utilized
+        - Whether budget constraints were binding
+        - Relationship between drift and regret
+        
+        Args:
+            budget_tracker: VariationBudgetTracker instance from training
+            
+        Returns:
+            Dictionary with decomposed metrics:
+                - total_regret: Total dynamic regret
+                - V_R_consumed: Amount of reward budget consumed
+                - V_P_consumed: Amount of transition budget consumed
+                - V_pi_consumed: Amount of policy budget consumed
+                - budget_efficiency: Regret per unit of budget consumed
+                - budget_constraint_binding: Whether budgets were exhausted
+        """
+        total_regret = self.compute_total_regret()
+        
+        # Get budget consumption
+        V_R_consumed = budget_tracker.V_R_consumed
+        V_P_consumed = budget_tracker.V_P_consumed
+        V_pi_consumed = budget_tracker.V_pi_star_consumed
+        
+        # Total variation (sum of consumed budgets)
+        total_variation = V_R_consumed + V_P_consumed + V_pi_consumed
+        
+        # Budget efficiency: regret per unit of variation
+        if total_variation > 0:
+            budget_efficiency = total_regret / total_variation
+        else:
+            budget_efficiency = 0.0
+        
+        # Check if budgets were exhausted (constraint binding)
+        min_remaining_frac = budget_tracker.get_min_remaining_fraction()
+        budget_constraint_binding = min_remaining_frac < 0.2  # <20% remaining
+        
+        # Budget fractions consumed
+        consumed_fracs = budget_tracker.get_consumed_fraction()
+        
+        return {
+            'total_regret': total_regret,
+            'average_regret': self.compute_average_regret(),
+            
+            # Budget consumption
+            'V_R_consumed': V_R_consumed,
+            'V_P_consumed': V_P_consumed,
+            'V_pi_consumed': V_pi_consumed,
+            'total_variation': total_variation,
+            
+            # Budget fractions
+            'V_R_fraction_consumed': consumed_fracs[0],
+            'V_P_fraction_consumed': consumed_fracs[1],
+            'V_pi_fraction_consumed': consumed_fracs[2],
+            
+            # Efficiency metrics
+            'budget_efficiency': budget_efficiency,
+            'regret_per_V_R': total_regret / max(V_R_consumed, 1e-6),
+            'regret_per_V_P': total_regret / max(V_P_consumed, 1e-6),
+            'regret_per_V_pi': total_regret / max(V_pi_consumed, 1e-6),
+            
+            # Constraint binding
+            'budget_constraint_binding': budget_constraint_binding,
+            'min_budget_remaining_fraction': min_remaining_frac,
+        }
+    
     def get_summary(self) -> Dict[str, float]:
         """
         Get a summary of regret statistics.

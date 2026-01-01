@@ -432,6 +432,19 @@ class DriftAdaptiveCallback(BaseCallback):
                 print(f"    Final Clip Range: {self.current_clip_range:.4f}")
             elif self.algo_name == 'TRPO':
                 print(f"    Final Target KL: {self.current_target_kl:.4f}")
+    
+    def __getstate__(self):
+        """Exclude unpicklable objects when saving."""
+        state = self.__dict__.copy()
+        # Remove logger reference (it's not picklable)
+        if 'logger' in state:
+            del state['logger']
+        return state
+    
+    def __setstate__(self, state):
+        """Restore state when loading."""
+        self.__dict__.update(state)
+        # Logger will be re-initialized by parent class
 
 
 # Backward compatibility alias
