@@ -5,10 +5,10 @@ env:
   parameter: "reward_scale"
   drift_type: "jump"
   magnitude: 0.7
-  period: 250000
+  period: 5000
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["minigrid", "nsmdmpi", "jump", "reward"]
   mode: "online"

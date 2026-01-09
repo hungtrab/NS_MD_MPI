@@ -5,10 +5,10 @@ env:
   parameter: "gravity"
   drift_type: "linear"
   magnitude: 0.0015
-  period: 250000
+  period: 10000
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["mountaincar", "nsmdmpi", "linear", "gravity"]
   mode: "online"
@@ -27,9 +27,9 @@ adaptive:
 
 nsmdmpi:
   enabled: true
-  V_R: 0.06
-  V_P: 0.06
-  V_pi_star: 0.03
+  V_R: 6.0
+  V_P: 6.0
+  V_pi_star: 3.0
   auto_estimate_budgets: false
   budget_scale_factor: 2.0
   

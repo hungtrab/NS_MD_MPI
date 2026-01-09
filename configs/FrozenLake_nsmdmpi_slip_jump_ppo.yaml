@@ -5,14 +5,14 @@ env:
   parameter: "slip_prob"
   drift_type: "jump"
   magnitude: 0.25
-  period: 250000
+  period: 1000
 
 env_kwargs:
   is_slippery: true
   map_name: "4x4"
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["frozenlake", "nsmdmpi", "jump", "slip"]
   mode: "online"

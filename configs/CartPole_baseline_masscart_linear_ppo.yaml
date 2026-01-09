@@ -5,10 +5,10 @@ env:
   parameter: "masscart"
   drift_type: "linear"
   magnitude: 0.5
-  period: 25000
+  period: 500
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["cartpole", "baseline", "linear", "masscart"]
   mode: "online"

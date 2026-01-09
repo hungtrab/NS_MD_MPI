@@ -5,10 +5,10 @@ env:
   parameter: "friction"
   drift_type: "sine"
   magnitude: 0.3
-  period: 50000
+  period: 5000  
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["halfcheetah", "baseline", "sine", "friction", "sac"]
   mode: "online"

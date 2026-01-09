@@ -1,0 +1,38 @@
+# FrozenLake Baseline - Jump Slip Drift - PPO
+env_id: "FrozenLake-v1"
+
+env:
+  parameter: "slip_prob"
+  drift_type: "jump"
+  magnitude: 0.25
+  period: 1000
+
+env_kwargs:
+  is_slippery: true
+  map_name: "4x4"
+
+wandb:
+  project: "NSMDMPI_EXP"
+  entity: null
+  tags: ["frozenlake", "baseline", "jump", "slip"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.001
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 4
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

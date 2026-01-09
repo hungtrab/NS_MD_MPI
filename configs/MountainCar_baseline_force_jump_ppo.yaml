@@ -5,10 +5,10 @@ env:
   parameter: "force"
   drift_type: "jump"
   magnitude: 0.0005
-  period: 500000
+  period: 10000
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["mountaincar", "baseline", "jump", "force"]
   mode: "online"

@@ -5,10 +5,10 @@ env:
   parameter: "gravity"
   drift_type: "linear"
   magnitude: 3.0
-  period: 250000
+  period: 5000
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["halfcheetah", "nsmdmpi", "linear", "gravity", "sac"]
   mode: "online"

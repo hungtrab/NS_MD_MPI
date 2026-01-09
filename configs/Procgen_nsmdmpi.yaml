@@ -17,7 +17,7 @@ env:
   use_backgrounds: true        # Bật background ngẫu nhiên (tăng sự thay đổi về vision)
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["procgen", "coinrun", "nsmdmpi", "distribution_shift", "vision"]
   mode: "online"

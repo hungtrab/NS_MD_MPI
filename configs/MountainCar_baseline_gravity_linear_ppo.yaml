@@ -5,10 +5,10 @@ env:
   parameter: "gravity"
   drift_type: "linear"
   magnitude: 0.0015
-  period: 250000
+  period: 10000
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["mountaincar", "baseline", "linear", "gravity"]
   mode: "online"

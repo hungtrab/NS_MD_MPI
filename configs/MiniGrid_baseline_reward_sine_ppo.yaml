@@ -5,10 +5,10 @@ env:
   parameter: "reward_scale"
   drift_type: "sine"
   magnitude: 0.5
-  period: 15000
+  period: 5000
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["minigrid", "baseline", "sine", "reward"]
   mode: "online"

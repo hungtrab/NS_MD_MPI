@@ -5,10 +5,10 @@ env:
   parameter: "damping"
   drift_type: "jump"
   magnitude: 0.5
-  period: 500000
+  period: 5000
 
 wandb:
-  project: "NS-MDP-Experiments"
+  project: "NSMDMPI_EXP"
   entity: null
   tags: ["halfcheetah", "nsmdmpi", "jump", "damping", "sac"]
   mode: "online"

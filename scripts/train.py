@@ -39,7 +39,7 @@ def load_config(config_path):
         return yaml.safe_load(f)
 
 
-def make_env(config, log_dir=None, seed=None):
+def make_env(config, log_dir=None, seed=None, num_envs=1):
     """
     Create a non-stationary environment based on config.
     
@@ -50,6 +50,7 @@ def make_env(config, log_dir=None, seed=None):
         config: Configuration dictionary
         log_dir: Optional log directory for Monitor wrapper
         seed: Random seed for reproducibility
+        num_envs: Number of parallel environments (only 1 supported for non-Procgen)
     """
     env_id = config['env_id']
     
@@ -246,6 +247,7 @@ def main():
     parser.add_argument("--config", type=str, default="configs/cartpole_adaptive.yaml", help="Path to the config file")
     parser.add_argument("--exp_name", type=str, default=None, help="Override run name for easier filtering")
     parser.add_argument("--algo", type=str, default=None, help="Override algorithm (PPO, SAC, TRPO)")
+    parser.add_argument("--num_envs", type=int, default=0, help="Number of parallel envs (0 = auto select)")
     args = parser.parse_args()
 
     # 1. Load Config
@@ -255,6 +257,13 @@ def main():
     # Determine algorithm (CLI override > config > default)
     algo_name = args.algo or cfg.get('train', {}).get('algorithm', 'PPO')
     algo_name = algo_name.upper()
+    
+    # Determine num_envs
+    if args.num_envs > 0:
+        num_envs = args.num_envs
+    else:
+        # Default: 4 for PPO/TRPO, 1 for SAC
+        num_envs = 4 if algo_name in ['PPO', 'TRPO'] else 1
     
     # Validate algorithm
     if algo_name not in ALGORITHM_REGISTRY:
@@ -282,6 +291,7 @@ def main():
     os.makedirs(cfg['paths']['model_dir'], exist_ok=True)
 
     print(f"--- Training Start: {run_name} ---")
+    print(f"--- Num Envs: {num_envs} ---")
 
     # ======================================================
     # >>> SETUP WANDB (ONLINE LOGGING) <<<
@@ -308,7 +318,7 @@ def main():
     )
 
     # 2. Setup Env
-    env = make_env(cfg, log_path)
+    env = make_env(cfg, log_path, num_envs=num_envs)
 
     # 3. Setup Model with Algorithm Factory
     # tensorboard_log=... : Đây là chỗ SB3 ghi log OFFLINE
