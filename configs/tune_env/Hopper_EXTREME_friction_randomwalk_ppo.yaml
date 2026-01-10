@@ -1,0 +1,35 @@
+# Hopper EXTREME - Friction Random Walk
+# σ=0.3 (very high variance), ultra-wide bounds
+
+env_id: "Hopper-v4"
+
+env:
+  parameter: "friction"
+  drift_type: "random_walk"
+  sigma: 0.3            # EXTREME random walk
+  bounds: [0.1, 3.0]    # Ice → Super grip
+
+wandb:
+  project: "TuneEnv"
+  tags: ["hopper", "mujoco", "extreme", "friction", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

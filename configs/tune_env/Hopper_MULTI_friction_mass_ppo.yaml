@@ -1,0 +1,42 @@
+# Hopper MULTI - Friction + Mass Simultaneous Drift
+# Both params change at once
+
+env_id: "Hopper-v4"
+
+env:
+  - parameter: "friction"
+    drift_type: "sine"
+    magnitude: 1.0
+    period: 5000
+    bounds: [0.2, 2.5]
+  
+  - parameter: "mass_scale"
+    drift_type: "jump"
+    magnitude: 1.2      # mass: 1.0 → 2.2
+    period: 8000
+    bounds: [0.4, 2.5]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["hopper", "mujoco", "multi-param", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

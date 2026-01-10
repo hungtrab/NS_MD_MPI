@@ -1,0 +1,35 @@
+env_id: CartPole-v1
+env:
+  parameter: length
+  drift_type: jump
+  magnitude: 0.3
+  period: 250
+  bounds:
+  - 0.3
+  - 1.0
+wandb:
+  project: TuneEnv
+  tags:
+  - cartpole
+  - extreme
+  - length
+  - jump
+  - baseline
+  mode: online
+train:
+  algorithm: TRPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+  target_kl: 0.01
+adaptive:
+  enabled: false
+nsmdmpi:
+  enabled: false
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

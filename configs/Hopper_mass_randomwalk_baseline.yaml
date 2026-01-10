@@ -1,0 +1,36 @@
+# Hopper Challenge - Mass Random Walk  
+# Mass scale thay đổi ngẫu nhiên → inertia khác nhau
+# Mục đích: Agent khó control khi mass không ổn định
+
+env_id: "Hopper-v4"
+
+env:
+  parameter: "mass_scale"
+  drift_type: "random_walk"
+  sigma: 0.1            # Moderate random walk
+  bounds: [0.5, 2.0]    # Mass: 0.5x → 2x
+
+wandb:
+  project: "TuneEnv"
+  tags: ["hopper", "mujoco", "mass", "random_walk", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

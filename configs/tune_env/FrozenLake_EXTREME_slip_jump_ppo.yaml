@@ -1,0 +1,36 @@
+# FrozenLake EXTREME - Slip Probability Jump
+# Suddenly becomes very slippery!
+
+env_id: "FrozenLake-v1"
+
+env:
+  parameter: "slip_prob"
+  drift_type: "jump"
+  magnitude: 0.5       # 0.66 → 1.0 (fully slippery!)
+  period: 50           # Jump every 50 steps
+  bounds: [0.3, 1.0]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["frozenlake", "extreme", "slip", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.001
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

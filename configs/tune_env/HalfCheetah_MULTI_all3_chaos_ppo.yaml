@@ -1,0 +1,48 @@
+# HalfCheetah MULTI - Friction + Damping + Mass
+# Triple parameter chaos!
+
+env_id: "HalfCheetah-v4"
+
+env:
+  - parameter: "friction"
+    drift_type: "sine"
+    magnitude: 0.3
+    period: 10000
+    bounds: [0.2, 1.5]
+  
+  - parameter: "damping"
+    drift_type: "jump"
+    magnitude: 1.5      # damping: 1.0 → 2.5
+    period: 15000
+    bounds: [0.5, 3.0]
+  
+  - parameter: "mass_scale"
+    drift_type: "linear"
+    magnitude: 0.8      # mass increases
+    period: 20000
+    bounds: [0.5, 2.0]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["halfcheetah", "mujoco", "multi-param", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 1000000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

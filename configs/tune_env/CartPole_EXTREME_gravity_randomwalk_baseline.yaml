@@ -1,0 +1,36 @@
+# CartPole EXTREME - Ultra High Gravity Random Walk
+# Sigma rất lớn → gravity thay đổi dữ dội mỗi step
+# Mục đích: Stochastic extreme - baseline PPO sẽ hoàn toàn fail
+
+env_id: "CartPole-v1"
+
+env:
+  parameter: "gravity"
+  drift_type: "random_walk"
+  sigma: 1.5            # EXTREME random walk (x7.5 so với moderate)
+  bounds: [2.0, 25.0]   # Rất rộng: từ Moon (1.6) đến cao hơn Jupiter
+
+wandb:
+  project: "TuneEnv"
+  tags: ["cartpole", "extreme", "gravity", "random_walk", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

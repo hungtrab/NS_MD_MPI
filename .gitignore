@@ -5,5 +5,5 @@ logs/
 draft.pdf
 logs_dryrun/
 models_dryrun/
-configs/temp_
+configs/temp_*.yaml
 budgets/

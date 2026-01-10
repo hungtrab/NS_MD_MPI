@@ -1,0 +1,37 @@
+# CartPole Challenge - Scenario 1: Extreme Gravity Jump
+# Gravity nhảy từ 9.8 → 24.8 (rất mạnh) với period ngắn
+# Mục đích: Baseline PPO sẽ fail khi gravity quá cao
+
+env_id: "CartPole-v1"
+
+env:
+  parameter: "gravity"
+  drift_type: "jump"
+  magnitude: 15.0       # Gravity: 9.8 → 24.8
+  period: 300           # Chu kỳ ngắn
+  bounds: [5.0, 30.0]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["cartpole", "extreme", "gravity", "jump", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

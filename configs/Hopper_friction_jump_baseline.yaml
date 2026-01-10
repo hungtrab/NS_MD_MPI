@@ -1,0 +1,37 @@
+# Hopper Challenge - Friction Jump
+# Friction nhảy từ smooth (0.9) → rough (1.5)
+# Mục đích: Hopper phải adapt hopping strategy với friction khác nhau
+
+env_id: "Hopper-v4"
+
+env:
+  parameter: "friction"
+  drift_type: "jump"
+  magnitude: 0.6        # friction: 0.9 → 1.5
+  period: 10000
+  bounds: [0.3, 2.0]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["hopper", "mujoco", "friction", "jump", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000  # Hopper cần nhiều timesteps hơn CartPole
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

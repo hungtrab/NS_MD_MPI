@@ -54,15 +54,22 @@ def make_env(config, log_dir=None, seed=None, num_envs=1):
     """
     env_id = config['env_id']
     
-    # Build drift configuration from YAML
-    drift_conf = {
-        'parameter': config['env'].get('parameter', 'gravity'),
-        'drift_type': config['env'].get('drift_type', 'static'),
-        'magnitude': config['env'].get('magnitude', 0.0),
-        'period': config['env'].get('period', 10000),
-        'sigma': config['env'].get('sigma', 0.1),
-        'bounds': config['env'].get('bounds', [0.0, 20.0]),
-    }
+    # Parse drift configuration
+    # Support both single-param (dict) and multi-param (list) configs
+    if isinstance(config['env'], list):
+        # Multi-parameter: env is already a list of drift configs
+        drift_conf = config['env']
+    else:
+        # Single-parameter: convert dict to standard drift config format
+        drift_conf = {
+            'parameter': config['env'].get('parameter', 'gravity'),
+            'drift_type': config['env'].get('drift_type', 'static'),
+            'magnitude': config['env'].get('magnitude', 0.0),
+            'period': config['env'].get('period', 1000),
+            'sigma': config['env'].get('sigma', 0.1),
+            'bounds': config['env'].get('bounds', None),
+            'base_value': config['env'].get('base_value', None),
+        }
     
     # Get additional env kwargs if specified
     env_kwargs = config.get('env_kwargs', {})
@@ -277,7 +284,17 @@ def main():
     if args.exp_name:
         run_name = args.exp_name
     else:
-        run_name = f"{cfg['env_id']}_{algo_name}_{cfg['env']['drift_type']}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        # Generate run name with timestamp
+        # Handle both single-param (dict) and multi-param (list) env configs
+        if isinstance(cfg['env'], list):
+            # Multi-parameter: use first param's drift type or 'multi'
+            drift_type = cfg['env'][0].get('drift_type', 'multi') if cfg['env'] else 'multi'
+            run_name = f"{cfg['env_id']}_{algo_name}_multi-param_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        else:
+            # Single-parameter
+            drift_type = cfg['env'].get('drift_type', 'static')
+            run_name = f"{cfg['env_id']}_{algo_name}_{drift_type}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        
         if cfg['adaptive']['enabled']:
             run_name += "_Adaptive"
         elif cfg['nsmdmpi']['enabled']:
@@ -412,7 +429,10 @@ def main():
         adaptive_cfg = cfg['adaptive']
         drift_callback = DriftAdaptiveCallback(
             # Environment parameter tracking
-            target_param=cfg['env'].get('parameter', 'gravity'),
+            # Handle both single-param (dict) and multi-param (list)
+            target_param=(cfg['env'][0].get('parameter', 'gravity') 
+                          if isinstance(cfg['env'], list) 
+                          else cfg['env'].get('parameter', 'gravity')),
             base_value=9.8,  # Will be auto-detected from env
             
             # Learning rate adaptation (all algorithms)

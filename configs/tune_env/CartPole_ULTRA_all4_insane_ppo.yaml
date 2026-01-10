@@ -1,0 +1,53 @@
+# CartPole ULTRA-EXTREME - All 4 Params INSANE Chaos
+# TẤT CẢ 4 params với magnitude CỰC LỚN và period CỰC NHANH
+# Mục đích: IMPOSSIBLE cho baseline PPO
+
+env_id: "CartPole-v1"
+
+env:
+  - parameter: "gravity"
+    drift_type: "random_walk"
+    sigma: 2.5           # EXTREME random walk (x12 moderate!)
+    bounds: [1.0, 30.0]  # Gravity từ Moon đến 3x Jupiter!
+  
+  - parameter: "masscart"
+    drift_type: "jump"
+    magnitude: 1.5       # masscart: 1.0 → 2.5 (rất nặng)
+    period: 30           # Jump MỖI 30 STEPS!
+    bounds: [0.3, 3.0]
+  
+  - parameter: "masspole"
+    drift_type: "sine"
+    magnitude: 0.15      # masspole: 0.1 ± 0.15
+    period: 40
+    bounds: [0.01, 0.3]
+  
+  - parameter: "length"
+    drift_type: "random_walk"
+    sigma: 0.03          # Length thay đổi nhanh
+    bounds: [0.2, 1.2]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["cartpole", "ultra-extreme", "all-4", "insane", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 200000  # Tăng timesteps để test
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

@@ -1,0 +1,48 @@
+# LunarLander MULTI - Gravity + Wind + Turbulence ALL DRIFT
+# Triple parameter chaos!
+
+env_id: "LunarLander-v3"
+
+env:
+  - parameter: "gravity"
+    drift_type: "linear"
+    magnitude: -8.0      # -10 → -18
+    period: 10000
+    bounds: [-5.0, -20.0]
+  
+  - parameter: "wind_power"
+    drift_type: "sine"
+    magnitude: 15.0
+    period: 3000
+    bounds: [0.0, 20.0]
+  
+  - parameter: "turbulence_power"
+    drift_type: "jump"
+    magnitude: 1.5
+    period: 5000
+    bounds: [0.0, 2.0]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["lunarlander", "multi-param", "all-3", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 300000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

@@ -1,30 +1,36 @@
-# Requirements for Non-Stationary MDP Research
-# Install with: pip install -r requirements.txt
+# Deep RL - Non-Stationary MDP Requirements
+# Updated: 2026-01-10
 
-# Core RL
-stable-baselines3>=2.0.0
-sb3-contrib>=2.0.0  # For TRPO and other algorithms
-gymnasium>=0.29.0
-gymnasium[mujoco]>=0.29.0  # For HalfCheetah and other MuJoCo envs
+# Core RL Dependencies
+gymnasium==0.29.1
+stable-baselines3==2.3.2
+shimmy==1.3.0
 
-# MiniGrid (for grid-world environments)
-minigrid>=2.3.0
+# Deep Learning
+torch==2.1.2
+numpy==1.26.3
 
-# Logging
-wandb>=0.15.0
-tensorboard>=2.14.0
+# MuJoCo Environments
+mujoco==3.1.1
+gymnasium[mujoco]
 
-# Scientific Computing
-numpy>=1.24.0
-scipy>=1.10.0
+# Box2D Environments (LunarLander)
+box2d-py==2.3.8
+swig==4.1.1
 
-# Configuration
-pyyaml>=6.0
+# Experiment Tracking
+wandb==0.16.2
 
-# Visualization (optional)
-matplotlib>=3.7.0
-seaborn>=0.12.0
+# Utilities
+pyyaml==6.0.1
+tqdm==4.66.1
+matplotlib==3.8.2
+tensorboard==2.15.1
 
-# Video Recording (optional)
-moviepy>=1.0.3
-imageio>=2.31.0
+# Optional: Procgen (if needed)
+# procgen==0.10.7
+
+# Development
+pytest==7.4.3
+black==23.12.1
+flake8==7.0.0

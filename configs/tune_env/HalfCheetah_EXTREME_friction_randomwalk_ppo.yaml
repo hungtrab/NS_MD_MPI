@@ -1,0 +1,35 @@
+# HalfCheetah EXTREME - Friction Random Walk
+# Very high variance friction
+
+env_id: "HalfCheetah-v4"
+
+env:
+  parameter: "friction"
+  drift_type: "random_walk"
+  sigma: 0.15           # EXTREME variance
+  bounds: [0.1, 2.0]    # Ice → High grip
+
+wandb:
+  project: "TuneEnv"
+  tags: ["halfcheetah", "mujoco", "extreme", "friction", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 1000000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

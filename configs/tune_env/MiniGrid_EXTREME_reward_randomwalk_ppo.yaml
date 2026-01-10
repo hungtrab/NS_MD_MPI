@@ -1,0 +1,35 @@
+# MiniGrid EXTREME - Reward Scale Random Walk
+# Reward becomes very noisy!
+
+env_id: "MiniGrid-Dynamic-Obstacles-8x8-v0"
+
+env:
+  parameter: "reward_scale"
+  drift_type: "random_walk"
+  sigma: 0.3           # High variance
+  bounds: [0.2, 2.0]   # 20% → 200% reward
+
+wandb:
+  project: "TuneEnv"
+  tags: ["minigrid", "extreme", "reward", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 200000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

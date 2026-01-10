@@ -1,0 +1,36 @@
+# MountainCar EXTREME - Gravity Jump
+# Sudden gravity changes make climbing impossible!
+
+env_id: "MountainCar-v0"
+
+env:
+  parameter: "gravity"
+  drift_type: "jump"
+  magnitude: 0.002      # 0.0025 → 0.0045
+  period: 100           # Jump every 100 steps!
+  bounds: [0.001, 0.006]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["mountaincar", "extreme", "gravity", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 200000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

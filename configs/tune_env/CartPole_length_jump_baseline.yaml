@@ -1,0 +1,37 @@
+# CartPole Challenge - Scenario 4: Pole Length Variation
+# Độ dài pole thay đổi → moment of inertia thay đổi
+# Mục đích: Pole dài hơn dễ đổ hơn, dynamics phi tuyến
+
+env_id: "CartPole-v1"
+
+env:
+  parameter: "length"
+  drift_type: "jump"
+  magnitude: 0.3        # length: 0.5 → 0.8 (pole dài hơn 60%)
+  period: 250           # Nhảy nhanh
+  bounds: [0.3, 1.0]
+
+wandb:
+  project: "TuneEnv"
+  tags: ["cartpole", "extreme", "length", "jump", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

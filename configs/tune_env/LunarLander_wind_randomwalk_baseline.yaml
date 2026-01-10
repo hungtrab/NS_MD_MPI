@@ -1,0 +1,36 @@
+# LunarLander Challenge - Wind Random Walk (HARD)
+# Wind power thay đổi ngẫu nhiên → lander bị thổi lệch liên tục
+# Mục đích: Unpredictable lateral forces, baseline PPO rất khó handle
+
+env_id: "LunarLander-v2"
+
+env:
+  parameter: "wind_power"
+  drift_type: "random_walk"
+  sigma: 2.0           # Step size lớn cho wind variations
+  bounds: [0.0, 20.0]  # Max wind từ docs
+
+wandb:
+  project: "TuneEnv"
+  tags: ["lunarlander", "wind", "random_walk", "baseline"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

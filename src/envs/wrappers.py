@@ -175,6 +175,180 @@ class NonStationaryCartPoleWrapper(gym.Wrapper):
         self._update_physics()
 
 
+class NonStationaryLunarLanderWrapper(gym.Wrapper):
+    """
+    Non-Stationary wrapper for LunarLander-v2 environment.
+    
+    Since LunarLander parameters (gravity, wind_power, turbulence_power) can only
+    be set during __init__, this wrapper implements PER-EPISODE drift:
+    - Parameters are updated on each reset() call
+    - Creates non-stationary MDP across episodes
+    - Safer than trying to modify Box2D physics during episodes
+    
+    Supported Parameters:
+        - gravity: float (-12.0 to 0.0) - gravitational force
+        - wind_power: float (0.0 to 20.0) - wind strength  
+        - turbulence_power: float (0.0 to 2.0) - turbulence/noise level
+    
+    Usage:
+        drift_conf = {
+            'parameter': 'gravity',
+            'drift_type': 'jump',
+            'magnitude': 5.0,
+            'period': 10,  # episodes, not steps
+        }
+        env = gym.make('LunarLander-v2')
+        env = NonStationaryLunarLanderWrapper(env, drift_conf)
+    """
+    
+    VALID_PARAMS = ['gravity', 'wind_power', 'turbulence_power']
+    
+    def __init__(
+        self,
+        env: gym.Env,
+        drift_conf: Union[Dict[str, Any], List[Dict[str, Any]]],
+        seed: Optional[int] = None
+    ):
+        """
+        Initialize the non-stationary LunarLander wrapper.
+        
+        Args:
+            env: Base LunarLander-v2 environment
+            drift_conf: Drift configuration(s)
+            seed: Random seed for reproducibility
+        """
+        super().__init__(env)
+        
+        # Handle single config or multiple configs
+        if isinstance(drift_conf, dict):
+            drift_conf = [drift_conf]
+        
+        self.drift_configs = drift_conf
+        self.episode_count = 0
+        self.step_counter = 0
+        
+        # Store original parameters from the environment
+        self.original_params = {
+            'gravity': self.unwrapped.gravity,
+            'wind_power': self.unwrapped.wind_power,
+            'turbulence_power': self.unwrapped.turbulence_power,
+        }
+        
+        # Create drift generators (use episode_count as "timestep")
+        self.drift_generators: Dict[str, DriftGenerator] = {}
+        
+        for conf in self.drift_configs:
+            param = conf.get('parameter', 'gravity')
+            if param not in self.VALID_PARAMS:
+                raise ValueError(f"Invalid parameter '{param}'. Must be one of {self.VALID_PARAMS}")
+            
+            # Set base value from environment if not specified
+            if 'base_value' not in conf:
+                conf['base_value'] = self.original_params[param]
+            
+            self.drift_generators[param] = create_drift_generator(conf, seed=seed)
+        
+        # Store env spec for recreating environment
+        self.env_id = env.spec.id if hasattr(env, 'spec') and env.spec else 'LunarLander-v3'
+        
+        # Current parameter values
+        self.current_params = self.original_params.copy()
+        
+        print(f">>> [Wrapper] Initialized Non-Stationary LunarLander (PER-EPISODE drift)")
+        print(f"    - Environment: {self.env_id}")
+        for param, gen in self.drift_generators.items():
+            print(f"    - {param}: {gen.config.drift_type} (magnitude={gen.config.magnitude}, period={gen.config.period} episodes)")
+    
+    def reset(self, **kwargs):
+        """
+        Reset environment with updated parameters based on episode count.
+        
+        This is where drift happens - we compute new parameter values
+        and recreate the environment with those values.
+        """
+        # Compute new parameter values based on current episode
+        for param, gen in self.drift_generators.items():
+            # Use episode_count as "timestep" for drift generator
+            new_value = gen.get_value(self.episode_count)
+            self.current_params[param] = new_value
+        
+        # Recreate environment with new parameters
+        # Get env_kwargs from current env
+        env_kwargs = {
+            'render_mode': self.unwrapped.render_mode,
+            'continuous': self.unwrapped.continuous,
+            'gravity': self.current_params['gravity'],
+            'enable_wind': self.unwrapped.enable_wind,
+            'wind_power': self.current_params['wind_power'],
+            'turbulence_power': self.current_params['turbulence_power'],
+        }
+        
+        # Destroy current env and create new one
+        self.env.close()
+        self.env = gym.make(self.env_id, **env_kwargs)
+        
+        # Reset counters
+        self.step_counter = 0
+        self.episode_count += 1
+        
+        # Reset the new environment
+        obs, info = self.env.reset(**kwargs)
+        
+        # Add drift info to info dict
+        info['drift/episode'] = self.episode_count
+        info['drift/params'] = {}
+        
+        for param in self.VALID_PARAMS:
+            current_val = self.current_params[param]
+            base_val = self.original_params[param]
+            info['drift/params'][param] = {
+                'current': current_val,
+                'base': base_val,
+                'delta': current_val - base_val,
+            }
+        
+        return obs, info
+    
+    def step(self, action):
+        """Execute one step."""
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        
+        # Add drift info to every step
+        info['drift/episode'] = self.episode_count
+        info['drift/step'] = self.step_counter
+        info['drift/params'] = {}
+        
+        for param in self.VALID_PARAMS:
+            current_val = self.current_params[param]
+            base_val = self.original_params[param]
+            info['drift/params'][param] = {
+                'current': current_val,
+                'base': base_val,
+                'delta': current_val - base_val,
+            }
+        
+        self.step_counter += 1
+        
+        return obs, reward, terminated, truncated, info
+    
+    def get_drift_info(self) -> Dict[str, Any]:
+        """Get current drift information."""
+        info = {
+            'episode_count': self.episode_count,
+            'step_count': self.step_counter,
+            'parameters': {}
+        }
+        
+        for param, gen in self.drift_generators.items():
+            info['parameters'][param] = {
+                'config': gen.get_drift_info(self.episode_count),
+                'current': self.current_params[param],
+                'base': self.original_params[param],
+            }
+        
+        return info
+
+
 class NonStationaryWrapper(gym.Wrapper):
     """
     Generic non-stationary wrapper for any Gym environment.

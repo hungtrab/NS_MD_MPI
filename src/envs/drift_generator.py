@@ -105,7 +105,7 @@ class DriftGenerator:
         """
         period = self.config.period
         magnitude = self.config.magnitude
-        base = self.config.base_value
+        base = self.config.base_value if self.config.base_value is not None else 0.0
         
         # Determine which regime we're in
         regime = (t // period) % 2
@@ -125,7 +125,7 @@ class DriftGenerator:
         """
         period = self.config.period
         magnitude = self.config.magnitude
-        base = self.config.base_value
+        base = self.config.base_value if self.config.base_value is not None else 0.0
         
         # Calculate rate from magnitude and period
         rate = magnitude / period if period > 0 else 0
@@ -150,7 +150,7 @@ class DriftGenerator:
         """
         period = self.config.period
         magnitude = self.config.magnitude
-        base = self.config.base_value
+        base = self.config.base_value if self.config.base_value is not None else 0.0
         
         return base + magnitude * math.sin(2 * math.pi * t / period)
     
@@ -164,6 +164,10 @@ class DriftGenerator:
         """
         sigma = self.config.sigma
         bounds = self.config.bounds
+        
+        # Initialize random walk value if needed
+        if self._random_walk_value is None:
+            self._random_walk_value = self.config.base_value if self.config.base_value is not None else 0.0
         
         # Only update if we're moving forward in time
         if t > self._last_step:

@@ -1,0 +1,35 @@
+env_id: CartPole-v1
+env:
+  parameter: gravity
+  drift_type: sine
+  magnitude: 10.0
+  period: 200
+  bounds:
+  - 0.5
+  - 25.0
+wandb:
+  project: TuneEnv
+  tags:
+  - cartpole
+  - extreme
+  - gravity
+  - fast_sine
+  - baseline
+  mode: online
+train:
+  algorithm: TRPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 100000
+  seed: 42
+  target_kl: 0.01
+adaptive:
+  enabled: false
+nsmdmpi:
+  enabled: false
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

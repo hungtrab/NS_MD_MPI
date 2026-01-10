@@ -18,6 +18,7 @@ from typing import Dict, Any, Optional, List, Union, Tuple
 import copy
 
 from .drift_generator import DriftGenerator, DriftConfig, create_drift_generator
+from .wrappers import NonStationaryLunarLanderWrapper
 
 
 # =============================================================================
@@ -773,6 +774,211 @@ class NonStationaryHalfCheetahWrapper(gym.Wrapper):
 
 
 # =============================================================================
+# HOPPER (MUJOCO) NON-STATIONARY WRAPPER
+# =============================================================================
+
+class NonStationaryHopperWrapper(gym.Wrapper):
+    """
+    Non-Stationary Hopper (MuJoCo) environment.
+    
+    Driftable Parameters:
+        - friction: Ground friction coefficient
+        - damping: Joint damping (affects all joints uniformly)
+        - mass_scale: Scales the mass of all bodies
+        - torso_length: Length of torso body
+    
+    Requires: pip install mujoco gymnasium[mujoco]
+    
+    Usage:
+        drift_conf = {
+            'parameter': 'friction',
+            'drift_type': 'jump',
+            'magnitude': 0.5,
+            'period': 50000,
+        }
+        env = NonStationaryHopperWrapper(gym.make('Hopper-v4'), drift_conf)
+    """
+    
+    VALID_PARAMS = ['friction', 'damping', 'mass_scale', 'torso_length']
+    
+    DEFAULT_VALUES = {
+        'friction': 0.9,      # Default MuJoCo floor friction
+        'damping': 1.0,       # Multiplier for joint damping
+        'mass_scale': 1.0,    # Multiplier for body masses
+        'torso_length': 1.0,  # Multiplier for torso size
+    }
+    
+    def __init__(
+        self,
+        env: gym.Env,
+        drift_conf: Union[Dict[str, Any], List[Dict[str, Any]]],
+        seed: Optional[int] = None
+    ):
+        super().__init__(env)
+        
+        if isinstance(drift_conf, dict):
+            drift_conf = [drift_conf]
+        
+        self.drift_configs = drift_conf
+        self.step_counter = 0
+        self.total_steps = 0
+        
+        # Store original MuJoCo model parameters
+        self.original_params = {}
+        self._store_original_params()
+        
+        self.drift_generators: Dict[str, DriftGenerator] = {}
+        
+        for conf in self.drift_configs:
+            param = conf.get('parameter', 'friction')
+            if param not in self.VALID_PARAMS:
+                raise ValueError(f"Invalid parameter '{param}'. Must be one of {self.VALID_PARAMS}")
+            
+            if 'base_value' not in conf:
+                conf['base_value'] = self.original_params.get(param, self.DEFAULT_VALUES[param])
+            
+            self.drift_generators[param] = create_drift_generator(conf, seed=seed)
+        
+        self.target_param = list(self.drift_generators.keys())[0]
+        
+        print(f">>> [Wrapper] Initialized Non-Stationary Hopper")
+        for param, gen in self.drift_generators.items():
+            base_val = gen.config.base_value if gen.config.base_value is not None else 0.0
+            print(f"    - {param}: {gen.config.drift_type} (base={base_val:.3f})")
+
+    def _store_original_params(self):
+        """Store original MuJoCo model parameters."""
+        try:
+            model = self.unwrapped.model
+            
+            # Friction (floor geom, usually index 0)
+            if hasattr(model, 'geom_friction'):
+                self.original_params['friction'] = float(model.geom_friction[0, 0])
+            else:
+                self.original_params['friction'] = self.DEFAULT_VALUES['friction']
+            
+            # Damping (store original values for all joints)
+            if hasattr(model, 'dof_damping'):
+                self.original_damping = model.dof_damping.copy()
+                self.original_params['damping'] = 1.0
+            
+            # Mass (store original values for all bodies)
+            if hasattr(model, 'body_mass'):
+                self.original_mass = model.body_mass.copy()
+                self.original_params['mass_scale'] = 1.0
+            
+            # Torso length (geom sizes)
+            if hasattr(model, 'geom_size'):
+                self.original_geom_size = model.geom_size.copy()
+                self.original_params['torso_length'] = 1.0
+                
+        except Exception as e:
+            print(f"Warning: Could not access MuJoCo model parameters: {e}")
+            self.original_params = self.DEFAULT_VALUES.copy()
+
+    def step(self, action):
+        self._update_physics()
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        
+        info['drift/step'] = self.total_steps
+        info['drift/params'] = {}
+        
+        for param, gen in self.drift_generators.items():
+            current_val = self._get_current_param(param)
+            info['drift/params'][param] = {
+                'current': current_val,
+                'base': self.original_params.get(param, self.DEFAULT_VALUES[param]),
+            }
+        
+        if len(self.drift_generators) == 1:
+            info['drift/current_value'] = self._get_current_param(self.target_param)
+            info['drift/parameter'] = self.target_param
+        
+        self.step_counter += 1
+        self.total_steps += 1
+        
+        return obs, reward, terminated, truncated, info
+
+    def reset(self, **kwargs):
+        self.step_counter = 0
+        result = self.env.reset(**kwargs)
+        self._update_physics()
+        return result
+
+    def _update_physics(self):
+        """Update MuJoCo model parameters based on drift."""
+        try:
+            model = self.unwrapped.model
+            
+            for param, gen in self.drift_generators.items():
+                new_value = gen.get_value(self.total_steps)
+                
+                if param == 'friction':
+                    # Update floor friction (geom 0)
+                    if hasattr(model, 'geom_friction'):
+                        model.geom_friction[0, 0] = new_value
+                        model.geom_friction[0, 1] = new_value * 0.005  # torsional
+                        model.geom_friction[0, 2] = new_value * 0.0001  # rolling
+                
+                elif param == 'damping':
+                    # Scale all joint damping
+                    if hasattr(model, 'dof_damping') and hasattr(self, 'original_damping'):
+                        model.dof_damping[:] = self.original_damping * new_value
+                
+                elif param == 'mass_scale':
+                    # Scale all body masses
+                    if hasattr(model, 'body_mass') and hasattr(self, 'original_mass'):
+                        model.body_mass[:] = self.original_mass * new_value
+                
+                elif param == 'torso_length':
+                    # Scale torso geom sizes (geom indices 1-2 typically torso)
+                    if hasattr(model, 'geom_size') and hasattr(self, 'original_geom_size'):
+                        # Hopper torso geoms are typically indices 1-2
+                        model.geom_size[1:3] = self.original_geom_size[1:3] * new_value
+                        
+        except Exception as e:
+            pass  # Silently fail if MuJoCo access fails
+
+    def _get_current_param(self, param: str) -> float:
+        """Get current value of a parameter from MuJoCo model."""
+        try:
+            model = self.unwrapped.model
+            
+            if param == 'friction':
+                return float(model.geom_friction[0, 0])
+            elif param == 'damping':
+                if hasattr(self, 'original_damping'):
+                    return float(model.dof_damping[0] / self.original_damping[0])
+                return 1.0
+            elif param == 'mass_scale':
+                if hasattr(self, 'original_mass'):
+                    return float(model.body_mass[1] / self.original_mass[1])
+                return 1.0
+            elif param == 'torso_length':
+                if hasattr(self, 'original_geom_size'):
+                    return float(model.geom_size[1, 0] / self.original_geom_size[1, 0])
+                return 1.0
+        except:
+            pass
+        
+        return self.DEFAULT_VALUES.get(param, 0.0)
+
+    def get_drift_info(self) -> Dict[str, Any]:
+        return {
+            'total_steps': self.total_steps,
+            'episode_steps': self.step_counter,
+            'parameters': {
+                param: gen.get_drift_info(self.total_steps)
+                for param, gen in self.drift_generators.items()
+            }
+        }
+
+    def set_total_steps(self, steps: int):
+        self.total_steps = steps
+        self._update_physics()
+
+
+# =============================================================================
 # REGISTRY AND FACTORY
 # =============================================================================
 
@@ -786,6 +992,10 @@ WRAPPER_REGISTRY = {
     'FrozenLake8x8-v1': 'NonStationaryFrozenLakeWrapper',
     'HalfCheetah-v4': 'NonStationaryHalfCheetahWrapper',
     'HalfCheetah-v5': 'NonStationaryHalfCheetahWrapper',
+    'Hopper-v4': 'NonStationaryHopperWrapper',
+    'Hopper-v5': 'NonStationaryHopperWrapper',
+    'LunarLander-v2': 'NonStationaryLunarLanderWrapper',
+    'LunarLander-v3': 'NonStationaryLunarLanderWrapper',
 }
 
 # Default driftable parameters per environment
@@ -795,6 +1005,8 @@ DEFAULT_DRIFT_PARAMS = {
     'FrozenLake': ['slip_prob', 'reward_scale'],
     'MiniGrid': ['reward_scale', 'max_steps', 'step_penalty'],
     'HalfCheetah': ['friction', 'damping', 'mass_scale', 'gravity'],
+    'Hopper': ['friction', 'damping', 'mass_scale', 'torso_length'],
+    'LunarLander': ['gravity', 'wind_power', 'turbulence_power'],
 }
 
 
@@ -806,7 +1018,9 @@ def get_wrapper_for_env(env_id: str):
         'NonStationaryMountainCarWrapper': NonStationaryMountainCarWrapper,
         'NonStationaryFrozenLakeWrapper': NonStationaryFrozenLakeWrapper,
         'NonStationaryHalfCheetahWrapper': NonStationaryHalfCheetahWrapper,
+        'NonStationaryHopperWrapper': NonStationaryHopperWrapper,
         'NonStationaryMiniGridWrapper': NonStationaryMiniGridWrapper,
+        'NonStationaryLunarLanderWrapper': NonStationaryLunarLanderWrapper,
     }
     
     # Direct match
@@ -815,7 +1029,7 @@ def get_wrapper_for_env(env_id: str):
         return all_wrappers[wrapper_name]
     
     # Partial match (e.g., 'MiniGrid-Empty-8x8-v0' -> MiniGrid)
-    for key_prefix in ['CartPole', 'MountainCar', 'FrozenLake', 'HalfCheetah', 'MiniGrid']:
+    for key_prefix in ['CartPole', 'MountainCar', 'FrozenLake', 'HalfCheetah', 'Hopper', 'MiniGrid', 'LunarLander']:
         if key_prefix in env_id:
             if key_prefix == 'CartPole':
                 return NonStationaryCartPoleWrapper
@@ -825,8 +1039,12 @@ def get_wrapper_for_env(env_id: str):
                 return NonStationaryFrozenLakeWrapper
             elif key_prefix == 'HalfCheetah':
                 return NonStationaryHalfCheetahWrapper
+            elif key_prefix == 'Hopper':
+                return NonStationaryHopperWrapper
             elif key_prefix == 'MiniGrid':
                 return NonStationaryMiniGridWrapper
+            elif key_prefix == 'LunarLander':
+                return NonStationaryLunarLanderWrapper
     
     raise ValueError(f"No wrapper available for environment: {env_id}")
 
