@@ -641,7 +641,8 @@ class NonStationaryHalfCheetahWrapper(gym.Wrapper):
         
         print(f">>> [Wrapper] Initialized Non-Stationary HalfCheetah")
         for param, gen in self.drift_generators.items():
-            print(f"    - {param}: {gen.config.drift_type} (base={gen.config.base_value:.3f})")
+            base_val = gen.config.base_value if gen.config.base_value is not None else 0.0
+            print(f"    - {param}: {gen.config.drift_type} (base={base_val:.3f})")
 
     def _store_original_params(self):
         """Store original MuJoCo model parameters."""

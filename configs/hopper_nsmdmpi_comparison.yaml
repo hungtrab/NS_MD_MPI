@@ -1,0 +1,46 @@
+# Hopper NS-MDMPI - Friction Drift (for comparison)
+# Seed will be set via command line
+
+env_id: "Hopper-v4"
+
+env:
+  parameter: "friction"
+  drift_type: "sine"
+  magnitude: 0.5
+  period: 10000
+  base_value: 0.9
+  bounds: [0.3, 2.0]
+
+wandb:
+  project: "Hopper_NSMDMPI_Comparison"
+  tags: ["hopper", "nsmdmpi", "friction", "comparison"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42  # Will be overridden by command line
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: true
+  # NS-MDMPI parameters
+  V_R: 10.0              # Reward variation budget
+  V_P: 10.0              # Transition variation budget
+  V_pi_star: 5.0         # Policy variation budget
+  kappa_base: 0.01       # Base trust region
+  lambda_base: 0.01      # Base regularization
+  kappa_adaptive: true   # Enable adaptive trust region
+  lambda_adaptive: true  # Enable adaptive regularization
+  sensitivity: 0.1       # Sensitivity to drift
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"

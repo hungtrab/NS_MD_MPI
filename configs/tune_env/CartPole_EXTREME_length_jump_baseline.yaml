@@ -9,6 +9,7 @@ env:
   drift_type: "jump"
   magnitude: 1.0        # length: 0.5 → 1.5 (pole dài gấp 3 lần)
   period: 100           # Jump nhanh mỗi 100 steps
+  base_value: 0.5       # CartPole default length (half-pole)
   bounds: [0.3, 1.5]
 
 wandb:

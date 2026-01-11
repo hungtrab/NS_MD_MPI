@@ -1,0 +1,37 @@
+# Hopper Baseline - Friction Drift (for NS-MDMPI comparison)
+# Seed will be set via command line
+
+env_id: "Hopper-v4"
+
+env:
+  parameter: "friction"
+  drift_type: "sine"
+  magnitude: 0.5
+  period: 10000
+  base_value: 0.9
+  bounds: [0.3, 2.0]
+
+wandb:
+  project: "Hopper_NSMDMPI_Comparison"
+  tags: ["hopper", "baseline", "friction", "comparison"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42  # Will be overridden by command line
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"
