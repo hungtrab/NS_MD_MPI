@@ -1,0 +1,31 @@
+# MountainCar Vanilla Baseline (No Drift)
+# Standard stationary environment
+
+env_id: "MountainCar-v0"
+
+# No env drift parameters - vanilla baseline
+
+wandb:
+  project: "Vanilla_Baselines"
+  tags: ["mountaincar", "vanilla", "baseline", "stationary"]
+  mode: "online"
+
+train:
+  algorithm: "PPO"
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 200000
+  seed: 42
+
+adaptive:
+  enabled: false
+
+nsmdmpi:
+  enabled: false
+
+paths:
+  log_dir: "logs/"
+  model_dir: "models/"
+  video_dir: "videos/"
