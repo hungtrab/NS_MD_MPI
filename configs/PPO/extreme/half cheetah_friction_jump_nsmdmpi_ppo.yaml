@@ -9,7 +9,7 @@ env:
   - 0.1
   - 1.8
 wandb:
-  project: att_3_Extreme_NSMDMPI
+  project: att_3_HalfCheetah_Extreme_Comparison
   tags:
   - half cheetah
   - extreme

@@ -1,19 +1,23 @@
 #!/bin/bash
-# Lunarlander Extreme - PPO (Baseline + NS-MDMPI)
+# Run LunarLander Extreme - ALL configs
 
-echo "Running Lunarlander Extreme (PPO): Baseline + NS-MDMPI"
+echo "Running LunarLander Extreme (PPO): 2 configs × 2 methods = 4 runs"
+echo "WandB: att_3_LunarLander_Extreme_Comparison"
 
-# Baseline
-conda run -n rl_hf_course python scripts/train.py \
-  --config configs/PPO/extreme/lunarlander_gravity_random_walk_baseline_ppo.yaml \
-  > logs/lunarlander_extreme_baseline_ppo.log 2>&1 &
+CONFIGS=("lunarlander_gravity_random_walk" "lunarlander_gravity_jump")
 
-sleep 2
+for config in "${CONFIGS[@]}"; do
+    conda run -n rl_hf_course python scripts/train.py \
+      --config "configs/PPO/extreme/${config}_baseline_ppo.yaml" \
+      > "logs/${config}_baseline_ppo.log" 2>&1 &
+    sleep 2
+done
 
-# NS-MDMPI
-conda run -n rl_hf_course python scripts/train.py \
-  --config configs/PPO/extreme/lunarlander_gravity_random_walk_nsmdmpi_ppo.yaml \
-  > logs/lunarlander_extreme_nsmdmpi_ppo.log 2>&1 &
+for config in "${CONFIGS[@]}"; do
+    conda run -n rl_hf_course python scripts/train.py \
+      --config "configs/PPO/extreme/${config}_nsmdmpi_ppo.yaml" \
+      > "logs/${config}_nsmdmpi_ppo.log" 2>&1 &
+    sleep 2
+done
 
-echo "✅ Started 2 runs: baseline + nsmdmpi"
-echo "Monitor: tail -f logs/lunarlander_extreme_*.log"
+echo "✅ Launched 4 runs"
