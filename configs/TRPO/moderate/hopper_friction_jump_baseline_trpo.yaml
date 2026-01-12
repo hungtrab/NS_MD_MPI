@@ -1,0 +1,35 @@
+env_id: Hopper-v4
+env:
+  parameter: friction
+  drift_type: jump
+  magnitude: 0.36000000000000004
+  period: 8000
+  base_value: 0.9
+  bounds:
+  - 0.45
+  - 1.35
+wandb:
+  project: att_3_Moderate_Baseline
+  tags:
+  - hopper
+  - moderate
+  - trpo
+  - friction
+  - jump
+  - baseline
+  mode: online
+train:
+  algorithm: TRPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 1000000
+  seed: 42
+  target_kl: 0.01
+nsmdmpi:
+  enabled: false
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

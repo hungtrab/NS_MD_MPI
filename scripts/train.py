@@ -55,8 +55,10 @@ def make_env(config, log_dir=None, seed=None, num_envs=1):
     env_id = config['env_id']
     
     # Parse drift configuration
-    # Support both single-param (dict) and multi-param (list) configs
-    if isinstance(config['env'], list):
+    # Check if vanilla (no drift) or non-stationary
+    if 'env' not in config or config['env'] is None:
+        drift_conf = None  # Vanilla baseline
+    elif isinstance(config['env'], list):
         # Multi-parameter: env is already a list of drift configs
         drift_conf = config['env']
     else:
@@ -226,10 +228,14 @@ def make_env(config, log_dir=None, seed=None, num_envs=1):
             print(f"Error creating Procgen environment: {e}")
             raise
 
-    # Create non-stationary environment using factory
+    # Create non-stationary environment using factory (or vanilla if drift_conf is None)
     try:
-        env = make_nonstationary_env(env_id, drift_conf, seed=seed, **env_kwargs)
-        # env = gym.make(env_id, **env_kwargs)
+        if drift_conf is None:
+            # Vanilla baseline - no drift wrapper
+            env = gym.make(env_id, **env_kwargs)
+        else:
+            # Non-stationary with drift
+            env = make_nonstationary_env(env_id, drift_conf, seed=seed, **env_kwargs)
     except ValueError as e:
         print(f"Warning: {e}")
         print(f"Falling back to base environment without drift wrapper")
@@ -285,9 +291,12 @@ def main():
         run_name = args.exp_name
     else:
         # Generate run name with timestamp
-        # Handle both single-param (dict) and multi-param (list) env configs
-        if isinstance(cfg['env'], list):
-            # Multi-parameter: use first param's drift type or 'multi'
+        # Check if vanilla (no drift) or non-stationary
+        if 'env' not in cfg or cfg['env'] is None:
+            # Vanilla baseline
+            run_name = f"{cfg['env_id']}_{algo_name}_vanilla_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        elif isinstance(cfg['env'], list):
+            # Multi-parameter: use first param's drift type or 'multi'  
             drift_type = cfg['env'][0].get('drift_type', 'multi') if cfg['env'] else 'multi'
             run_name = f"{cfg['env_id']}_{algo_name}_multi-param_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         else:

@@ -1,0 +1,34 @@
+env_id: Hopper-v4
+env:
+  parameter: friction
+  drift_type: random_walk
+  sigma: 0.3
+  period: 1000
+  base_value: 0.9
+  bounds:
+  - 0.1
+  - 2.25
+wandb:
+  project: att_3_Extreme_Baseline
+  tags:
+  - hopper
+  - extreme
+  - sac
+  - friction
+  - random_walk
+  - baseline
+  mode: online
+train:
+  algorithm: SAC
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 1000000
+  seed: 42
+nsmdmpi:
+  enabled: false
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

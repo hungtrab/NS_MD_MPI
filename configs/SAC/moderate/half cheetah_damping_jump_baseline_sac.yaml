@@ -1,0 +1,34 @@
+env_id: HalfCheetah-v4
+env:
+  parameter: damping
+  drift_type: jump
+  magnitude: 0.4
+  period: 8000
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 1.5
+wandb:
+  project: att_3_Moderate_Baseline
+  tags:
+  - half cheetah
+  - moderate
+  - sac
+  - damping
+  - jump
+  - baseline
+  mode: online
+train:
+  algorithm: SAC
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 1000000
+  seed: 42
+nsmdmpi:
+  enabled: false
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

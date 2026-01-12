@@ -1,0 +1,42 @@
+env_id: LunarLander-v3
+env:
+  parameter: gravity
+  drift_type: sine
+  magnitude: 3.0
+  period: 10000
+  base_value: -10.0
+  bounds:
+  - -11.9
+  - -5.0
+wandb:
+  project: att_3_Moderate_NSMDMPI
+  tags:
+  - lunarlander
+  - moderate
+  - sac
+  - gravity
+  - sine
+  - nsmdmpi
+  mode: online
+train:
+  algorithm: SAC
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42
+nsmdmpi:
+  enabled: true
+  V_R: 10.0
+  V_P: 10.0
+  V_pi_star: 5.0
+  kappa_base: 0.01
+  lambda_base: 0.01
+  kappa_adaptive: true
+  lambda_adaptive: true
+  sensitivity: 0.1
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
