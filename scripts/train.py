@@ -92,11 +92,9 @@ def make_env(config, log_dir=None, seed=None, num_envs=1):
                 print("=" * 70)
                 raise RuntimeError("NumPy version incompatibility with Procgen")
             
+            
             from procgen import ProcgenEnv
             from stable_baselines3.common.vec_env import VecMonitor
-            import gymnasium as gym
-            from gymnasium import spaces as gym_spaces
-            import gym as old_gym
             from stable_baselines3.common.vec_env.base_vec_env import VecEnv, VecEnvWrapper
             import numpy as np
             
@@ -304,9 +302,8 @@ def main():
             drift_type = cfg['env'].get('drift_type', 'static')
             run_name = f"{cfg['env_id']}_{algo_name}_{drift_type}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         
-        if cfg['adaptive']['enabled']:
-            run_name += "_Adaptive"
-        elif cfg['nsmdmpi']['enabled']:
+        # Add method suffix
+        if cfg.get('nsmdmpi', {}).get('enabled', False):
             run_name += "_NSMDMPI"
         else:
             run_name += "_Baseline"
@@ -378,14 +375,22 @@ def main():
     # 4. Setup Callback List
     callbacks = []
 
-    # >>> CALLBACK 1: WandB (Log model, gradient,...)
-    callbacks.append(
-        WandbCallback(
-            gradient_save_freq=1000,
-            model_save_path=os.path.join(cfg['paths']['model_dir'], f"wandb_{run_name}"),
-            verbose=2,
+    # Check if NS-MDMPI is enabled (determines if we can use WandB callback)
+    use_nsmdmpi = cfg.get('nsmdmpi', {}).get('enabled', False)
+    
+    # >>> CALLBACK 1: WandB (only for baseline, causes pickle error with NS-MDMPI)
+    if not use_nsmdmpi:
+        callbacks.append(
+            WandbCallback(
+                gradient_save_freq=1000,
+                model_save_path=os.path.join(cfg['paths']['model_dir'], f"wandb_{run_name}"),
+                verbose=2,
+            )
         )
-    )
+    else:
+        # For NS-MDMPI: Log to WandB but skip automatic model saving
+        # Model will be saved manually after training
+        print(">>> WandB callback skipped (NS-MDMPI mode - will save model manually)")
 
     # >>> CALLBACK 2: NS-MD-MPI or Adaptive Drift Logic
     # Check if NS-MD-MPI is enabled (Algorithm 1 from paper)
@@ -444,26 +449,6 @@ def main():
                           else cfg['env'].get('parameter', 'gravity')),
             base_value=9.8,  # Will be auto-detected from env
             
-            # Learning rate adaptation (all algorithms)
-            scale_factor=adaptive_cfg.get('scale_factor', 0.1),
-            min_lr_multiplier=adaptive_cfg.get('min_lr_multiplier', 0.5),
-            max_lr_multiplier=adaptive_cfg.get('max_lr_multiplier', 3.0),
-            
-            # PPO-specific: clip range adaptation
-            adapt_clip_range=adaptive_cfg.get('adapt_clip_range', True),
-            base_clip_range=adaptive_cfg.get('base_clip_range', 0.2),
-            min_clip_range=adaptive_cfg.get('min_clip_range', 0.05),
-            max_clip_range=adaptive_cfg.get('max_clip_range', 0.4),
-            
-            # Entropy adaptation (PPO/SAC)
-            adapt_entropy=adaptive_cfg.get('adapt_entropy', True),
-            base_ent_coef=adaptive_cfg.get('base_ent_coef', 0.0),  # 0 = auto-detect
-            min_ent_coef=adaptive_cfg.get('min_ent_coef', 0.0),
-            max_ent_coef=adaptive_cfg.get('max_ent_coef', 0.1),
-            
-            # TRPO-specific: target KL adaptation
-            adapt_target_kl=adaptive_cfg.get('adapt_target_kl', True),
-            base_target_kl=adaptive_cfg.get('base_target_kl', 0.01),
             min_target_kl=adaptive_cfg.get('min_target_kl', 0.001),
             max_target_kl=adaptive_cfg.get('max_target_kl', 0.05),
             
@@ -485,12 +470,32 @@ def main():
     except KeyboardInterrupt:
         print("Training interrupted manually...")
     finally:
-        # Đóng WandB sạch sẽ kể cả khi lỗi
+        # Close WandB cleanly
         wandb.finish()
 
-    # 6. Save Model Local
+    # 6. Save Model
     save_path = os.path.join(cfg['paths']['model_dir'], run_name)
-    model.save(save_path)
+    
+    # For NS-MDMPI: Save only model parameters to avoid pickle error
+    if cfg.get('nsmdmpi', {}).get('enabled', False):
+        print(f"\n>>> [NS-MDMPI] Saving model parameters to: {save_path}")
+        try:
+            import torch
+            # Save policy and value function parameters only (no callbacks)
+            torch.save({
+                'policy_state_dict': model.policy.state_dict(),
+                'config': cfg,
+                'algorithm': cfg['train']['algorithm'],
+            }, f"{save_path}_params.pt")
+            print(f">>> [NS-MDMPI] Model parameters saved successfully!")
+            print(f">>> [NS-MDMPI] Note: Model saved as  PyTorch parameters (.pt), not full SB3 model (.zip)")
+        except Exception as e:
+            print(f">>> [NS-MDMPI] Warning: Model save failed: {e}")
+            # Continue anyway - training was successful
+    else:
+        # Baseline: Normal save (already saved by WandB callback)
+        print(f"\n>>> Saving model to: {save_path}")
+        model.save(save_path)
     print(f"Model saved locally to: {save_path}.zip")
     
     # 7. Save Config
