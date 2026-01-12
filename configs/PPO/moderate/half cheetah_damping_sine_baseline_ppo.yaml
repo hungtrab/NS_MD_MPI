@@ -9,7 +9,7 @@ env:
   - 0.5
   - 1.5
 wandb:
-  project: att_3_Moderate_Baseline
+  project: att_3_HalfCheetah_Moderate_Comparison
   tags:
   - half cheetah
   - moderate
