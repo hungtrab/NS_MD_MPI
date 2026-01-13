@@ -185,14 +185,13 @@ def objective_function(
         verbose=0,
     )
     
-    # Evaluation callback with pruning
+    # Evaluation callback (without Optuna reporting to avoid callback errors)
     eval_callback = EvalCallback(
         eval_env,
         eval_freq=eval_freq,
         n_eval_episodes=n_eval_episodes,
         deterministic=False,  # Faster
         verbose=0,
-        callback_after_eval=lambda: trial.report(eval_callback.last_mean_reward, model.num_timesteps),
     )
     
     callbacks = [nsmdmpi_callback, eval_callback]
