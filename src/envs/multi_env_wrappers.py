@@ -1012,14 +1012,6 @@ DEFAULT_DRIFT_PARAMS = {
 
 
 def get_wrapper_for_env(env_id: str):
-    """Get the appropriate wrapper class for an environment ID."""
-    # Build complete registry with all wrappers
-    all_wrappers = {
-        'NonStationaryCartPoleWrapper': NonStationaryCartPoleWrapper,
-        'NonStationaryMountainCarWrapper': NonStationaryMountainCarWrapper,
-        'NonStationaryFrozenLakeWrapper': NonStationaryFrozenLakeWrapper,
-        'NonStationaryHalfCheetahWrapper': NonStationaryHalfCheetahWrapper,
-        'NonStationaryHopperWrapper': NonStationaryHopperWrapper,
     """Get the appropriate wrapper for a given environment ID."""
     if 'CartPole' in env_id:
         return NonStationaryCartPoleWrapper
@@ -1043,8 +1035,6 @@ def get_wrapper_for_env(env_id: str):
         return NonStationaryLunarLanderWrapper
     else:
         raise ValueError(f"No wrapper available for environment: {env_id}")
-
-
 def make_nonstationary_env(
     env_id: str,
     drift_conf: Union[Dict[str, Any], List[Dict[str, Any]]],
