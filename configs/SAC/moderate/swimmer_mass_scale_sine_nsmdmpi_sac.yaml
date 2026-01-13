@@ -1,4 +1,4 @@
-env_id: Swimmer-v4
+env_id: Swimmer-v5
 env:
   parameter: mass_scale
   drift_type: sine

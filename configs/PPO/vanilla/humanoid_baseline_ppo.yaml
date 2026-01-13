@@ -1,4 +1,4 @@
-env_id: Humanoid-v4
+env_id: Humanoid-v5
 wandb:
   project: att_3_Humanoid_Vanilla_Baseline
   tags:

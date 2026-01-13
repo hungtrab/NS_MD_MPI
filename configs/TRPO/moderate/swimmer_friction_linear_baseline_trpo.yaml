@@ -1,4 +1,4 @@
-env_id: Swimmer-v4
+env_id: Swimmer-v5
 env:
   parameter: friction
   drift_type: linear

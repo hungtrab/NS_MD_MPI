@@ -1,4 +1,4 @@
-env_id: Humanoid-v4
+env_id: Humanoid-v5
 env:
   parameter: damping
   drift_type: linear

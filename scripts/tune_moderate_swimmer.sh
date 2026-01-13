@@ -3,11 +3,11 @@
 
 echo "================================================================"
 echo "  NS-MDMPI Hyperparameter Tuning - MODERATE DRIFT"
-echo "  Environment: Swimmer-v4"
+echo "  Environment: Swimmer-v5"
 echo "================================================================"
 echo ""
 echo "This will optimize hyperparameters using Optuna"
-echo "Environment: Swimmer-v4"
+echo "Environment: Swimmer-v5"
 echo "Config: Moderate Drift"
 echo "Trials: 50 (can be interrupted and resumed)"
 echo "================================================================"
@@ -16,7 +16,7 @@ echo "================================================================"
 echo ""
 echo "Running quick validation (5 trials)..."
 python scripts/tune_hyperparameters.py \
-    --env "Swimmer-v4" \
+    --env "Swimmer-v5" \
     --config "configs/PPO/moderate/swimmer_friction_sine_baseline_ppo.yaml" \
     --type moderate \
     --n-trials 5 \
@@ -46,7 +46,7 @@ echo "This may take several hours. You can safely interrupt (Ctrl+C) and resume 
 echo ""
 
 python scripts/tune_hyperparameters.py \
-    --env "Swimmer-v4" \
+    --env "Swimmer-v5" \
     --config "configs/PPO/moderate/swimmer_friction_sine_baseline_ppo.yaml" \
     --type moderate \
     --n-trials 50 \
