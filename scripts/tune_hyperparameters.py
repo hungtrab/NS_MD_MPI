@@ -24,7 +24,8 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.callbacks import EvalCallback
 from src.callbacks.nsmdmpi_callback import NSMDMPICallback
-from src.envs.make_env import make_nonstationary_env
+from src.envs.multi_env_wrappers import make_nonstationary_env
+
 
 
 def create_fast_env(env_id: str, drift_config: Optional[Dict], n_envs: int = 4, seed: int = 42):
