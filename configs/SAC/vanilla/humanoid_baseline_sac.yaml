@@ -1,0 +1,21 @@
+env_id: Humanoid-v4
+wandb:
+  project: att_3_Humanoid_Vanilla_Baseline
+  tags:
+  - humanoid
+  - vanilla
+  - sac
+  - baseline
+  mode: online
+train:
+  algorithm: SAC
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

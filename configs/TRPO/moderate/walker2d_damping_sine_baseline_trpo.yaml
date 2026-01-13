@@ -1,0 +1,33 @@
+env_id: Walker2d-v4
+env:
+  parameter: damping
+  drift_type: sine
+  magnitude: 0.2
+  period: 10000
+  base_value: 1.0
+  bounds:
+  - 0.6
+  - 1.4
+wandb:
+  project: att_3_Walker2d_Moderate_Comparison
+  tags:
+  - walker2d
+  - moderate
+  - trpo
+  - damping
+  - sine
+  - baseline
+  - baseline
+  mode: online
+train:
+  algorithm: TRPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 1000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

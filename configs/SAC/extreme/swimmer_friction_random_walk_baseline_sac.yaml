@@ -1,0 +1,33 @@
+env_id: Swimmer-v4
+env:
+  parameter: friction
+  drift_type: random_walk
+  magnitude: 0.5
+  period: 10000
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 1.5
+wandb:
+  project: att_3_Swimmer_Extreme_Comparison
+  tags:
+  - swimmer
+  - extreme
+  - sac
+  - friction
+  - random_walk
+  - baseline
+  - baseline
+  mode: online
+train:
+  algorithm: SAC
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 500000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

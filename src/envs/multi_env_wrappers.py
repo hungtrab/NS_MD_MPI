@@ -1097,3 +1097,140 @@ def make_nonstationary_env(
     base_env = gym.make(env_id, **env_kwargs)
     wrapper_class = get_wrapper_for_env(env_id)
     return wrapper_class(base_env, drift_conf, seed=seed)
+
+
+# =============================================================================
+# WALKER2D NON-STATIONARY WRAPPER
+# =============================================================================
+
+class Walker2dMultiParamWrapper(MuJoCoNonStationaryWrapper):
+    """
+    Walker2d-v4 environment with multi-parameter drift support.
+    
+    Supported parameters:
+    - friction: Joint friction coefficient (default: 0.9, range: [0.6, 1.4])
+    - mass_scale: Torso mass scale multiplier (default: 1.0, range: [0.7, 1.3])
+    - damping: Joint damping coefficient (default: 1.0, range: [0.6, 1.4])
+    - gravity: Gravity magnitude (default: -9.81, range: [-12.0, -7.0])
+    
+    Similar to Hopper but with bipedal walking dynamics.
+    """
+    
+    VALID_PARAMS = ['friction', 'mass_scale', 'damping', 'gravity']
+    
+    def _apply_drift(self, param: str, new_value: float) -> None:
+        """Apply drift to Walker2d parameters."""
+        if param == 'friction':
+            # Apply to all joint friction (hip, thigh, leg, foot joints)
+            for i in range(self.model.njnt):
+                self.model.jnt_frictionloss[i] = new_value
+                
+        elif param == 'mass_scale':
+            # Scale torso mass (body 1 is typically torso in Walker2d)
+            torso_body_id = 1  # Walker2d torso
+            original_mass = self.initial_body_masses[torso_body_id]
+            self.model.body_mass[torso_body_id] = original_mass * new_value
+            
+        elif param == 'damping':
+            # Apply to all joint damping
+            for i in range(self.model.njnt):
+                self.model.dof_damping[i] = new_value
+                
+        elif param == 'gravity':
+            # Modify gravity (z-component)
+            self.model.opt.gravity[2] = new_value
+        
+        else:
+            raise ValueError(f"Unknown parameter: {param}. Valid: {self.VALID_PARAMS}")
+
+
+# =============================================================================
+# SWIMMER NON-STATIONARY WRAPPER
+# =============================================================================
+
+class SwimmerMultiParamWrapper(MuJoCoNonStationaryWrapper):
+    """
+    Swimmer-v4 environment with multi-parameter drift support.
+    
+    Supported parameters:
+    - friction: Joint friction coefficient (default: 1.0, range: [0.5, 1.5])
+    - mass_scale: Body mass scale multiplier (default: 1.0, range: [0.7, 1.3])
+    - gravity: Gravity magnitude (default: -9.81, range: [-12.0, -7.0])
+    - density: Fluid density (viscosity) (default: 1.0, range: [0.5, 2.0])
+    
+    Simple 2D swimmer with snake-like motion in fluid.
+    """
+    
+    VALID_PARAMS = ['friction', 'mass_scale', 'gravity', 'density']
+    
+    def _apply_drift(self, param: str, new_value: float) -> None:
+        """Apply drift to Swimmer parameters."""
+        if param == 'friction':
+            # Apply to all joint friction
+            for i in range(self.model.njnt):
+                self.model.jnt_frictionloss[i] = new_value
+                
+        elif param == 'mass_scale':
+            # Scale all body masses uniformly (swimmer has 3 body segments)
+            for body_id in range(self.model.nbody):
+                if body_id > 0:  # Skip world body (id=0)
+                    original_mass = self.initial_body_masses[body_id]
+                    self.model.body_mass[body_id] = original_mass * new_value
+                    
+        elif param == 'gravity':
+            # Modify gravity (z-component)
+            self.model.opt.gravity[2] = new_value
+            
+        elif param == 'density':
+            # Modify fluid density (affects drag/buoyancy)
+            # In MuJoCo, this is controlled via geom density
+            for i in range(self.model.ngeom):
+                self.model.geom_density[i] = new_value
+        
+        else:
+            raise ValueError(f"Unknown parameter: {param}. Valid: {self.VALID_PARAMS}")
+
+
+# =============================================================================
+# HUMANOID NON-STATIONARY WRAPPER
+# =============================================================================
+
+class HumanoidMultiParamWrapper(MuJoCoNonStationaryWrapper):
+    """
+    Humanoid-v4 environment with multi-parameter drift support.
+    
+    Supported parameters:
+    - friction: Joint friction coefficient (default: 0.9, range: [0.7, 1.3])
+    - mass_scale: Torso mass scale multiplier (default: 1.0, range: [0.8, 1.2])
+    - damping: Joint damping coefficient (default: 1.0, range: [0.7, 1.3])
+    - gravity: Gravity magnitude (default: -9.81, range: [-12.0, -7.0])
+    
+    Complex humanoid with 17 DoF. More conservative ranges due to complexity.
+    """
+    
+    VALID_PARAMS = ['friction', 'mass_scale', 'damping', 'gravity']
+    
+    def _apply_drift(self, param: str, new_value: float) -> None:
+        """Apply drift to Humanoid parameters."""
+        if param == 'friction':
+            # Apply to all joint friction (many joints in humanoid)
+            for i in range(self.model.njnt):
+                self.model.jnt_frictionloss[i] = new_value
+                
+        elif param == 'mass_scale':
+            # Scale torso mass (body 1 is typically torso in Humanoid)
+            torso_body_id = 1  # Humanoid torso
+            original_mass = self.initial_body_masses[torso_body_id]
+            self.model.body_mass[torso_body_id] = original_mass * new_value
+            
+        elif param == 'damping':
+            # Apply to all joint damping
+            for i in range(self.model.njnt):
+                self.model.dof_damping[i] = new_value
+                
+        elif param == 'gravity':
+            # Modify gravity (z-component)
+            self.model.opt.gravity[2] = new_value
+        
+        else:
+            raise ValueError(f"Unknown parameter: {param}. Valid: {self.VALID_PARAMS}")
