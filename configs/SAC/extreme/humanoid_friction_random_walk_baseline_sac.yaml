@@ -1,4 +1,4 @@
-env_id: Humanoid-v5
+env_id: Humanoid-v4
 env:
   parameter: friction
   drift_type: random_walk
