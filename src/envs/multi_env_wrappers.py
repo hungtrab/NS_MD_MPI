@@ -1020,12 +1020,6 @@ def get_wrapper_for_env(env_id: str):
         'NonStationaryFrozenLakeWrapper': NonStationaryFrozenLakeWrapper,
         'NonStationaryHalfCheetahWrapper': NonStationaryHalfCheetahWrapper,
         'NonStationaryHopperWrapper': NonStationaryHopperWrapper,
-        'NonStationaryMiniGridWrapper': NonStationaryMiniGridWrapper,
-        'NonStationaryLunarLanderWrapper': NonStationaryLunarLanderWrapper,
-    }
-    
-    # Direct match
-    if env_id in WRAPPER_REGISTRY:
     """Get the appropriate wrapper for a given environment ID."""
     if 'CartPole' in env_id:
         return NonStationaryCartPoleWrapper
@@ -1047,8 +1041,8 @@ def get_wrapper_for_env(env_id: str):
         return HumanoidMultiParamWrapper
     elif 'LunarLander' in env_id:
         return NonStationaryLunarLanderWrapper
-    # Add more as needed
-    raise ValueError(f"No wrapper available for environment: {env_id}")
+    else:
+        raise ValueError(f"No wrapper available for environment: {env_id}")
 
 
 def make_nonstationary_env(
