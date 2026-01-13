@@ -40,11 +40,9 @@ def create_fast_env(env_id: str, drift_config: Optional[Dict], n_envs: int = 4, 
             return env
         return _init
     
-    # Use SubprocVecEnv for parallel execution
-    if n_envs > 1:
-        env = SubprocVecEnv([make_env(i) for i in range(n_envs)])
-    else:
-        env = DummyVecEnv([make_env(0)])
+    # Use DummyVecEnv to avoid multiprocessing/pickling issues with custom wrappers
+    # SubprocVecEnv can cause ConnectionResetError with complex wrappers
+    env = DummyVecEnv([make_env(i) for i in range(n_envs)])
     
     return env
 
