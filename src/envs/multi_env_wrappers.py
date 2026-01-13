@@ -1016,6 +1016,16 @@ def get_wrapper_for_env(env_id: str):
     # Build complete registry with all wrappers
     all_wrappers = {
         'NonStationaryCartPoleWrapper': NonStationaryCartPoleWrapper,
+        'NonStationaryMountainCarWrapper': NonStationaryMountainCarWrapper,
+        'NonStationaryFrozenLakeWrapper': NonStationaryFrozenLakeWrapper,
+        'NonStationaryHalfCheetahWrapper': NonStationaryHalfCheetahWrapper,
+        'NonStationaryHopperWrapper': NonStationaryHopperWrapper,
+        'NonStationaryMiniGridWrapper': NonStationaryMiniGridWrapper,
+        'NonStationaryLunarLanderWrapper': NonStationaryLunarLanderWrapper,
+    }
+    
+    # Direct match
+    if env_id in WRAPPER_REGISTRY:
     """Get the appropriate wrapper for a given environment ID."""
     if 'CartPole' in env_id:
         return NonStationaryCartPoleWrapper
