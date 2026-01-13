@@ -14,11 +14,14 @@ echo "WandB Project: att_3_Hopper_Moderate_Comparison"
 echo "================================================================"
 echo ""
 
-# Array of Hopper moderate configs (NS-MDMPI only)
+# Array of Hopper moderate configs (NS-MDMPI only, all 6 experiments)
 configs=(
     "configs/PPO/moderate/hopper_friction_sine_nsmdmpi_ppo_tuned.yaml"
     "configs/PPO/moderate/hopper_friction_linear_nsmdmpi_ppo_tuned.yaml"
+    "configs/PPO/moderate/hopper_friction_jump_nsmdmpi_ppo_tuned.yaml"
     "configs/PPO/moderate/hopper_mass_scale_sine_nsmdmpi_ppo_tuned.yaml"
+    "configs/PPO/moderate/hopper_mass_scale_linear_nsmdmpi_ppo_tuned.yaml"
+    "configs/PPO/moderate/hopper_mass_scale_jump_nsmdmpi_ppo_tuned.yaml"
 )
 
 total=${#configs[@]}
