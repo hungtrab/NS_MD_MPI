@@ -1103,6 +1103,14 @@ class Walker2dMultiParamWrapper(NonStationaryHalfCheetahWrapper):
     
     VALID_PARAMS = ['friction', 'mass_scale', 'damping', 'gravity']
     
+    def __init__(self, env, drift_conf, seed=None):
+        super().__init__(env, drift_conf, seed)
+        # Override print message
+        print(f">>> [Wrapper] Initialized Non-Stationary Walker2d")
+        for param, gen in self.drift_generators.items():
+            base_val = gen.config.base_value if gen.config.base_value is not None else 0.0
+            print(f"    - {param}: {gen.config.drift_type} (base={base_val:.3f})")
+    
     def _apply_drift(self, param: str, new_value: float) -> None:
         """Apply drift to Walker2d parameters."""
         if param == 'friction':
@@ -1147,6 +1155,14 @@ class SwimmerMultiParamWrapper(NonStationaryHalfCheetahWrapper):
     """
     
     VALID_PARAMS = ['friction', 'mass_scale', 'gravity', 'density']
+    
+    def __init__(self, env, drift_conf, seed=None):
+        super().__init__(env, drift_conf, seed)
+        # Override print message
+        print(f">>> [Wrapper] Initialized Non-Stationary Swimmer")
+        for param, gen in self.drift_generators.items():
+            base_val = gen.config.base_value if gen.config.base_value is not None else 0.0
+            print(f"    - {param}: {gen.config.drift_type} (base={base_val:.3f})")
     
     def _apply_drift(self, param: str, new_value: float) -> None:
         """Apply drift to Swimmer parameters."""
@@ -1194,6 +1210,14 @@ class HumanoidMultiParamWrapper(NonStationaryHalfCheetahWrapper):
     """
     
     VALID_PARAMS = ['friction', 'mass_scale', 'damping', 'gravity']
+    
+    def __init__(self, env, drift_conf, seed=None):
+        super().__init__(env, drift_conf, seed)
+        # Override print message
+        print(f">>> [Wrapper] Initialized Non-Stationary Humanoid")
+        for param, gen in self.drift_generators.items():
+            base_val = gen.config.base_value if gen.config.base_value is not None else 0.0
+            print(f"    - {param}: {gen.config.drift_type} (base={base_val:.3f})")
     
     def _apply_drift(self, param: str, new_value: float) -> None:
         """Apply drift to Humanoid parameters."""
