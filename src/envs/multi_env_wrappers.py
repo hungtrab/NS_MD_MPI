@@ -1103,7 +1103,7 @@ def make_nonstationary_env(
 # WALKER2D NON-STATIONARY WRAPPER
 # =============================================================================
 
-class Walker2dMultiParamWrapper(NonStationaryMuJoCoWrapper):
+class Walker2dMultiParamWrapper(NonStationaryHalfCheetahWrapper):
     """
     Walker2d-v4 environment with multi-parameter drift support.
     
@@ -1148,7 +1148,7 @@ class Walker2dMultiParamWrapper(NonStationaryMuJoCoWrapper):
 # SWIMMER NON-STATIONARY WRAPPER
 # =============================================================================
 
-class SwimmerMultiParamWrapper(NonStationaryMuJoCoWrapper):
+class SwimmerMultiParamWrapper(NonStationaryHalfCheetahWrapper):
     """
     Swimmer-v4 environment with multi-parameter drift support.
     
@@ -1195,7 +1195,7 @@ class SwimmerMultiParamWrapper(NonStationaryMuJoCoWrapper):
 # HUMANOID NON-STATIONARY WRAPPER
 # =============================================================================
 
-class HumanoidMultiParamWrapper(NonStationaryMuJoCoWrapper):
+class HumanoidMultiParamWrapper(NonStationaryHalfCheetahWrapper):
     """
     Humanoid-v4 environment with multi-parameter drift support.
     
