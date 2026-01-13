@@ -1026,27 +1026,28 @@ def get_wrapper_for_env(env_id: str):
     
     # Direct match
     if env_id in WRAPPER_REGISTRY:
-        wrapper_name = WRAPPER_REGISTRY[env_id]
-        return all_wrappers[wrapper_name]
-    
-    # Partial match (e.g., 'MiniGrid-Empty-8x8-v0' -> MiniGrid)
-    for key_prefix in ['CartPole', 'MountainCar', 'FrozenLake', 'HalfCheetah', 'Hopper', 'MiniGrid', 'LunarLander']:
-        if key_prefix in env_id:
-            if key_prefix == 'CartPole':
-                return NonStationaryCartPoleWrapper
-            elif key_prefix == 'MountainCar':
-                return NonStationaryMountainCarWrapper
-            elif key_prefix == 'FrozenLake':
-                return NonStationaryFrozenLakeWrapper
-            elif key_prefix == 'HalfCheetah':
-                return NonStationaryHalfCheetahWrapper
-            elif key_prefix == 'Hopper':
-                return NonStationaryHopperWrapper
-            elif key_prefix == 'MiniGrid':
-                return NonStationaryMiniGridWrapper
-            elif key_prefix == 'LunarLander':
-                return NonStationaryLunarLanderWrapper
-    
+    """Get the appropriate wrapper for a given environment ID."""
+    if 'CartPole' in env_id:
+        return NonStationaryCartPoleWrapper
+    elif 'MountainCar' in env_id:
+        return NonStationaryMountainCarWrapper
+    elif 'FrozenLake' in env_id:
+        return NonStationaryFrozenLakeWrapper
+    elif 'MiniGrid' in env_id:
+        return NonStationaryMiniGridWrapper
+    elif 'Hopper' in env_id:
+        return NonStationaryHopperWrapper
+    elif 'HalfCheetah' in env_id:
+        return NonStationaryHalfCheetahWrapper
+    elif 'Walker2d' in env_id:
+        return Walker2dMultiParamWrapper
+    elif 'Swimmer' in env_id:
+        return SwimmerMultiParamWrapper
+    elif 'Humanoid' in env_id:
+        return HumanoidMultiParamWrapper
+    elif 'LunarLander' in env_id:
+        return NonStationaryLunarLanderWrapper
+    # Add more as needed
     raise ValueError(f"No wrapper available for environment: {env_id}")
 
 
