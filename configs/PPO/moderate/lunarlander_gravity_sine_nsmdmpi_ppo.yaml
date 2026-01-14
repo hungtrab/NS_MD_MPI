@@ -31,11 +31,18 @@ nsmdmpi:
   V_R: 10.0
   V_P: 10.0
   V_pi_star: 5.0
-  kappa_base: 0.01
-  lambda_base: 0.01
+  kappa_base: 0.2
+  lambda_base: 1.0
   kappa_adaptive: true
   lambda_adaptive: true
-  sensitivity: 0.1
+  trust_region_sensitivity: 5.0
+  regularization_sensitivity: 2.0
+  max_ent_coef: 0.1
+  drift_window_size: 1000
+  log_freq: 50  # Log every 50 steps for detailed tracking
+  save_budget_history: true  # Save budget history for analysis
+  budget_save_dir: budgets/
+  verbose: 1
 paths:
   log_dir: logs/
   model_dir: models/
