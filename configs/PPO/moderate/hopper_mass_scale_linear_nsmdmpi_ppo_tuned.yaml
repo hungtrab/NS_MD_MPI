@@ -29,14 +29,18 @@ train:
   seed: 42
 nsmdmpi:
   enabled: true
-  V_R: 18.97367456278567
-  V_P: 18.24940071172589
-  V_pi_star: 7.760499451131514
-  kappa_base: 0.11447409611244551
-  lambda_base: 1.1332215696517505
+  V_R: 12.278003224918699
+  V_P: 8.447093807430807
+  V_pi_star: 2.7492641675302627
+  kappa_base: 0.205722634466976
+  lambda_base: 1.4124842855984459
   kappa_adaptive: true
   lambda_adaptive: true
   sensitivity: 0.1
+  trust_region_sensitivity: 5.060509071764029
+  regularization_sensitivity: 1.112520471983751
+  max_ent_coef: 0.09002052320815648
+  drift_window_size: 900
 paths:
   log_dir: logs/
   model_dir: models/
