@@ -174,7 +174,13 @@ class TransitionDriftEstimator:
             if self.base_value is None:
                 self.base_value = current_val
             
-            drift = abs(current_val - self.base_value)
+            # Compute RELATIVE drift (normalized by base value)
+            # This ensures drift is ~0-1 scale regardless of parameter magnitude
+            if abs(self.base_value) > 1e-8:
+                drift = abs(current_val - self.base_value) / abs(self.base_value)
+            else:
+                drift = abs(current_val - self.base_value)
+            
             self.drift_values.append(drift)
             
             # Update EMA
@@ -305,10 +311,10 @@ class BellmanCommutatorEstimator:
         """
         Estimate Bellman Commutator magnitude ||C_t||.
         
-        Uses TD error variance as proxy.
+        Uses NORMALIZED TD error variance as proxy.
         
         Returns:
-            Estimated commutator magnitude
+            Estimated commutator magnitude (normalized to ~0-1 scale)
         """
         if len(self.td_errors) < self.config.min_samples:
             return 0.0
@@ -318,8 +324,16 @@ class BellmanCommutatorEstimator:
         td_variance = np.var(self.td_errors)
         td_mean = np.mean(np.abs(self.td_errors))
         
-        # Combine mean and variance for robust estimate
-        return td_mean + 0.5 * np.sqrt(td_variance)
+        # Normalize by value scale (typical value magnitude)
+        # LunarLander: V ≈ 100-300, so normalize by 100
+        # MuJoCo: V ≈ 1000-5000, so normalize by 1000
+        value_scale = max(1.0, np.mean(np.abs(list(self.value_predictions)))) if len(self.value_predictions) > 0 else 100.0
+        
+        # Combine mean and variance for robust estimate (normalized)
+        raw_estimate = td_mean + 0.5 * np.sqrt(td_variance)
+        
+        # Return normalized commutator
+        return raw_estimate / max(value_scale, 1.0)
     
     def estimate_from_drift(self, drift_magnitude: float, lipschitz_const: float = 1.0) -> float:
         """
