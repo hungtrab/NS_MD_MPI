@@ -406,38 +406,57 @@ class NSMDMPICallback(BaseCallback):
             timestep=self.num_timesteps,
         )
         
-        # 3. Compute combined drift using Bellman Commutator formula (story.md Sec 2)
+        # 3. Compute combined drift using Bellman Commutator formula (paper Eq. 559)
         # Δ̂_t = Δ̂_t^R + 2γB·Δ̂_t^P
         gamma = 0.99  # Discount factor
         B = 1.0  # Bound on Q-values (can be estimated from training)
         combined_drift = delta_R + 2 * gamma * B * delta_P
         
-        # Update EMA of drift (story.md: EMA_τ)
+        # Update EMA of drift (paper: EMA_τ)
         self.drift_ema = (1 - self.ema_tau) * self.drift_ema + self.ema_tau * combined_drift
         
-        # 4. Compute adaptive trust region δ_t (story.md Sec 2)
-        # Formula: δ_t = clip(δ_min, δ_max, c_0 + c_1 · EMA_τ(Δ̂_t))
+        # Get budget fraction for adaptive control
+        budget_frac = self.budget_tracker.get_min_remaining_fraction()
+        
+        # 4. Compute adaptive trust region κ_t
+        # FIXED: Now uses BOTH budget_fraction AND drift
+        # Formula (matching docstring): κ_t = κ_0 * budget_frac * (1 + α * drift_ema)
+        # - Shrinks as budgets deplete (budget_frac → 0)
+        # - Expands temporarily when drift is high
         if self.kappa_adaptive:
-            # c_0 = kappa_base, c_1 = trust_region_sensitivity
-            self.kappa_t = self.kappa_base + self.trust_region_sensitivity * self.drift_ema
+            # Budget factor: shrink trust region as budgets deplete
+            budget_factor = max(0.1, budget_frac)  # Floor at 10% to avoid complete collapse
+            
+            # Drift factor: allow larger steps when drift detected
+            drift_factor = 1.0 + self.trust_region_sensitivity * self.drift_ema
+            
+            # Combined: trust region shrinks with budget but can expand with drift
+            self.kappa_t = self.kappa_base * budget_factor * drift_factor
             self.kappa_t = np.clip(self.kappa_t, self.kappa_min, self.kappa_max)
         
-        # 5. Compute adaptive temperature η_t (story.md Sec 2)
-        # Formula: η_t = clip(η_min, η_max, d_0 + d_1 · EMA_τ(Δ̂_t))
+        # 5. Compute adaptive regularization λ_t
+        # FIXED: Now uses BOTH budget_fraction AND drift
+        # More regularization when: (a) drift is high, OR (b) budgets depleted
         if self.lambda_adaptive:
-            # d_0 = lambda_base, d_1 = regularization_sensitivity
-            self.lambda_t = self.lambda_base + self.regularization_sensitivity * self.drift_ema
+            # Budget factor: increase regularization as budgets deplete
+            budget_reg = 1.0 + (1.0 - budget_frac) * 0.5  # Up to 1.5x when depleted
+            
+            # Drift factor: increase regularization when drift is high
+            drift_reg = 1.0 + self.regularization_sensitivity * self.drift_ema
+            
+            # Combined regularization
+            self.lambda_t = self.lambda_base * budget_reg * drift_reg
             self.lambda_t = np.clip(self.lambda_t, self.lambda_min, self.lambda_max)
         
         # 6. Apply trust region and regularization via hyperparameters
         self._apply_trust_region()
         self._apply_regularization()
         
-        # 7. Check budget exhaustion
+        # 7. Log budget exhaustion warning
         if self.budget_tracker.is_budget_exhausted(threshold=0.1):
             if self.verbose > 0:
                 print(f"\n⚠️  [NS-MD-MPI] Warning: Variation budgets nearly exhausted!")
-                print(f"    Remaining: {self.budget_tracker.get_min_remaining_fraction():.1%}")
+                print(f"    Remaining: {budget_frac:.1%}")
                 print(f"    Trust region reduced to κ_t={self.kappa_t:.4f}\n")
     
     def _apply_trust_region(self) -> None:
