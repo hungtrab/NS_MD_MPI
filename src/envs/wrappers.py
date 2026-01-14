@@ -327,6 +327,13 @@ class NonStationaryLunarLanderWrapper(gym.Wrapper):
                 'delta': current_val - base_val,
             }
         
+        # Add drift/current_value for TransitionDriftEstimator compatibility
+        # Use the first drifting parameter as main drift signal
+        if len(self.drift_generators) > 0:
+            main_param = list(self.drift_generators.keys())[0]
+            info['drift/current_value'] = self.current_params[main_param]
+            info['drift/parameter'] = main_param
+        
         self.step_counter += 1
         
         return obs, reward, terminated, truncated, info

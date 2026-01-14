@@ -347,8 +347,29 @@ class NSMDMPICallback(BaseCallback):
             rewards = self.locals.get('rewards', [0])
             reward = rewards[0] if len(rewards) > 0 else 0
             
-            # Update drift estimators
+            # Update drift estimators (reward + transition)
             self.drift_estimator.update(reward, info)
+            
+            # Extract value predictions for CommutatorEstimator
+            # PPO stores values in rollout buffer
+            try:
+                if hasattr(self.model, 'rollout_buffer') and self.model.rollout_buffer is not None:
+                    buffer = self.model.rollout_buffer
+                    if buffer.pos > 0:  # Has data
+                        # Get latest value prediction and return
+                        value_pred = buffer.values[buffer.pos - 1, 0] if buffer.pos > 0 else 0.0
+                        returns = buffer.returns[buffer.pos - 1, 0] if hasattr(buffer, 'returns') and buffer.pos > 0 else value_pred
+                        td_error = returns - value_pred
+                        
+                        # Update commutator estimator with TD error
+                        self.drift_estimator.commutator_estimator.update(
+                            value_pred=float(value_pred),
+                            value_target=float(returns),
+                            td_error=float(td_error)
+                        )
+            except Exception as e:
+                # Silently skip if buffer not ready
+                pass
         
         # Log periodically
         if self.n_calls % self.log_freq == 0:
