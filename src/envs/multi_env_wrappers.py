@@ -948,21 +948,21 @@ class NonStationaryHopperWrapper(gym.Wrapper):
             if param == 'friction':
                 return float(model.geom_friction[0, 0])
             elif param == 'damping':
-                if hasattr(self, 'original_damping'):
+                if hasattr(self, 'original_damping') and self.original_damping[0] != 0:
                     return float(model.dof_damping[0] / self.original_damping[0])
                 return 1.0
             elif param == 'mass_scale':
-                if hasattr(self, 'original_mass'):
+                if hasattr(self, 'original_mass') and self.original_mass[1] != 0:
                     return float(model.body_mass[1] / self.original_mass[1])
                 return 1.0
             elif param == 'torso_length':
-                if hasattr(self, 'original_geom_size'):
+                if hasattr(self, 'original_geom_size') and self.original_geom_size[1, 0] != 0:
                     return float(model.geom_size[1, 0] / self.original_geom_size[1, 0])
                 return 1.0
-        except:
+        except Exception as e:
             pass
         
-        return self.DEFAULT_VALUES.get(param, 0.0)
+        return self.DEFAULT_VALUES.get(param, 1.0)  # Default to 1.0 for scale params
 
     def get_drift_info(self) -> Dict[str, Any]:
         return {
