@@ -948,21 +948,34 @@ class NonStationaryHopperWrapper(gym.Wrapper):
             if param == 'friction':
                 return float(model.geom_friction[0, 0])
             elif param == 'damping':
-                if hasattr(self, 'original_damping') and self.original_damping[0] != 0:
-                    return float(model.dof_damping[0] / self.original_damping[0])
+                # Use mean ratio across all joints with non-zero original damping
+                if hasattr(self, 'original_damping'):
+                    mask = self.original_damping != 0
+                    if mask.any():
+                        ratios = model.dof_damping[mask] / self.original_damping[mask]
+                        return float(ratios.mean())
                 return 1.0
             elif param == 'mass_scale':
-                if hasattr(self, 'original_mass') and self.original_mass[1] != 0:
-                    return float(model.body_mass[1] / self.original_mass[1])
+                # Use mean ratio across all bodies with non-zero original mass
+                if hasattr(self, 'original_mass'):
+                    mask = self.original_mass != 0
+                    if mask.any():
+                        ratios = model.body_mass[mask] / self.original_mass[mask]
+                        return float(ratios.mean())
                 return 1.0
             elif param == 'torso_length':
-                if hasattr(self, 'original_geom_size') and self.original_geom_size[1, 0] != 0:
-                    return float(model.geom_size[1, 0] / self.original_geom_size[1, 0])
+                # Use mean ratio for torso geoms
+                if hasattr(self, 'original_geom_size'):
+                    orig_sizes = self.original_geom_size[1:3, 0]
+                    mask = orig_sizes != 0
+                    if mask.any():
+                        ratios = model.geom_size[1:3, 0][mask] / orig_sizes[mask]
+                        return float(ratios.mean())
                 return 1.0
         except Exception as e:
             pass
         
-        return self.DEFAULT_VALUES.get(param, 1.0)  # Default to 1.0 for scale params
+        return self.DEFAULT_VALUES.get(param, 1.0)
 
     def get_drift_info(self) -> Dict[str, Any]:
         return {
