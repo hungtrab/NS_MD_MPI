@@ -745,19 +745,27 @@ class NonStationaryHalfCheetahWrapper(gym.Wrapper):
             if param == 'friction':
                 return float(model.geom_friction[0, 0])
             elif param == 'damping':
+                # Use mean ratio across all joints with non-zero original damping
                 if hasattr(self, 'original_damping'):
-                    return float(model.dof_damping[0] / self.original_damping[0])
+                    mask = self.original_damping != 0
+                    if mask.any():
+                        ratios = model.dof_damping[mask] / self.original_damping[mask]
+                        return float(ratios.mean())
                 return 1.0
             elif param == 'mass_scale':
+                # Use mean ratio across all bodies with non-zero original mass
                 if hasattr(self, 'original_mass'):
-                    return float(model.body_mass[1] / self.original_mass[1])
+                    mask = self.original_mass != 0
+                    if mask.any():
+                        ratios = model.body_mass[mask] / self.original_mass[mask]
+                        return float(ratios.mean())
                 return 1.0
             elif param == 'gravity':
                 return float(model.opt.gravity[2])
-        except:
+        except Exception as e:
             pass
         
-        return self.DEFAULT_VALUES.get(param, 0.0)
+        return self.DEFAULT_VALUES.get(param, 1.0)
 
     def get_drift_info(self) -> Dict[str, Any]:
         return {
