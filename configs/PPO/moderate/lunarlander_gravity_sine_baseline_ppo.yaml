@@ -1,4 +1,4 @@
-env_id: LunarLander-v2
+env_id: LunarLander-v3
 env:
   parameter: gravity
   drift_type: sine

@@ -1,4 +1,4 @@
-env_id: LunarLander-v2
+env_id: LunarLander-v3
 wandb:
   project: att_3_LunarLander_Moderate_Comparison
   tags:
