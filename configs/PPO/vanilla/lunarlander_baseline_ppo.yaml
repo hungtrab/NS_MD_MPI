@@ -1,22 +1,11 @@
 env_id: LunarLander-v2
-env:
-  parameter: gravity
-  drift_type: sine
-  magnitude: 3.0
-  period: 10000
-  base_value: -10.0
-  bounds:
-  - -11.9
-  - -5.0
 wandb:
   project: att_3_LunarLander_Moderate_Comparison
   tags:
   - lunarlander
-  - moderate
+  - vanilla
   - ppo
-  - gravity
-  - sine
-  - baseline
+  - no_drift
   mode: online
 train:
   algorithm: PPO
@@ -26,8 +15,6 @@ train:
   gamma: 0.99
   total_timesteps: 500000
   seed: 42
-nsmdmpi:
-  enabled: false
 paths:
   log_dir: logs/
   model_dir: models/
