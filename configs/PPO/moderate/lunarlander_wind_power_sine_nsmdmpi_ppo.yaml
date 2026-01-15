@@ -3,7 +3,7 @@ env:
   parameter: wind_power
   drift_type: sine
   magnitude: 0.3
-  period: 10000
+  period: 50000
   base_value: 0.0
 wandb:
   project: att_3_LunarLander_Moderate_Comparison
@@ -21,7 +21,7 @@ train:
   n_steps: 2048
   batch_size: 64
   gamma: 0.99
-  total_timesteps: 500000
+  total_timesteps: 1000000
   seed: 42
 nsmdmpi:
   enabled: true
