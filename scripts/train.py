@@ -261,6 +261,7 @@ def main():
     parser.add_argument("--num_envs", type=int, default=0, help="Number of parallel envs (0 = auto select)")
     parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint (.zip) to resume training from")
     parser.add_argument("--remaining_steps", type=int, default=None, help="Remaining timesteps (default: auto-calculate)")
+    parser.add_argument("--seed", type=int, default=None, help="Override random seed (default: from config or 42)")
     args = parser.parse_args()
 
     # 1. Load Config
@@ -318,6 +319,11 @@ def main():
 
     print(f"--- Training Start: {run_name} ---")
     print(f"--- Num Envs: {num_envs} ---")
+    
+    # Determine seed (CLI override > config > default)
+    seed = args.seed if args.seed is not None else cfg.get('train', {}).get('seed', 42)
+    print(f"--- Seed: {seed} ---")
+    set_random_seed(seed)
 
     # ======================================================
     # >>> SETUP WANDB (ONLINE LOGGING) <<<
@@ -344,7 +350,7 @@ def main():
     )
 
     # 2. Setup Env
-    env = make_env(cfg, log_path, num_envs=num_envs)
+    env = make_env(cfg, log_path, num_envs=num_envs, seed=seed)
 
     # 3. Setup Model with Algorithm Factory
     # tensorboard_log=... : Đây là chỗ SB3 ghi log OFFLINE
@@ -537,19 +543,22 @@ def main():
     # 6. Save Model
     save_path = os.path.join(cfg['paths']['model_dir'], run_name)
     
-    # For NS-MDMPI: Save only model parameters to avoid pickle error
+    # For NS-MDMPI: Save both .zip (for eval) and .pt (for backup)
     if cfg.get('nsmdmpi', {}).get('enabled', False):
-        print(f"\n>>> [NS-MDMPI] Saving model parameters to: {save_path}")
+        print(f"\n>>> [NS-MDMPI] Saving model to: {save_path}")
         try:
+            # Save .zip for evaluation (SB3 format)
+            model.save(save_path)
+            print(f">>> [NS-MDMPI] Model saved as .zip for evaluation")
+            
+            # Also save .pt for backup
             import torch
-            # Save policy and value function parameters only (no callbacks)
             torch.save({
                 'policy_state_dict': model.policy.state_dict(),
                 'config': cfg,
                 'algorithm': cfg['train']['algorithm'],
             }, f"{save_path}_params.pt")
-            print(f">>> [NS-MDMPI] Model parameters saved successfully!")
-            print(f">>> [NS-MDMPI] Note: Model saved as  PyTorch parameters (.pt), not full SB3 model (.zip)")
+            print(f">>> [NS-MDMPI] Backup saved as .pt")
         except Exception as e:
             print(f">>> [NS-MDMPI] Warning: Model save failed: {e}")
             # Continue anyway - training was successful
