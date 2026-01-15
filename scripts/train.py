@@ -377,23 +377,54 @@ def main():
     # Check if resuming from checkpoint
     if args.resume:
         checkpoint_path = args.resume
-        if not checkpoint_path.endswith('.zip'):
-            checkpoint_path += '.zip'
         
-        if not os.path.exists(checkpoint_path):
-            print(f"ERROR: Checkpoint not found: {checkpoint_path}")
-            return
+        # Determine checkpoint type and find the file
+        is_pt_checkpoint = checkpoint_path.endswith('.pt') or checkpoint_path.endswith('_params.pt')
         
-        print(f">>> RESUMING from checkpoint: {checkpoint_path}")
-        model = AlgoClass.load(checkpoint_path, env=env, **{k: v for k, v in model_kwargs.items() if k not in ['policy', 'env']})
-        
-        # Get current timesteps from loaded model
-        current_steps = model.num_timesteps
-        total_steps = cfg['train']['total_timesteps']
-        remaining_steps = args.remaining_steps if args.remaining_steps else (total_steps - current_steps)
-        
-        print(f">>> Current timesteps: {current_steps:,}")
-        print(f">>> Remaining timesteps: {remaining_steps:,}")
+        if is_pt_checkpoint:
+            # PyTorch state dict (.pt) - from NS-MDMPI runs
+            if not os.path.exists(checkpoint_path):
+                print(f"ERROR: Checkpoint not found: {checkpoint_path}")
+                return
+            
+            print(f">>> RESUMING from .pt checkpoint: {checkpoint_path}")
+            import torch
+            checkpoint = torch.load(checkpoint_path)
+            
+            # Create new model first
+            model = AlgoClass(**model_kwargs)
+            
+            # Load policy weights
+            model.policy.load_state_dict(checkpoint['policy_state_dict'])
+            print(f">>> Policy weights loaded from: {checkpoint_path}")
+            
+            # For .pt files, we need remaining_steps from args or use full training
+            if args.remaining_steps:
+                remaining_steps = args.remaining_steps
+                print(f">>> Remaining timesteps (manual): {remaining_steps:,}")
+            else:
+                remaining_steps = cfg['train']['total_timesteps']
+                print(f">>> WARNING: .pt checkpoint doesn't store timestep count. Training full {remaining_steps:,} steps.")
+                print(f">>> Use --remaining_steps to specify how many steps to continue.")
+        else:
+            # SB3 full model (.zip) - from baseline runs
+            if not checkpoint_path.endswith('.zip'):
+                checkpoint_path += '.zip'
+            
+            if not os.path.exists(checkpoint_path):
+                print(f"ERROR: Checkpoint not found: {checkpoint_path}")
+                return
+            
+            print(f">>> RESUMING from .zip checkpoint: {checkpoint_path}")
+            model = AlgoClass.load(checkpoint_path, env=env, **{k: v for k, v in model_kwargs.items() if k not in ['policy', 'env']})
+            
+            # Get current timesteps from loaded model
+            current_steps = model.num_timesteps
+            total_steps = cfg['train']['total_timesteps']
+            remaining_steps = args.remaining_steps if args.remaining_steps else (total_steps - current_steps)
+            
+            print(f">>> Current timesteps: {current_steps:,}")
+            print(f">>> Remaining timesteps: {remaining_steps:,}")
         
         if remaining_steps <= 0:
             print(">>> Training already complete! No more steps needed.")
