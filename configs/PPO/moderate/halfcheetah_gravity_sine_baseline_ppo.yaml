@@ -2,14 +2,14 @@ env_id: HalfCheetah-v4
 env:
   parameter: gravity
   drift_type: sine
-  magnitude: 1.5
+  magnitude: 0.3
   period: 100000
   base_value: -9.81
   bounds:
   - -11.0
   - -8.0
 wandb:
-  project: att_3_HalfCheetah_Drift_Study
+  project: NS_MDMPI_Halfcheetah_Moderate
   tags:
   - halfcheetah
   - moderate
@@ -24,7 +24,7 @@ train:
   n_steps: 2048
   batch_size: 64
   gamma: 0.99
-  total_timesteps: 1000000
+  total_timesteps: 2000000
   seed: 42
 paths:
   log_dir: logs/

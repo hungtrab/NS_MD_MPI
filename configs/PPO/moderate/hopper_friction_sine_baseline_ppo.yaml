@@ -9,7 +9,7 @@ env:
   - 0.5
   - 1.5
 wandb:
-  project: att_3_Hopper_Drift_Study
+  project: NS_MDMPI_Hopper_Moderate
   tags:
   - hopper
   - moderate
@@ -24,9 +24,8 @@ train:
   n_steps: 2048
   batch_size: 64
   gamma: 0.99
-  total_timesteps: 1000000
+  total_timesteps: 2000000
   seed: 42
-# No nsmdmpi section - this is baseline
 paths:
   log_dir: logs/
   model_dir: models/

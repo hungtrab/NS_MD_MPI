@@ -1,0 +1,59 @@
+env_id: HalfCheetah-v4
+env:
+- parameter: friction
+  drift_type: random_walk
+  magnitude: 0.3
+  period: 100000
+  sigma: 0.1
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 1.5
+- parameter: damping
+  drift_type: random_walk
+  magnitude: 0.3
+  period: 100000
+  sigma: 0.1
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 2.0
+- parameter: mass_scale
+  drift_type: random_walk
+  magnitude: 0.3
+  period: 100000
+  sigma: 0.1
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 2.0
+- parameter: gravity
+  drift_type: random_walk
+  magnitude: 0.3
+  period: 100000
+  sigma: 0.1
+  base_value: -9.81
+  bounds:
+  - -11.0
+  - -8.0
+wandb:
+  project: NS_MDMPI_Halfcheetah_Multi
+  tags:
+  - halfcheetah
+  - multi
+  - ppo
+  - 4param
+  - baseline
+  mode: online
+train:
+  algorithm: PPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

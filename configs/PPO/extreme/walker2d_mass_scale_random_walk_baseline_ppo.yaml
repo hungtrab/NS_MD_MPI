@@ -1,0 +1,32 @@
+env_id: Walker2d-v4
+env:
+  parameter: mass_scale
+  drift_type: random_walk
+  magnitude: 0.6
+  period: 50000
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 2.0
+wandb:
+  project: NS_MDMPI_Walker2D_Extreme
+  tags:
+  - walker2d
+  - extreme
+  - ppo
+  - mass_scale
+  - random_walk
+  - baseline
+  mode: online
+train:
+  algorithm: PPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

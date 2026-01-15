@@ -1,0 +1,32 @@
+env_id: Walker2d-v4
+env:
+  parameter: gravity
+  drift_type: sine
+  magnitude: 0.3
+  period: 100000
+  base_value: -9.81
+  bounds:
+  - -11.0
+  - -8.0
+wandb:
+  project: NS_MDMPI_Walker2D_Moderate
+  tags:
+  - walker2d
+  - moderate
+  - ppo
+  - gravity
+  - sine
+  - baseline
+  mode: online
+train:
+  algorithm: PPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/

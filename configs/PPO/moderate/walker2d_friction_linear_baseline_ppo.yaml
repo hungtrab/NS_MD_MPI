@@ -2,21 +2,20 @@ env_id: Walker2d-v4
 env:
   parameter: friction
   drift_type: linear
-  magnitude: 0.2
-  period: 10000
-  base_value: 0.9
+  magnitude: 0.3
+  period: 100000
+  base_value: 1.0
   bounds:
-  - 0.6
-  - 1.4
+  - 0.5
+  - 1.5
 wandb:
-  project: att_3_Walker2d_Moderate_Comparison
+  project: NS_MDMPI_Walker2D_Moderate
   tags:
   - walker2d
   - moderate
   - ppo
   - friction
   - linear
-  - baseline
   - baseline
   mode: online
 train:
@@ -25,7 +24,7 @@ train:
   n_steps: 2048
   batch_size: 64
   gamma: 0.99
-  total_timesteps: 1000000
+  total_timesteps: 2000000
   seed: 42
 paths:
   log_dir: logs/

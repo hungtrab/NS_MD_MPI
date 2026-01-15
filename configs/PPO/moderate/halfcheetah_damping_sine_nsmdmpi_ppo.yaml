@@ -2,14 +2,14 @@ env_id: HalfCheetah-v4
 env:
   parameter: damping
   drift_type: sine
-  magnitude: 0.5
+  magnitude: 0.3
   period: 100000
   base_value: 1.0
   bounds:
   - 0.5
   - 2.0
 wandb:
-  project: att_3_HalfCheetah_Drift_Study
+  project: NS_MDMPI_Halfcheetah_Moderate
   tags:
   - halfcheetah
   - moderate
@@ -24,13 +24,17 @@ train:
   n_steps: 2048
   batch_size: 64
   gamma: 0.99
-  total_timesteps: 1000000
+  total_timesteps: 2000000
   seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
 nsmdmpi:
   enabled: true
-  V_R: 100.0
-  V_P: 150.0
-  V_pi_star: 600.0
+  V_R: 200.0
+  V_P: 300.0
+  V_pi_star: 1200.0
   kappa_base: 0.2
   kappa_min: 0.1
   kappa_max: 0.4
@@ -45,7 +49,3 @@ nsmdmpi:
   save_budget_history: true
   budget_save_dir: budgets/
   verbose: 1
-paths:
-  log_dir: logs/
-  model_dir: models/
-  video_dir: videos/

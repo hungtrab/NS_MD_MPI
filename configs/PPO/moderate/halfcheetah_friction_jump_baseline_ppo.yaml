@@ -1,0 +1,32 @@
+env_id: HalfCheetah-v4
+env:
+  parameter: friction
+  drift_type: jump
+  magnitude: 0.3
+  period: 100000
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 1.5
+wandb:
+  project: NS_MDMPI_Halfcheetah_Moderate
+  tags:
+  - halfcheetah
+  - moderate
+  - ppo
+  - friction
+  - jump
+  - baseline
+  mode: online
+train:
+  algorithm: PPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
