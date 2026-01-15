@@ -3,7 +3,7 @@ env:
   parameter: gravity
   drift_type: linear
   magnitude: 3.0
-  period: 500000
+  period: 100000
   base_value: -10.0
   bounds:
   - -13.0

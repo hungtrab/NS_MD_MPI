@@ -3,7 +3,7 @@ env:
   parameter: gravity
   drift_type: jump
   magnitude: 3.0
-  period: 50000
+  period: 10000
   base_value: -10.0
   bounds:
   - -13.0
