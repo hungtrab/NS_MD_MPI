@@ -36,12 +36,12 @@ nsmdmpi:
   V_P: 300.0
   V_pi_star: 1200.0
   kappa_base: 0.2
-  kappa_min: 0.1
+  kappa_min: 0.15
   kappa_max: 0.4
   lambda_base: 1.0
   kappa_adaptive: true
   lambda_adaptive: true
-  trust_region_sensitivity: 2.0
+  trust_region_sensitivity: 1.0
   regularization_sensitivity: 1.0
   max_ent_coef: 0.1
   drift_window_size: 1000

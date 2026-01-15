@@ -33,7 +33,7 @@ nsmdmpi:
   V_P: 100.0
   V_pi_star: 400.0
   kappa_base: 0.2
-  kappa_min: 0.1
+  kappa_min: 0.15
   kappa_max: 0.4
   lambda_base: 1.0
   kappa_adaptive: true
