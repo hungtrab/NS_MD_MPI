@@ -2,14 +2,14 @@ env_id: LunarLander-v3
 env:
   parameter: gravity
   drift_type: jump
-  magnitude: 8.0
-  period: 3000
+  magnitude: 3.0
+  period: 50000
   base_value: -10.0
   bounds:
-  - -11.9
-  - -1.0
+  - -13.0
+  - -7.0
 wandb:
-  project: att_3_LunarLander_Extreme_Comparison
+  project: att_3_LunarLander_Drift_Study
   tags:
   - lunarlander
   - extreme
@@ -26,8 +26,7 @@ train:
   gamma: 0.99
   total_timesteps: 500000
   seed: 42
-nsmdmpi:
-  enabled: false
+# No nsmdmpi section - this is baseline
 paths:
   log_dir: logs/
   model_dir: models/

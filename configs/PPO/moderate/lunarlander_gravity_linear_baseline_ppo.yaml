@@ -3,13 +3,13 @@ env:
   parameter: gravity
   drift_type: linear
   magnitude: 3.0
-  period: 15000
+  period: 500000
   base_value: -10.0
   bounds:
-  - -11.9
-  - -6.0
+  - -13.0
+  - -7.0
 wandb:
-  project: att_3_LunarLander_Moderate_Comparison
+  project: att_3_LunarLander_Drift_Study
   tags:
   - lunarlander
   - moderate
@@ -26,8 +26,7 @@ train:
   gamma: 0.99
   total_timesteps: 500000
   seed: 42
-nsmdmpi:
-  enabled: false
+# No nsmdmpi section - this is baseline
 paths:
   log_dir: logs/
   model_dir: models/

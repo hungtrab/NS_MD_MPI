@@ -298,9 +298,10 @@ def main():
             drift_type = cfg['env'][0].get('drift_type', 'multi') if cfg['env'] else 'multi'
             run_name = f"{cfg['env_id']}_{algo_name}_multi-param_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         else:
-            # Single-parameter
+            # Single-parameter: include BOTH parameter name AND drift type
+            param_name = cfg['env'].get('parameter', 'unknown')
             drift_type = cfg['env'].get('drift_type', 'static')
-            run_name = f"{cfg['env_id']}_{algo_name}_{drift_type}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            run_name = f"{cfg['env_id']}_{algo_name}_{param_name}_{drift_type}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         
         # Add method suffix
         if cfg.get('nsmdmpi', {}).get('enabled', False):

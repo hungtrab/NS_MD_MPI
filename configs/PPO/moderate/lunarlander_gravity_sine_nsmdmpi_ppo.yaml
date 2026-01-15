@@ -28,19 +28,26 @@ train:
   seed: 42
 nsmdmpi:
   enabled: true
-  V_R: 10.0
-  V_P: 10.0
-  V_pi_star: 5.0
+  # TUNED BUDGETS based on consumption analysis:
+  # V_R: was 21% consumed with V_R=50 → reduce to 25
+  # V_P: was 60% consumed with V_P=50 → keep at 50
+  # V_π*: was 100% consumed too early → increase to 125
+  V_R: 25.0
+  V_P: 50.0
+  # V_π*: delta_C≈1.15/rollout × 245 = 282, set to 300
+  V_pi_star: 300.0
   kappa_base: 0.2
+  kappa_min: 0.1  # Don't collapse below 0.1 (was 0.05)
+  kappa_max: 0.4
   lambda_base: 1.0
   kappa_adaptive: true
   lambda_adaptive: true
-  trust_region_sensitivity: 5.0
-  regularization_sensitivity: 2.0
+  trust_region_sensitivity: 2.0  # Reduced from 5.0 (less aggressive)
+  regularization_sensitivity: 1.0  # Reduced from 2.0
   max_ent_coef: 0.1
   drift_window_size: 1000
-  log_freq: 50  # Log every 50 steps for detailed tracking
-  save_budget_history: true  # Save budget history for analysis
+  log_freq: 50
+  save_budget_history: true
   budget_save_dir: budgets/
   verbose: 1
 paths:
