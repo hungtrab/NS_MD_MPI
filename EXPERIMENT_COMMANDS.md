@@ -259,6 +259,56 @@ python scripts/train.py --config configs/PPO/multi/walker2d_4param_randomwalk_ns
 
 ---
 
+## LunarLander-v3 (1M steps, 10k period)
+
+### Moderate
+
+#### Gravity
+```bash
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_sine_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_sine_nsmdmpi_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_randomwalk_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_randomwalk_nsmdmpi_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_linear_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_linear_nsmdmpi_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_jump_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_gravity_jump_nsmdmpi_ppo.yaml --seed 42
+```
+
+#### Wind Power
+```bash
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_power_sine_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_power_sine_nsmdmpi_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_power_linear_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_power_linear_nsmdmpi_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_power_jump_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_power_jump_nsmdmpi_ppo.yaml --seed 42
+```
+
+#### Wind (Sine only)
+```bash
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_sine_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/moderate/lunarlander_wind_sine_nsmdmpi_ppo.yaml --seed 42
+```
+
+### Extreme
+
+```bash
+python scripts/train.py --config configs/PPO/extreme/lunarlander_gravity_random_walk_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/extreme/lunarlander_gravity_random_walk_nsmdmpi_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/extreme/lunarlander_gravity_jump_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/extreme/lunarlander_gravity_jump_nsmdmpi_ppo.yaml --seed 42
+```
+
+### Multi-Parameter
+
+```bash
+python scripts/train.py --config configs/PPO/multi/lunarlander_gravity_wind_power_baseline_ppo.yaml --seed 42
+python scripts/train.py --config configs/PPO/multi/lunarlander_gravity_wind_power_nsmdmpi_ppo.yaml --seed 42
+```
+
+---
+
 ## Running with Multiple Seeds
 
 For each experiment, run with seeds 42, 43, 44:
@@ -292,6 +342,8 @@ python scripts/train.py --config CONFIG --resume models/MODEL_NAME_params.pt --r
 | HalfCheetah | 24 | 12 | 6 | 42 |
 | Hopper | 24 | 12 | 6 | 42 |
 | Walker2d | 24 | 12 | 6 | 42 |
-| **Total** | **72** | **36** | **18** | **126** |
+| LunarLander | 20 | 4 | 2 | 26 |
+| **Total** | **92** | **40** | **20** | **152** |
 
-With 3 seeds each: **126 × 3 = 378 total runs**
+With 3 seeds each: **152 × 3 = 456 total runs**
+
