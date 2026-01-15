@@ -3,7 +3,7 @@ env:
   parameter: damping
   drift_type: sine
   magnitude: 0.5
-  period: 200000
+  period: 100000
   base_value: 1.0
   bounds:
   - 0.5
