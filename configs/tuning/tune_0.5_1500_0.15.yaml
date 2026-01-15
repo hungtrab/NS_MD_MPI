@@ -1,0 +1,50 @@
+env:
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 1.5
+  drift_type: random_walk
+  magnitude: 0.3
+  parameter: friction
+  period: 100000
+env_id: HalfCheetah-v4
+nsmdmpi:
+  V_P: 150.0
+  V_R: 100.0
+  V_pi_star: 1500
+  budget_save_dir: budgets/
+  drift_window_size: 1000
+  enabled: true
+  kappa_adaptive: true
+  kappa_base: 0.2
+  kappa_max: 0.4
+  kappa_min: 0.15
+  lambda_adaptive: true
+  lambda_base: 1.0
+  log_freq: 50
+  max_ent_coef: 0.1
+  regularization_sensitivity: 1.0
+  save_budget_history: true
+  trust_region_sensitivity: 0.5
+  verbose: 1
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
+train:
+  algorithm: PPO
+  batch_size: 64
+  gamma: 0.99
+  learning_rate: 0.0003
+  n_steps: 2048
+  seed: 42
+  total_timesteps: 500000
+wandb:
+  mode: online
+  project: NS_MDMPI_Tuning
+  tags:
+  - tuning
+  - halfcheetah
+  - trust_region_sensitivity=0.5
+  - V_pi_star=1500
+  - kappa_min=0.15
