@@ -259,6 +259,8 @@ def main():
     parser.add_argument("--exp_name", type=str, default=None, help="Override run name for easier filtering")
     parser.add_argument("--algo", type=str, default=None, help="Override algorithm (PPO, SAC, TRPO)")
     parser.add_argument("--num_envs", type=int, default=0, help="Number of parallel envs (0 = auto select)")
+    parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint (.zip) to resume training from")
+    parser.add_argument("--remaining_steps", type=int, default=None, help="Remaining timesteps (default: auto-calculate)")
     args = parser.parse_args()
 
     # 1. Load Config
@@ -371,7 +373,34 @@ def main():
         model_kwargs['tau'] = cfg['train'].get('tau', 0.005)
     
     print(f">>> Initializing {algo_name} with kwargs: {list(model_kwargs.keys())}")
-    model = AlgoClass(**model_kwargs)
+    
+    # Check if resuming from checkpoint
+    if args.resume:
+        checkpoint_path = args.resume
+        if not checkpoint_path.endswith('.zip'):
+            checkpoint_path += '.zip'
+        
+        if not os.path.exists(checkpoint_path):
+            print(f"ERROR: Checkpoint not found: {checkpoint_path}")
+            return
+        
+        print(f">>> RESUMING from checkpoint: {checkpoint_path}")
+        model = AlgoClass.load(checkpoint_path, env=env, **{k: v for k, v in model_kwargs.items() if k not in ['policy', 'env']})
+        
+        # Get current timesteps from loaded model
+        current_steps = model.num_timesteps
+        total_steps = cfg['train']['total_timesteps']
+        remaining_steps = args.remaining_steps if args.remaining_steps else (total_steps - current_steps)
+        
+        print(f">>> Current timesteps: {current_steps:,}")
+        print(f">>> Remaining timesteps: {remaining_steps:,}")
+        
+        if remaining_steps <= 0:
+            print(">>> Training already complete! No more steps needed.")
+            return
+    else:
+        model = AlgoClass(**model_kwargs)
+        remaining_steps = cfg['train']['total_timesteps']
 
     # 4. Setup Callback List
     callbacks = []
@@ -463,7 +492,7 @@ def main():
     # 5. Train
     try:
         model.learn(
-            total_timesteps=cfg['train']['total_timesteps'], 
+            total_timesteps=remaining_steps, 
             callback=callbacks,
             tb_log_name=run_name,
             reset_num_timesteps=False
