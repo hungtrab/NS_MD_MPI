@@ -262,6 +262,7 @@ def main():
     parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint (.zip) to resume training from")
     parser.add_argument("--remaining_steps", type=int, default=None, help="Remaining timesteps (default: auto-calculate)")
     parser.add_argument("--seed", type=int, default=None, help="Override random seed (default: from config or 42)")
+    parser.add_argument("--wandb_name", type=str, default=None, help="Override WandB run name")
     args = parser.parse_args()
 
     # 1. Load Config
@@ -348,7 +349,7 @@ def main():
     # Mode online/offline từ yaml
     mode=cfg.get('wandb', {}).get('mode', "online"),
     
-    name=run_name,
+    name=args.wandb_name if args.wandb_name else run_name,
     config=cfg,
     sync_tensorboard=True, 
     monitor_gym=True,
