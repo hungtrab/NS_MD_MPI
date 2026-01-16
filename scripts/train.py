@@ -547,6 +547,12 @@ def main():
     if cfg.get('nsmdmpi', {}).get('enabled', False):
         print(f"\n>>> [NS-MDMPI] Saving model to: {save_path}")
         try:
+            # Clear callbacks to avoid pickle error
+            if hasattr(model, '_callback'):
+                model._callback = None
+            if hasattr(model, 'callback'):
+                model.callback = None
+            
             # Save .zip for evaluation (SB3 format)
             model.save(save_path)
             print(f">>> [NS-MDMPI] Model saved as .zip for evaluation")
@@ -561,7 +567,17 @@ def main():
             print(f">>> [NS-MDMPI] Backup saved as .pt")
         except Exception as e:
             print(f">>> [NS-MDMPI] Warning: Model save failed: {e}")
-            # Continue anyway - training was successful
+            # Try saving just the .pt backup
+            try:
+                import torch
+                torch.save({
+                    'policy_state_dict': model.policy.state_dict(),
+                    'config': cfg,
+                    'algorithm': cfg['train']['algorithm'],
+                }, f"{save_path}_params.pt")
+                print(f">>> [NS-MDMPI] Backup .pt saved successfully")
+            except:
+                pass
     else:
         # Baseline: Normal save (already saved by WandB callback)
         print(f"\n>>> Saving model to: {save_path}")
