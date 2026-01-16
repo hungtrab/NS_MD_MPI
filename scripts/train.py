@@ -411,14 +411,30 @@ def main():
             model.policy.load_state_dict(checkpoint['policy_state_dict'])
             print(f">>> Policy weights loaded from: {checkpoint_path}")
             
-            # For .pt files, we need remaining_steps from args or use full training
+            # Restore num_timesteps if saved
+            if 'num_timesteps' in checkpoint:
+                model.num_timesteps = checkpoint['num_timesteps']
+                model._num_timesteps_at_start = checkpoint['num_timesteps']
+                print(f">>> Restored timesteps: {model.num_timesteps:,}")
+            
+            # Calculate remaining steps
             if args.remaining_steps:
                 remaining_steps = args.remaining_steps
                 print(f">>> Remaining timesteps (manual): {remaining_steps:,}")
+            elif 'num_timesteps' in checkpoint:
+                total_steps = cfg['train']['total_timesteps']
+                remaining_steps = total_steps - checkpoint['num_timesteps']
+                print(f">>> Remaining timesteps (auto): {remaining_steps:,}")
             else:
                 remaining_steps = cfg['train']['total_timesteps']
                 print(f">>> WARNING: .pt checkpoint doesn't store timestep count. Training full {remaining_steps:,} steps.")
                 print(f">>> Use --remaining_steps to specify how many steps to continue.")
+            
+            # Store budget state for callback to restore
+            if 'budget_state' in checkpoint:
+                # Will be used by NS-MDMPI callback if created
+                model._resume_budget_state = checkpoint['budget_state']
+                print(f">>> Budget state will be restored")
         else:
             # SB3 full model (.zip) - from baseline runs
             if not checkpoint_path.endswith('.zip'):
@@ -550,9 +566,23 @@ def main():
     # 6. Save Model
     save_path = os.path.join(cfg['paths']['model_dir'], run_name)
     
-    # For NS-MDMPI: Save both .zip (for eval) and .pt (for backup)
+    # For NS-MDMPI: Save both .zip (for eval) and .pt (for resume)
     if cfg.get('nsmdmpi', {}).get('enabled', False):
         print(f"\n>>> [NS-MDMPI] Saving model to: {save_path}")
+        
+        # Get budget state from callback if available
+        budget_state = None
+        for cb in callbacks:
+            if hasattr(cb, 'budget_tracker') and cb.budget_tracker is not None:
+                budget_state = {
+                    'V_R_remaining': cb.budget_tracker.V_R_remaining,
+                    'V_P_remaining': cb.budget_tracker.V_P_remaining,
+                    'V_pi_star_remaining': cb.budget_tracker.V_pi_star_remaining,
+                    'kappa_t': cb.kappa_t,
+                    'lambda_t': cb.lambda_t,
+                }
+                break
+        
         try:
             # Clear callbacks to avoid pickle error
             if hasattr(model, '_callback'):
@@ -563,28 +593,27 @@ def main():
             # Save .zip for evaluation (SB3 format)
             model.save(save_path)
             print(f">>> [NS-MDMPI] Model saved as .zip for evaluation")
-            
-            # Also save .pt for backup
+        except Exception as e:
+            print(f">>> [NS-MDMPI] Warning: .zip save failed: {e}")
+        
+        # Always save .pt with full state for resume
+        try:
             import torch
-            torch.save({
+            checkpoint_data = {
                 'policy_state_dict': model.policy.state_dict(),
+                'num_timesteps': model.num_timesteps,
                 'config': cfg,
                 'algorithm': cfg['train']['algorithm'],
-            }, f"{save_path}_params.pt")
-            print(f">>> [NS-MDMPI] Backup saved as .pt")
+            }
+            if budget_state:
+                checkpoint_data['budget_state'] = budget_state
+            
+            torch.save(checkpoint_data, f"{save_path}_params.pt")
+            print(f">>> [NS-MDMPI] Checkpoint saved as .pt (timesteps: {model.num_timesteps:,})")
+            if budget_state:
+                print(f">>> [NS-MDMPI] Budget state: V_R={budget_state['V_R_remaining']:.1f}, V_P={budget_state['V_P_remaining']:.1f}")
         except Exception as e:
-            print(f">>> [NS-MDMPI] Warning: Model save failed: {e}")
-            # Try saving just the .pt backup
-            try:
-                import torch
-                torch.save({
-                    'policy_state_dict': model.policy.state_dict(),
-                    'config': cfg,
-                    'algorithm': cfg['train']['algorithm'],
-                }, f"{save_path}_params.pt")
-                print(f">>> [NS-MDMPI] Backup .pt saved successfully")
-            except:
-                pass
+            print(f">>> [NS-MDMPI] Warning: .pt save failed: {e}")
     else:
         # Baseline: Normal save (already saved by WandB callback)
         print(f"\n>>> Saving model to: {save_path}")

@@ -224,6 +224,21 @@ class NSMDMPICallback(BaseCallback):
         # Initialize variation budgets
         self._initialize_budgets()
         
+        # Restore budget state from checkpoint if resuming
+        if hasattr(self.model, '_resume_budget_state') and self.model._resume_budget_state:
+            state = self.model._resume_budget_state
+            if self.budget_tracker:
+                self.budget_tracker.V_R_remaining = state.get('V_R_remaining', self.budget_tracker.V_R_remaining)
+                self.budget_tracker.V_P_remaining = state.get('V_P_remaining', self.budget_tracker.V_P_remaining)
+                self.budget_tracker.V_pi_star_remaining = state.get('V_pi_star_remaining', self.budget_tracker.V_pi_star_remaining)
+            self.kappa_t = state.get('kappa_t', self.kappa_t)
+            self.lambda_t = state.get('lambda_t', self.lambda_t)
+            print(f"\n>>> [NS-MD-MPI] Restored budget state from checkpoint:")
+            print(f"    V_R: {self.budget_tracker.V_R_remaining:.1f}, V_P: {self.budget_tracker.V_P_remaining:.1f}")
+            print(f"    kappa_t: {self.kappa_t:.4f}, lambda_t: {self.lambda_t:.4f}")
+            # Clear the attribute
+            del self.model._resume_budget_state
+        
         if self.verbose > 0:
             self._print_init_summary()
     
