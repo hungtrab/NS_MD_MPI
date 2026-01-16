@@ -402,7 +402,7 @@ def main():
             
             print(f">>> RESUMING from .pt checkpoint: {checkpoint_path}")
             import torch
-            checkpoint = torch.load(checkpoint_path)
+            checkpoint = torch.load(checkpoint_path, weights_only=False)
             
             # Create new model first
             model = AlgoClass(**model_kwargs)
