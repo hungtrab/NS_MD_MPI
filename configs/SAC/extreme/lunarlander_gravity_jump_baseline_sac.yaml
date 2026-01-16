@@ -9,7 +9,7 @@ env:
   - -11.9
   - -1.0
 wandb:
-  project: att_3_Extreme_Baseline
+  project: att_4_Extreme_Baseline
   tags:
   - lunarlander
   - extreme

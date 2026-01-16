@@ -9,7 +9,7 @@ env:
   - 0.54
   - 1.26
 wandb:
-  project: att_3_Hopper_Moderate_Comparison
+  project: att_4_Hopper_Moderate_Comparison
   tags:
   - hopper
   - moderate

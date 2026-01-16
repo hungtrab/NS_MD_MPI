@@ -17,7 +17,7 @@ env:
   - -5.0
   - 5.0
 wandb:
-  project: att_3_LunarLander_Multi_Comparison
+  project: att_4_LunarLander_Multi_Comparison
   tags:
   - lunarlander
   - multi-param

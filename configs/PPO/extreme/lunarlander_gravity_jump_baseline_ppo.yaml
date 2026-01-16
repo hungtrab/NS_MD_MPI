@@ -9,7 +9,7 @@ env:
   - -11.9
   - -7.0
 wandb:
-  project: att_3_LunarLander_Drift_Study
+  project: att_4_LunarLander_Drift_Study
   tags:
   - lunarlander
   - extreme

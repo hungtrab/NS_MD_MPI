@@ -9,7 +9,7 @@ env:
   - 0.7
   - 1.3
 wandb:
-  project: att_3_Hopper_Drift_Study
+  project: att_4_Hopper_Drift_Study
   tags:
   - hopper
   - moderate

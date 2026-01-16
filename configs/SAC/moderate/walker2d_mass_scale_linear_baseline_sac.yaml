@@ -9,7 +9,7 @@ env:
   - 0.7
   - 1.3
 wandb:
-  project: att_3_Walker2d_Moderate_Comparison
+  project: att_4_Walker2d_Moderate_Comparison
   tags:
   - walker2d
   - moderate

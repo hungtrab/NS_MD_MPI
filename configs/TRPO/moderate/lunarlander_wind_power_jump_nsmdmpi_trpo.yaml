@@ -6,7 +6,7 @@ env:
   period: 8000
   base_value: 0.0
 wandb:
-  project: att_3_Moderate_NSMDMPI
+  project: att_4_Moderate_NSMDMPI
   tags:
   - lunarlander
   - moderate

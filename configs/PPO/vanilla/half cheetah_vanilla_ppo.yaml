@@ -1,6 +1,6 @@
 env_id: HalfCheetah-v4
 wandb:
-  project: att_3_Vanilla_Baselines
+  project: att_4_Vanilla_Baselines
   tags:
   - half cheetah
   - vanilla

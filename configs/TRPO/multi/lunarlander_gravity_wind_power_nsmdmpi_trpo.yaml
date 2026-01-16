@@ -17,7 +17,7 @@ env:
   - 0.1
   - 0.0
 wandb:
-  project: att_3_Multi_NSMDMPI
+  project: att_4_Multi_NSMDMPI
   tags:
   - lunarlander
   - multi-param

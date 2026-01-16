@@ -1,6 +1,6 @@
 env_id: LunarLander-v3
 wandb:
-  project: att_3_LunarLander_Moderate_Comparison
+  project: att_4_LunarLander_Moderate_Comparison
   tags:
   - lunarlander
   - vanilla

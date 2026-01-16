@@ -9,7 +9,7 @@ env:
   - 0.5
   - 1.5
 wandb:
-  project: att_3_Swimmer_Extreme_Comparison
+  project: att_4_Swimmer_Extreme_Comparison
   tags:
   - swimmer
   - extreme

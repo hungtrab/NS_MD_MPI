@@ -2,42 +2,46 @@ env_id: HalfCheetah-v4
 env:
   parameter: damping
   drift_type: sine
-  magnitude: 0.5
+  magnitude: 0.3
   period: 100000
   base_value: 1.0
   bounds:
   - 0.5
   - 2.0
 wandb:
-  project: att_4_HalfCheetah_TRPO
+  project: Test_NSMDMPI
   tags:
   - halfcheetah
   - moderate
-  - trpo
+  - ppo
   - damping
   - sine
   - nsmdmpi
   mode: online
 train:
-  algorithm: TRPO
-  learning_rate: 0.001
+  algorithm: PPO
+  learning_rate: 0.0003
   n_steps: 2048
-  batch_size: 128
+  batch_size: 64
   gamma: 0.99
-  total_timesteps: 1000000
+  total_timesteps: 200000
   seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
 nsmdmpi:
   enabled: true
-  V_R: 100.0
-  V_P: 150.0
-  V_pi_star: 600.0
+  V_R: 200.0
+  V_P: 300.0
+  V_pi_star: 1200.0
   kappa_base: 0.2
-  kappa_min: 0.1
+  kappa_min: 0.15
   kappa_max: 0.4
   lambda_base: 1.0
   kappa_adaptive: true
   lambda_adaptive: true
-  trust_region_sensitivity: 2.0
+  trust_region_sensitivity: 1.0
   regularization_sensitivity: 1.0
   max_ent_coef: 0.1
   drift_window_size: 1000
@@ -45,7 +49,3 @@ nsmdmpi:
   save_budget_history: true
   budget_save_dir: budgets/
   verbose: 1
-paths:
-  log_dir: logs/
-  model_dir: models/
-  video_dir: videos/

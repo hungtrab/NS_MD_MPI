@@ -1,6 +1,6 @@
 env_id: Swimmer-v3
 wandb:
-  project: att_3_Swimmer_Vanilla_Baseline
+  project: att_4_Swimmer_Vanilla_Baseline
   tags:
   - swimmer
   - vanilla

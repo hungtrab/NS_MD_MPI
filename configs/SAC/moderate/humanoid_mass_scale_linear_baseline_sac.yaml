@@ -9,7 +9,7 @@ env:
   - 0.8
   - 1.2
 wandb:
-  project: att_3_Humanoid_Moderate_Comparison
+  project: att_4_Humanoid_Moderate_Comparison
   tags:
   - humanoid
   - moderate

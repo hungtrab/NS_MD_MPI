@@ -9,7 +9,7 @@ env:
   - 0.5
   - 1.5
 wandb:
-  project: att_3_HalfCheetah_TRPO
+  project: att_4_HalfCheetah_TRPO
   tags:
   - halfcheetah
   - moderate
