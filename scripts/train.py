@@ -584,34 +584,32 @@ def main():
                 break
         
         try:
-            # Thoroughly clear all unpicklable attributes
-            # 1. Clear callbacks
-            if hasattr(model, '_callback'):
-                model._callback = None
-            if hasattr(model, 'callback'):
-                model.callback = None
+            # Create a fresh model for saving (avoids pickle issues with runtime state)
+            from stable_baselines3.common.utils import get_device
             
-            # 2. Clear logger references (file handles)
-            if hasattr(model, '_logger'):
-                model._logger = None
-            if hasattr(model, 'logger'):
-                model.logger = None
+            # Create minimal model kwargs for fresh model
+            save_model_kwargs = {
+                'policy': 'MlpPolicy',
+                'env': env,
+                'learning_rate': cfg['train'].get('learning_rate', 0.0003),
+                'gamma': cfg['train'].get('gamma', 0.99),
+                'verbose': 0,
+            }
             
-            # 3. Clear environment (has file handles from Monitor wrapper)
-            original_env = model.env
-            model.env = None
-            model._vec_normalize_env = None
+            # Create fresh model
+            fresh_model = AlgoClass(**save_model_kwargs)
             
-            # 4. Clear rollout buffer (may have large tensors causing issues)
-            if hasattr(model, 'rollout_buffer'):
-                model.rollout_buffer = None
+            # Copy policy weights
+            fresh_model.policy.load_state_dict(model.policy.state_dict())
+            fresh_model.num_timesteps = model.num_timesteps
+            fresh_model._num_timesteps_at_start = model._num_timesteps_at_start if hasattr(model, '_num_timesteps_at_start') else 0
             
-            # 5. Use exclude parameter to skip problematic components
-            model.save(save_path, exclude=['env', 'replay_buffer', 'rollout_buffer', '_episode_storage'])
-            print(f">>> [NS-MDMPI] Model saved as .zip for evaluation")
+            # Save fresh model (no callback issues)
+            fresh_model.save(save_path)
+            print(f">>> [NS-MDMPI] Model saved as .zip for evaluation (timesteps: {model.num_timesteps:,})")
             
-            # Restore environment
-            model.env = original_env
+            # Cleanup
+            del fresh_model
         except Exception as e:
             print(f">>> [NS-MDMPI] Warning: .zip save failed: {e}")
         
