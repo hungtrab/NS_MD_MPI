@@ -59,6 +59,7 @@ class DriftGenerator:
             seed: Random seed for reproducibility (used in random walk)
         """
         self.config = config
+        self._seed = seed
         self.rng = np.random.default_rng(seed)
         
         # State for random walk
@@ -190,6 +191,8 @@ class DriftGenerator:
         """Reset the generator state (for new episodes)."""
         self._random_walk_value = self.config.base_value
         self._last_step = -1
+        # DO NOT reset RNG here - we want consistent random walk trajectory across training
+        # RNG should only be initialized once with seed at __init__
     
     def get_drift_info(self, t: int) -> dict:
         """

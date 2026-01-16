@@ -324,6 +324,13 @@ def main():
     seed = args.seed if args.seed is not None else cfg.get('train', {}).get('seed', 42)
     print(f"--- Seed: {seed} ---")
     set_random_seed(seed)
+    
+    # Force deterministic behavior for reproducibility
+    import torch
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    print(f"--- Deterministic Mode: ENABLED ---")
 
     # ======================================================
     # >>> SETUP WANDB (ONLINE LOGGING) <<<
