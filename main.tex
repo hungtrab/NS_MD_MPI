@@ -1,0 +1,834 @@
+\documentclass{article}
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs} % for professional tables
+
+% hyperref makes hyperlinks in the resulting PDF.
+\usepackage{hyperref}
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use the following line for the initial blind version submitted for review:
+\usepackage{icml2026}
+
+% If accepted, instead use the following line for the camera-ready submission:
+% \usepackage[accepted]{icml2026}
+
+% For theorems and such
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+% Algorithms
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% Misc helpers
+\usepackage{bbm}
+\usepackage{enumitem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NOTATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\1}{\mathbbm{1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\ip}[2]{\left\langle #1,\,#2 \right\rangle}
+\newcommand{\KL}{\mathrm{KL}}
+\newcommand{\TV}{\mathrm{TV}}
+\newcommand{\softmax}{\mathrm{softmax}}
+
+% --- Macros for consistency ---
+\newcommand{\Sspace}{\mathcal{S}}
+\newcommand{\Aspace}{\mathcal{A}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\Ptrans}{P}
+\newcommand{\Simplex}{\Delta_{\Aspace}}
+\newcommand{\inner}[2]{\langle #1, #2 \rangle}
+\newcommand{\infnorm}[1]{\| #1 \|_\infty}
+
+% Operator definitions
+\newcommand{\T}{T}
+\newcommand{\Tpi}[2]{T^{\pi_{#1}}_{#1, \Omega}} % T^pi_{t, Omega}
+\newcommand{\Tstar}[1]{T^{\star}_{#1, \Omega}} % T^*{t, Omega}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% META
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\icmltitlerunning{Regularized Non-Stationary MDPs: Tracking and Dynamic Regret}
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{Regularized Non-Stationary Markov Decision Processes:\\
+Mirror-Descent Tracking, Bellman Commutators, and Dynamic Regret}
+
+\icmlsetsymbol{equal}{*}
+
+\begin{icmlauthorlist}
+\icmlauthor{Firstname1 Lastname1}{equal,yyy}
+\icmlauthor{Firstname2 Lastname2}{equal,yyy,comp}
+\icmlauthor{Firstname3 Lastname3}{comp}
+\icmlauthor{Firstname4 Lastname4}{sch}
+\icmlauthor{Firstname5 Lastname5}{yyy}
+\icmlauthor{Firstname6 Lastname6}{sch,yyy,comp}
+\icmlauthor{Firstname7 Lastname7}{comp}
+\icmlauthor{Firstname8 Lastname8}{sch}
+\icmlauthor{Firstname9 Lastname9}{yyy,comp}
+\end{icmlauthorlist}
+
+\icmlaffiliation{yyy}{Department of XXX, University of YYY, City, Country}
+\icmlaffiliation{comp}{Company Name, City, Country}
+\icmlaffiliation{sch}{School of ZZZ, Institute of WWW, City, Country}
+
+\icmlcorrespondingauthor{Firstname1 Lastname1}{first1.last1@xxx.edu}
+\icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
+
+\icmlkeywords{Reinforcement Learning, Non-Stationary MDPs, Regularization, Mirror Descent, Dynamic Regret, Bellman Commutator, ICML}
+
+\vskip 0.3in
+]
+
+\printAffiliationsAndNotice{\icmlEqualContribution}
+
+\begin{abstract}
+Regularization---via entropy or divergence penalties---underpins the stability and exploration capabilities of many successful reinforcement learning methods (e.g., TRPO, MPO, SAC). However, theoretical analyses predominantly assume a stationary Markov Decision Process (MDP). In this paper, we develop a theory of \emph{regularized non-stationary MDPs} wherein rewards and dynamics drift over time. Adopting a Legendre--Fenchel perspective, we define \emph{stage-wise} regularized Bellman operators that maintain $\gamma$-contraction properties and admit closed-form greedy steps when the regularizer possesses a tractable conjugate. Departing from the stationary lens, we quantify the impact of drift via \emph{Bellman commutators}, $T_\cdot^t - T_\cdot^{t-1}$, and derive a \emph{dynamic-regret} bound for a non-stationary Mirror-Descent Modified Policy Iteration (MPI) scheme. Crucially, this bound decomposes into \emph{variation budgets} corresponding to reward drift, transition drift, and optimal-policy path-length, recovering the stationary theory in the zero-drift limit. We further investigate the continuity and convergence properties of this framework, viewing the problem as a partial Legendre--Fenchel transform. Finally, we propose \emph{drift-adaptive} trust-region and temperature schedules inspired by our theoretical findings.
+\end{abstract}
+
+\section{Introduction}
+Regularization is a workhorse in modern reinforcement learning: trust regions \cite{schulman2015trpo}, maximum-entropy control \cite{haarnoja2018sac}, and E/M-style projections \cite{abdolmaleki2018mpo} are widely used to constrain policy updates or encourage stochasticity. A unified stationary theory for regularized DP---via regularized Bellman operators and convex-conjugate greediness---is now well established \cite{geist2019theory}. Yet, real-world systems are inherently non-stationary: robot dynamics degrade, market regimes shift, and user preferences evolve. Under such non-stationarity, the optimal policy sequence $\{\pi_t^\star\}_{t \ge 0}$ becomes a moving target.
+
+\paragraph{Key questions.} How should regularization be \emph{incorporated} at each time step when both the transition model and reward distribution drift? What are the appropriate performance measures under drift? How do divergence or entropy penalties trade off stability against \emph{tracking} accuracy?
+
+\paragraph{Contributions.} Building on stage-wise regularization, we make four primary advances:
+\begin{enumerate}[leftmargin=*,itemsep=2pt,topsep=2pt]
+\item \textbf{Stage-wise regularized Bellman operators under drift.} We define $T^t_{\pi_t,\Omega}$ and $T^t_{\star,\Omega}$; we prove that each is a $\gamma$-contraction and yields unique greedy policies via $\nabla\Omega^\star$, strictly generalizing the stationary theory of \cite{geist2019theory}.
+\item \textbf{Drift control of the Bellman commutator.} We bound the operator difference $\|T^t_\cdot v - T^{t-1}_\cdot v\|_\infty$ using reward and kernel shifts. This lemma isolates the specific \emph{drift channels} and serves as a critical step in bounding the dynamic regret via mirror descent.
+\item \textbf{Dynamic-regret analysis via Mirror Descent.} We analyze a non-stationary MD-MPI scheme and prove a \emph{dynamic-regret} bound that decomposes into \emph{variation budgets} $(V_r,V_P,V_{\pi^\star})$ alongside approximation errors. This result recovers standard stationary guarantees when these budgets vanish.
+\item \textbf{Convergence properties via partial Legendre-Fenchel transform.} We analyze the continuity and convergence of the primal and dual operators, including their subdifferentials (greedy policies). This establishes the stability required to apply regularization within non-stationary MDPs.
+\item \textbf{Drift-adaptive algorithms.} We instantiate stage-dependent trust-region/temperature schedules calibrated by online drift estimates and discuss practical design choices.
+\end{enumerate}
+
+Beyond extending regularizers to a time-indexed notation, we: (i) introduce explicit \emph{commutator} bounds for non-stationary Bellman operators, (ii) move from asymptotic loss to \emph{tracking} guarantees through \emph{dynamic regret}, and (iii) connect these guarantees to actionable, \emph{adaptive} update radii. In the zero-drift limit, our results collapse to the stationary regularized framework \cite{geist2019theory}, while the new terms explicitly reveal the interaction between drift and regularization.
+
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+We consider a finite state space $\Sspace$ and a finite action space $\Aspace$. We study the setting of a \textit{non-stationary} Markov Decision Process (MDP), denoted by $\M_{1:\infty} = (\Sspace, \Aspace, \{P_t\}_{t \ge 1}, \{r_t\}_{t \ge 1}, \gamma)$, where $\gamma \in [0, 1)$ is a discount factor. At each time step $t$, $P_t(\cdot|s, a) \in \Delta_{\Sspace}$ denotes the transition kernel and $r_t: \Sspace \times \Aspace \to \R$ is the bounded reward function.
+We denote by $\Delta_{\Aspace}$ the probability simplex over the action space. A non-stationary policy is a sequence $\pi = \{\pi_t\}_{t \ge 1}$, where each $\pi_t: \Sspace \to \Delta_{\Aspace}$ maps states to probability distributions over actions. We denote $\pi_t(\cdot|s)$ simply as $\pi_t(\cdot|s) \in \Simplex$.
+
+Throughout the paper, we denote by $\mathcal{V} = \R^\Sspace$ the space of value functions bounded by $V_{\max} = R_{\max}/(1-\gamma)$, and $\mathcal{Q} = \R^{\Sspace \times \Aspace}$ the space of action-value functions.
+
+\subsection{Regularization and Conjugacy}
+Following the framework of regularized MDPs established by \cite{geist2019theory}, we introduce a regularization term to the decision process. Let $\Omega: \Simplex \to \R$ be a strictly convex, differentiable function on the interior of the simplex. We define its Fenchel-Legendre transform (or convex conjugate) $\Omega^*: \R^\Aspace \to \R$ as:
+\begin{equation}
+    \Omega^*(q) \coloneqq \max_{\pi \in \Simplex} \left( \inner{\pi}{q} - \Omega(\pi) \right),
+\end{equation}
+where $\inner{\cdot}{\cdot}$ denotes the standard dot product in $\R^\Aspace$. A crucial property of this conjugation is that the unique maximizing argument, which we refer to as the regularized greedy policy, is given by the gradient of the conjugate:
+\begin{equation}
+    \nabla \Omega^*(q) = \underset{\pi \in \Simplex}{\arg\max} \left( \inner{\pi}{q} - \Omega(\pi) \right).
+\end{equation}
+Common examples include the negative entropy $\Omega(\pi) = \sum_a \pi(a) \ln \pi(a)$, which leads to the softmax policy and LogSumExp conjugate, and the Euclidean norm $\Omega(\pi) = \frac{1}{2}\|\pi\|_2^2$, which leads to the sparsemax policy \cite{martins2016softmax}.
+
+\subsection{Non-Stationary Regularized Bellman Operators}
+In a stationary context, Bellman operators map a value function to an updated value function based on a fixed model. In our non-stationary setting, the environment dynamics drift over time. We thus define \textit{time-indexed} Bellman operators that link the value at step $t+1$ to step $t$.
+
+For any function $v: \Sspace \to \R$, we define the time-dependent action-value function $q_t \in \mathcal{Q}$ as:
+\begin{equation}
+    q_t(s, a; v) \coloneqq r_t(s, a) + \gamma \E_{s' \sim P_t(\cdot|s, a)}[v(s')].
+\end{equation}
+We define the \textit{regularized evaluation operator} at time $t$, denoted $\Tpi{t}{}$, acting on a next-step value function $v_{t+1} \in \mathcal{V}$:
+\begin{align}
+    [\Tpi{t}{} v_{t+1}](s) &\coloneqq \E_{a \sim \pi_t(\cdot|s)} [q_t(s, a; v_{t+1}) - \Omega(\pi_t(\cdot|s))] \nonumber \\
+    &= \inner{\pi_t(\cdot|s)}{q_t(s, \cdot; v_{t+1})} - \Omega(\pi_t(\cdot|s)). \label{eq:eval_op}
+\end{align}
+Similarly, we define the \textit{regularized optimality operator} at time $t$, denoted $\Tstar{t}$:
+\begin{align}
+    [\Tstar{t} v_{t+1}](s) &\coloneqq \max_{\pi \in \Simplex} \left( \inner{\pi}{q_t(s, \cdot; v_{t+1})} - \Omega(\pi) \right) \nonumber \\
+    &= \Omega^*(q_t(s, \cdot; v_{t+1})). \label{eq:opt_op}
+\end{align}
+Correspondingly, the regularized greedy policy with respect to a next-step value $v_{t+1}$ at time $t$ is given by:
+\begin{equation}
+    \pi^{\text{greedy}}_t(\cdot|s) = \nabla \Omega^*(q_t(s, \cdot; v_{t+1})).
+\end{equation}
+The following proposition summarizes the algebraic properties of these operators, which strictly generalize the stationary results of \cite{geist2019theory}.
+
+\begin{proposition}[Monotonicity, Shift-Invariance, and Contraction]
+\label{prop:properties}
+For any time step $t \ge 1$, the operators $\Tpi{t}{}$ and $\Tstar{t}$ satisfy:
+\begin{enumerate}
+    \item \textbf{Monotonicity:} For any $u, v \in \mathcal{V}$, if $u \le v$ (component-wise), then $\Tpi{t}{} u \le \Tpi{t}{} v$ and $\Tstar{t} u \le \Tstar{t} v$.
+    \item \textbf{Distributivity (Shift-Invariance):} For any $c \in \R$, $\Tstar{t}(v + c\mathbf{1}) = \Tstar{t} v + \gamma c\mathbf{1}$.
+    \item \textbf{Contraction:} Both operators are $\gamma$-contractions in the $\infnorm{\cdot}$ norm. That is, for any $u, v \in \mathcal{V}$:
+    \begin{equation}
+        \infnorm{\Tstar{t} u - \Tstar{t} v} \le \gamma \infnorm{u - v}.
+    \end{equation}
+\end{enumerate}
+\end{proposition}
+
+\subsection{Value Functions in Non-Stationary MDPs}
+Unlike stationary MDPs where value functions are fixed points of a single operator (e.g., $v^\pi = \T^\pi v^\pi$), non-stationary value functions are defined via backward recursion using the time-indexed operators.
+
+For a fixed policy sequence $\pi = \{\pi_t\}_{t \ge 1}$, the regularized value function $v^\pi_t$ at time $t$ is the unique solution to the backward recurrence relation:
+\begin{equation}
+    v^{\pi, \Omega}_t = \Tpi{t}{} v^{\pi, \Omega}_{t+1}.
+\end{equation}
+Similarly, the optimal regularized value function $v^{\star, \Omega}_t$ is defined as the sequence satisfying:
+\begin{equation}
+    v^{\star, \Omega}_t = \Tstar{t} v^{\star, \Omega}_{t+1}.
+\end{equation}
+These definitions ensure that $v^{\pi, \Omega}_t(s)$ represents the expected cumulative discounted regularized reward starting from state $s$ at time $t$, following policy $\pi_t$ at step $t$, $\pi_{t+1}$ at $t+1$, and so forth. Note that in the limit where $P_t \equiv P$ and $r_t \equiv r$ for all $t$, we recover the standard stationary regularized value functions $v^{\pi, \Omega}$ and $v^{\star, \Omega}$ as the unique fixed points of the stationary operators.
+
+% \section{Bellman Commutators and Variation Budgets}\label{sec:comm}
+% Drift enters via the \emph{commutator} between consecutive time-indexed Bellman operators.
+
+% \begin{definition}[One-step variation budgets]\label{def:budgets}
+% For $t\ge1$ define
+% \begin{align}
+% \Delta^R_t&:=\|R_t-R_{t-1}\|_\infty,\quad \\
+% \Delta^P_t&:=\sup_{s,a}\TV\!\big(P_t(\cdot|s,a),P_{t-1}(\cdot|s,a)\big), \\
+% V_R(T)&:=\sum_{t=1}^{T}\Delta^R_t,\quad V_P(T):=\sum_{t=1}^{T}\Delta^P_t.
+% \end{align}
+% For a policy sequence $\{\pi_t^\star\}$ and a strongly convex $\Omega$, define the optimal-policy path-length
+% \begin{align}
+% V_{\pi^\star}(T):=\sum_{t=1}^{T}\E_{s\sim \rho_t}\!\left[D_\Omega\!\big(\pi_t^\star(\cdot|s)\,\Vert\,\pi_{t-1}^\star(\cdot|s)\big)\right],
+% \end{align}
+% with $D_\Omega$ the Bregman divergence.
+% \end{definition}
+
+% \begin{lemma}[Bellman commutator bound]\label{lem:comm}
+% For any policy $\pi$, value $v$ with $\|v\|_\infty\le B$, and time $t\ge1$,
+% \begin{align}
+% \|T^t_{\pi}v - T^{t-1}_{\pi}v\|_\infty 
+% \le \Delta^R_t + 2\gamma B\,\Delta^P_t.\tag{$\star$}
+% \end{align}
+% The same bound holds for $T^t_{\star}$ (and for regularized operators by replacing $T_\cdot$ with $T_{\cdot,\Omega}$).
+% \end{lemma}
+
+% \noindent Lemma~\ref{lem:comm} is a standard application of the variational characterization of total variation:
+% $$|\E_{P}f-\E_{Q}f|\le ( \sup f - \inf f)\,\TV(P,Q).$$
+
+\section{Bellman Commutators and Variation Budgets}
+\label{sec:commutators}
+
+In non-stationary environments, the classical fixed-point analysis breaks down as the underlying MDP evolves at every step. Drift enters the analysis via the \textit{commutator} between consecutive time-indexed Bellman operators. This quantity measures the inherent tracking error caused by the environment shifting from time $t-1$ to $t$, distinct from the approximation errors of the learning algorithm.
+
+To rigorously quantify this environmental drift, we first define the variation budgets associated with the reward and transition dynamics.
+
+\begin{definition}[One-step variation budgets]
+\label{def:variation_budgets}
+For any time step $t \ge 1$, we define the instantaneous drifts in rewards and dynamics as:
+\begin{align}
+    \Delta_t^R &:= \|r_t - r_{t-1}\|_\infty, \label{eq:delta_R} \\
+    \Delta_t^P &:= \sup_{s,a} \mathrm{TV}\big(P_t(\cdot|s, a), P_{t-1}(\cdot|s, a)\big), \label{eq:delta_P}
+\end{align}
+where $\mathrm{TV}(P, Q) = \frac{1}{2}\|P-Q\|_1$ denotes the total variation distance. Over a horizon $T$, these accumulate into the total variation budgets:
+\begin{equation}
+    V_r(T) := \sum_{t=1}^T \Delta_t^r, \quad \text{and} \quad V_P(T) := \sum_{t=1}^T \Delta_t^P.
+\end{equation}
+For a policy sequence $\{\pi_t^\star\}$ and a strongly convex $\Omega$, define the optimal-policy path-length
+\begin{align}
+V_{\pi^\star}(T):=\sum_{t=1}^{T}\E_{s\sim \rho_t}\!\left[D_\Omega\!\big(\pi_t^\star(\cdot|s)\,\Vert\,\pi_{t-1}^\star(\cdot|s)\big)\right],
+\end{align}
+with $D_\Omega$ the Bregman divergence.
+\end{definition}
+
+These budgets generalize standard non-stationary measures. In the zero-drift limit ($V_R = V_P = 0$), we recover the stationary setting. The following lemma is central to our analysis: it bounds the operator drift (the Bellman commutator) purely in terms of these physical variation budgets.
+
+\begin{lemma}[Bellman commutator bound]
+\label{lemma:commutator}
+Consider any policy $\pi$ and any value function $v \in \mathbb{R}^\mathcal{S}$ with $\|v\|_\infty \le B$. For any time $t \ge 1$, the difference between applying the Bellman evaluation operator at time $t$ versus time $t-1$ is bounded by:
+\begin{equation}
+    \|T^t_\pi v - T^{t-1}_\pi v\|_\infty \le \Delta_t^R + 2\gamma B \Delta_t^P. \tag{$\star$}
+\end{equation}
+Furthermore, the same bound holds for the Bellman optimality operator difference $\|T^t_\star v - T^{t-1}_\star v\|_\infty$, and extends to the regularized Bellman operators ($T^t_{\pi, \Omega}$ and $T^t_{\star, \Omega}$) defined in Section 2.
+\end{lemma}
+
+\begin{proof}
+The result follows from the variational characterization of the total variation distance. Using the property that $|\mathbb{E}_P f - \mathbb{E}_Q f| \le (\sup f - \inf f) \mathrm{TV}(P, Q)$ and the fact that $\sup v - \inf v \le 2\|v\|_\infty \le 2B$, we obtain the bound for the $Q$-functions.
+For the evaluation operator $T^t_\pi$, the policy $\pi$ is fixed, so the bound transfers directly. For the regularized optimality operator $T^t_{\star, \Omega}v = \Omega^*(q_t(\cdot, \cdot; v))$, the result holds due to the non-expansiveness of the convex conjugate gradient (or simply the Lipschitz property of the max operator in the unregularized case).
+\end{proof}
+
+Lemma \ref{lemma:commutator} serves as the "drift control" mechanism for our Dynamic Regret analysis. It allows us to decompose the movement of the optimal policy into specific drift channels (reward versus dynamics), which will later be matched by the mirror-descent update steps.
+
+\section{Regularized Non-Stationary Modified Policy Iteration}
+\label{sec:r_ns_mpi}
+
+Building on the time-indexed Bellman operators, we now introduce \textit{Regularized Non-Stationary Modified Policy Iteration} (R-NS-MPI). This algorithmic scheme generalizes the stationary regularized MPI of \cite{geist2019theory} to handle drifting dynamics and rewards. The algorithm generates a sequence of policies $\{\pi^{(k)}\}_{k \ge 0}$ and values $\{v^{(k)}\}_{k \ge 0}$ by alternating between a regularized greedy improvement step and a partial policy evaluation over a lookahead horizon $m \in \mathbb{N} \cup \{\infty\}$.
+
+\subsection{Algorithmic Scheme}
+
+\begin{definition}[R-NS-MPI]
+\label{def:r_ns_mpi}
+Given an initial value sequence $\{v_t^{(0)}\}_{t \ge 1}$, at each iteration $k \ge 0$, R-NS-MPI performs the following updates for all time steps $t \ge 1$:
+\begin{align}
+    \pi_t^{(k+1)} &= \mathcal{G}_\Omega(v_t^{(k)}), \label{eq:greedy_step} \\
+    v_t^{(k+1)} &= \left( T_{\pi_t^{(k+1)}, \Omega}^t \circ T_{\pi_{t+1}^{(k+1)}, \Omega}^{t+1} \circ \dots \circ T_{\pi_{t+m-1}^{(k+1)}, \Omega}^{t+m-1} \right) v_{t+m}^{(k)}. \label{eq:eval_step}
+\end{align}
+\end{definition}
+
+In a practical setting, these steps are performed approximately. We explicitly account for these errors:
+\begin{itemize}
+    \item $\epsilon'_{t,k}$: The error in the greedy step (e.g., due to function approximation in the policy space).
+    \item $\epsilon_{t,k}$: The error in the evaluation step (e.g., due to finite-sample estimation or regression error).
+\end{itemize}
+The parameter $m$ controls the depth of the evaluation. For $m=1$, we recover a non-stationary Regularized Value Iteration (VI); for $m=\infty$, we recover Regularized Policy Iteration (PI).
+
+\subsection{Error Propagation Analysis}
+
+To analyze the propagation of errors through time and iterations, we define the \textit{regularized loss} at time $t$ and iteration $k$ as $\ell_{t,k,\Omega} \coloneqq v_t^{\star, \Omega} - v_t^{\pi_t^{(k)}, \Omega}$.
+We also introduce the time-indexed discounted kernel product $\Gamma_t^j$:
+\begin{equation}
+    \Gamma_t^j \coloneqq \prod_{u=t}^{t+j-1} \gamma P_{\pi_u}, \quad \text{with } \Gamma_t^0 = I,
+\end{equation}
+where $P_{\pi_u}$ is the transition kernel induced by policy $\pi_u$ at time $u$.
+
+The following theorem provides a pointwise bound on the loss, generalizing the analysis of AMPI \cite{scherrer2015approximate} to the regularized non-stationary setting.
+
+\begin{theorem}[Pointwise error propagation]
+\label{thm:pointwise}
+For any iteration $k \ge 1$ and time $t \ge 1$, the regularized loss is bounded as:
+\begin{equation}
+    |\ell_{t,k,\Omega}| \le 2 \sum_{i=1}^{k-1} \sum_{j=i}^\infty \Gamma_t^j |\epsilon_{t,k-i}| + \sum_{i=0}^{k-1} \sum_{j=i}^\infty \Gamma_t^j |\epsilon'_{t,k-i}| + h_t(k),
+\end{equation}
+where $h_t(k)$ is a residual term depending on the initialization which vanishes as $k \to \infty$ under exact evaluation.
+\end{theorem}
+
+This result shows that errors at time $t$ are influenced by errors accumulated from future time steps (due to the backward recursion of value functions) and previous iterations. Crucially, the coefficients $\Gamma_t^j$ decay geometrically with $\gamma$, ensuring stability.
+
+\subsection{\texorpdfstring{$L_p$}{Lp}-Norm Bounds and Concentrability}
+
+To derive interpretable bounds in $L_p$-norms, we define time-indexed concentrability coefficients. Let $\rho_t$ be a state distribution of interest at time $t$ (e.g., the occupancy measure of the optimal policy).
+
+\begin{definition}[Time-indexed $q$-concentrability]
+\label{def:concentrability}
+Fix a distribution $\mu$ and dual exponents $p, q$ such that $1/p + 1/q = 1$. For $j \ge 0$, we define:
+\begin{equation}
+    c_{q,t}^{(j)} \coloneqq \sup_{\pi_t:t+j-1} \left\| \frac{d(\rho_t P_{\pi_t}^t \dots P_{\pi_{t+j-1}}^{t+j-1})}{d\mu} \right\|_{q,\mu},
+\end{equation}
+and the aggregated coefficient:
+\begin{equation}
+    C_{q,t}^i \coloneqq \frac{1}{\gamma^i} \sum_{j=i}^\infty \gamma^j c_{q,t}^{(j)}.
+\end{equation}
+\end{definition}
+
+Using these coefficients, we convert the pointwise bound into a norm bound.
+
+\begin{theorem}[$L_p$ bound]
+\label{thm:lp_bound}
+Let $p \in [1, \infty]$. After $k$ iterations, the loss satisfies:
+\begin{align}
+    \|\ell_{t,k,\Omega}\|_{p,\rho_t} \le \;& 2 \sum_{i=1}^{k-1} \frac{\gamma^i}{1-\gamma} (C_{q,t}^i)^{1/p} \|\epsilon_{t,k-i}\|_{pq', \mu} \nonumber \\
+    &+ \sum_{i=0}^{k-1} \frac{\gamma^i}{1-\gamma} (C_{q,t}^i)^{1/p} \|\epsilon'_{t,k-i}\|_{pq', \mu} + g_t(k).
+\end{align}
+\end{theorem}
+
+\textbf{Stationary recovery:} If $P_t \equiv P$ and $R_t \equiv R$, then $C_{q,t}^i$ becomes the standard stationary concentrability coefficient, and Theorem \ref{thm:lp_bound} strictly recovers the bounds of \cite{geist2019theory}. The explicit dependency on $t$ in our bounds highlights the challenge of non-stationarity: the hardness of learning (captured by concentrability) may fluctuate over time.
+
+\section{Mirror-Descent Tracking and Dynamic Regret}\label{sec:md}
+\textbf{NS-MD-MPI.} We regularize policy \emph{movement} via the Bregman divergence $D_\Omega(\pi_t\|\pi^{(k)}_t)$:
+\begin{align}
+\pi_t^{(k+1)} \in \arg\max_{\pi_t}\ip{q_t(\cdot; v^{(k)}_{t+1})}{\pi_t} - D_\Omega(\pi_t\|\pi^{(k)}_t), \label{eq:md-greedy}
+\end{align}
+with either regularized or unregularized $m$-step evaluation. The three-point identity yields telescoping \emph{progress} terms; drift enters through commutators (Lemma~\ref{lem:comm}).
+
+\begin{definition}[Dynamic regret]
+For horizon $T$, define $\mathrm{DynReg}(T):=\sum_{t=1}^{T}\rho_t\!\left[v^\star_t - v^{\pi^{(K)}_t}_t\right]$ for the last-iterate policy sequence after $K$ outer iterations (we suppress $K$ when clear). 
+\end{definition}
+
+\begin{theorem}[Dynamic regret of NS-MD-MPI]\label{thm:dyn}
+Consider NS-MD-MPI with greedy and evaluation errors $\epsilon'_{t,k},\epsilon_{t,k}$. Then for any horizon $T$,
+\begin{align}
+&\mathrm{DynReg}(T)
+\le
+\frac{K_1}{(1-\gamma)^2}\sum_{t=1}^{T}\!\left(\|\epsilon_{t,k}\|+\|\epsilon'_{t,k}\|\right)\\
+&+\frac{K_2}{(1-\gamma)^2}\!\left(V_R(T)+2\gamma\,B\,V_P(T)\right)
++\frac{K_3}{1-\gamma}\,V_{\pi^\star}(T),\label{eq:dyn-main}
+\end{align}
+where $B=\sup_t\|v^{\star}_t\|_\infty$, and $K_1,K_2,K_3$ depend on time-indexed concentrability. In the stationary limit $V_R=V_P=V_{\pi^\star}=0$, the bound reduces to the stationary MD-MPI rate up to constants.
+\end{theorem}
+
+\begin{remark}[Interpretation]
+Three forces govern tracking: (i) \emph{approximation} ($\epsilon,\epsilon'$), (ii) \emph{environmental drift} through Bellman commutators (Lemma~\ref{lem:comm}), and (iii) \emph{target motion} via $V_{\pi^\star}$. Mirror-Descent induces a geometry-aware penalty on policy path-length that naturally controls (iii).
+\end{remark}
+
+\section{Partial Legendre--Fenchel View and Convergence of Greedy Policies}
+
+In this section we recast our stage-wise regularization in terms of a (partial) Legendre--Fenchel transform and show how this structure implies stability and convergence of the regularized greedy policies. In contrast to the previous sections, we keep the regularizer fixed across iterations of the algorithm and view only the value functions, advantages and greedy policies as iterative objects. This matches exactly how Approximate Modified Policy Iteration (AMPI) and NS-MD-MPI are implemented in practice.
+
+\subsection{Stage-wise perturbation function and partial conjugate}
+
+At each time step $t$ we consider a regularizer
+\[
+\Omega_t : \Delta(\mathcal{A}) \to \mathbb{R}\cup\{+\infty\},
+\]
+defined on the simplex of probability distributions over actions. Throughout this section we assume that for each $t$:
+\begin{itemize}
+  \item $\Omega_t$ is proper, lower semicontinuous, and convex;
+  \item $\Omega_t$ is $\sigma$--strongly convex with respect to a fixed norm $\|\cdot\|$ on $\Delta(\mathcal{A})$.
+\end{itemize}
+In the main body of the paper we often use a time-independent regularizer $\Omega_t \equiv \Omega$, but allowing $\Omega_t$ to depend on $t$ does not change the arguments below.
+
+We package these stage-wise regularizers into a perturbation function
+\[
+F : \{1,\dots,T\} \times \Delta(\mathcal{A}) \to \mathbb{R}\cup\{+\infty\},\qquad
+F(t,\pi_t) := \Omega_t(\pi_t).
+\]
+Here the time index $t$ plays the role of a parameter, while $\pi_t$ is the decision variable. This fits the framework of perturbation functions in convex analysis: for each fixed $t$, the map $\pi_t \mapsto F(t,\pi_t)$ is a proper, lsc, strongly convex function.
+
+The corresponding partial Legendre--Fenchel transform with respect to $\pi_t$ is defined by
+\[
+L(t,q_t)
+:= \inf_{\pi_t \in \Delta(\mathcal{A})}
+\big\{F(t,\pi_t) - \langle q_t, \pi_t \rangle\big\}
+= \inf_{\pi_t} \big\{ \Omega_t(\pi_t) - \langle q_t, \pi_t \rangle\big\}.
+\]
+By the standard definition of the convex conjugate,
+\[
+\Omega_t^*(q_t)
+:= \sup_{\pi_t \in \Delta(\mathcal{A})}
+\big\{\langle q_t,\pi_t\rangle - \Omega_t(\pi_t)\big\},
+\]
+we immediately obtain
+\[
+L(t,q_t) = -\,\Omega_t^*(q_t).
+\]
+
+Thus, up to a minus sign, the partial Legendre--Fenchel transform $F \mapsto L$ recovers exactly the dual regularized Bellman operator that we use in Section~\ref{sec:rnmdp}:
+\[
+[T_{t,\Omega}^\star v](s)
+= \Omega_t^*\big(q_t(s,\cdot; v)\big),
+\]
+and the associated greedy policy is
+\[
+\pi_t^\mathrm{greedy}(\cdot \mid s)
+= \nabla \Omega_t^*\big(q_t(s,\cdot; v)\big).
+\]
+In other words, the regularized optimality operator and the stage-wise greedy policy can be viewed as the partial Legendre--Fenchel conjugate $F^\star$ and its gradient with respect to the dual variable $q_t$.
+
+\subsection{Regularity of the conjugate and continuity of the greedy map}
+
+The strong convexity of $\Omega_t$ yields smoothness and Lipschitz properties of its conjugate and gradient. We recall a standard fact from convex analysis.
+
+\begin{lemma}[Conjugate of a strongly convex function]
+\label{lem:conjugate-regularity}
+Fix $t$. If $\Omega_t$ is $\sigma$--strongly convex on $\Delta(\mathcal{A})$ with respect to a norm $\|\cdot\|$, then:
+\begin{enumerate}
+  \item The conjugate $\Omega_t^*$ is everywhere finite and continuously differentiable on $\mathbb{R}^{|\mathcal{A}|}$.
+  \item Its gradient is $(1/\sigma)$-Lipschitz with respect to the dual norm $\|\cdot\|_*$, i.e.
+  \[
+  \big\|\nabla \Omega_t^*(q_t) - \nabla \Omega_t^*(q_t')\big\|
+  \;\le\; \frac{1}{\sigma}\,\|q_t - q_t'\|_*,
+  \quad \forall q_t,q_t'\in\mathbb{R}^{|\mathcal{A}|}.
+  \]
+\end{enumerate}
+In particular, the greedy map
+\[
+G_t(q_t) := \nabla \Omega_t^*(q_t)
+\]
+is single-valued, globally defined, and Lipschitz continuous.
+\end{lemma}
+
+In our RL context, the greedy policy at iteration $k$ and time $t$ is given by
+\[
+\pi_t^{k+1}(\cdot \mid s)
+= G_t\big(q_t^k(s,\cdot)\big)
+= \nabla \Omega_t^*\big(q_t^k(s,\cdot)\big),
+\]
+where $q_t^k(s,a)$ is the (regularized) advantage or $Q$-value associated with the value function $v^k$ used at iteration $k$. Lemma~\ref{lem:conjugate-regularity} immediately implies continuity of the greedy policy with respect to the $q_t^k$'s.
+
+\begin{lemma}[Continuity of greedy policies for fixed regularizer]
+\label{lem:greedy-continuity}
+Fix $t$ and a state $s$. Suppose that for some sequence $\{q_t^k(s,\cdot)\}_{k\ge1}$ and some $q_t^\infty(s,\cdot)$ we have
+\[
+q_t^k(s,\cdot) \;\longrightarrow\; q_t^\infty(s,\cdot)
+\quad \text{as } k\to\infty
+\]
+in the dual norm. Then
+\begin{align}
+    \pi_t^{k+1}(\cdot \mid s)
+    &= \nabla \Omega_t^*\big(q_t^k(s,\cdot)\big) \\
+    % \;\longrightarrow\;
+    % \nabla \Omega_t^*\big(q_t^\infty(s,\cdot)\big)
+    % &= \pi_t^\infty(\cdot \mid s)
+    % \quad \text{as } k\to\infty.
+\end{align}
+
+Moreover, if the convergence $q_t^k(\cdot,\cdot) \to q_t^\infty(\cdot,\cdot)$ is uniform over $(s,a)$ in a compact subset of $\mathcal{S}\times\mathcal{A}$, then the convergence of $\pi_t^{k+1}(\cdot\mid s)$ to $\pi_t^\infty(\cdot\mid s)$ is uniform over $s$ in that subset.
+\end{lemma}
+
+Thus, for a \emph{fixed} regularizer $\Omega_t$, the convergence of the greedy policies is entirely driven by the convergence of the underlying $Q$-functions. In particular, all the dynamic-programming and dynamic-regret bounds derived in previous sections for $\{v^k\}$ and $\{q_t^k\}$ automatically transfer to the sequence of greedy policies $\{\pi_t^k\}$ through the Lipschitz continuity of $\nabla \Omega_t^*$.
+
+\subsection{Connection with the partial Legendre--Fenchel continuity theory}
+
+The previous lemmas give a direct, elementary route to policy convergence for fixed regularizers. We now briefly explain how this fits into the more general continuity theory of partial Legendre--Fenchel transforms.
+
+In the classical results of Attouch, Azé and Wets, one considers a \emph{sequence} of perturbation functions $\{F_n\}$ and studies the equivalence between:
+\begin{itemize}
+  \item Mosco epi-convergence of $F_n$ to a limit $F$;
+  \item Mosco epi-convergence of the conjugates $F_n^*$ to $F^*$;
+  \item epi/hypo-convergence of the associated partial Lagrangians and graph convergence of the corresponding subdifferential operators.
+\end{itemize}
+In our notation, one may think of $F_n$ as arising from either small perturbations of the regularizers $\Omega_t$ (for instance, approximate or annealed regularization schemes), or from discretization/approximation of a more complex continuous-time model.
+
+In the present paper, however, we deliberately keep the regularizers $\Omega_t$ \emph{fixed across algorithmic iterations} $k$ and view the iteration as happening only on the value functions $v^k$, the $Q$-functions $q_t^k$ and the policies $\pi_t^k$. In this regime, we instantiate the Attouch--type picture at a single perturbation function $F(t,\pi_t)=\Omega_t(\pi_t)$ and use only:
+\begin{itemize}
+  \item the fact that $F$ is proper, lsc and strongly convex in $\pi_t$;
+  \item the fact that its partial conjugate $F^*(t,q_t)=\Omega_t^*(q_t)$ is smooth with Lipschitz gradient;
+  \item the fact that the greedy map $G_t=\nabla \Omega_t^*$ is continuous, so that convergence of $q_t^k$ implies convergence of $\pi_t^k$.
+\end{itemize}
+
+If one wishes to go further and allow the regularizers themselves to vary, say through a sequence $\{\Omega_t^{(n)}\}$ that Mosco-converges to $\Omega_t$, then the full theory of partial Legendre--Fenchel continuity becomes relevant: the corresponding perturbation functions $F_n(t,\pi_t)=\Omega_t^{(n)}(\pi_t)$ and partial conjugates $L_n(t,q_t)=-\Omega_t^{(n)*}(q_t)$ will epi-converge to $F$ and $L$, and the associated greedy maps $G_t^{(n)}=\nabla \Omega_t^{(n)*}$ will converge graph-wise to $G_t$. This provides a principled variational framework to justify, for instance, annealing of regularization strength or approximation of $\Omega_t$ by simpler surrogates. However, this additional layer is \emph{not needed} for the core convergence guarantees of our regularized non-stationary MPI schemes, which rely only on a fixed $\Omega_t$ and the continuity properties stated above.
+
+\subsection{Reduction to the stationary regularized MDP case}
+
+Finally, we note that when the MDP and the regularizer become stationary,
+\[
+P_t \equiv P,\quad R_t \equiv R,\quad \Omega_t \equiv \Omega,
+\]
+all the time indices $t$ can be dropped. The perturbation function reduces to
+\[
+F(\pi) = \Omega(\pi),
+\]
+its conjugate is $F^*(q)=\Omega^*(q)$, and the greedy map $G(q)=\nabla \Omega^*(q)$ is time-independent. The dynamic-regret bounds developed earlier collapse to the standard convergence rates of regularized MPI in stationary MDPs, and the partial Legendre--Fenchel viewpoint recovers the stationary regularized MDP framework as a special case. In this sense, our non-stationary regularized MDPs and NS-MD-MPI algorithms can be seen as a direct extension of the stationary theory, with the same underlying convex-analytic structure.
+
+
+\section{Drift-Adaptive Algorithms}
+\label{sec:alg}
+
+\paragraph{Design principle from the bound.}
+The dynamic-regret guarantee in Theorem~\ref{thm:dyn} decomposes into three forces:
+(i) approximation ($\epsilon,\epsilon'$), (ii) \emph{environmental drift} measured by the
+Bellman commutators, and (iii) \emph{comparator motion} via the path-length
+$V_{\pi^\star}(T)$. Mirror-Descent greedy steps control (iii) through Bregman
+progress terms. Our adaptive rules choose the per-stage update radius/temperature so
+that the policy movement induced by the algorithm \emph{matches} a current estimate of
+environmental drift---large steps when the MDP moves, small steps when it calms.
+This is the same ``follow the drift'' heuristic that underlies optimal dynamic-regret
+schedules in online convex optimization, here realized through the Bregman geometry of
+regularized DP and our commutator calculus.  The MD three-point inequality we use
+below is standard in MD-MPI (\S5) \citep{geist2019theory}.  
+
+\subsection{What should be adapted? Trust-region or temperature}
+For a Bregman divergence $D_\Omega$ generated by $\Omega$, we implement the MD greedy step at time $t$
+either in \emph{penalized} form with step-size $\eta_t>0$
+\begin{equation}
+\pi^{(k+1)}_t \in
+\arg\max_{\pi_t\in\Delta_A}\ \big\langle q_t(\cdot;v^{(k)}_{t+1}),\pi_t\big\rangle
+- \tfrac{1}{\eta_t}D_\Omega\!\big(\pi_t\|\pi^{(k)}_t\big),
+\label{eq:penalized}
+\end{equation}
+or in \emph{trust-region} form with radius $\delta_t>0$
+\begin{equation}
+\pi^{(k+1)}_t \in
+\arg\max_{\pi_t}\ \big\langle q_t(\cdot;v^{(k)}_{t+1}),\pi_t\big\rangle
+\ \ \text{s.t.}\ \ D_\Omega\!\big(\pi_t\|\pi^{(k)}_t\big)\le\delta_t.
+\label{eq:tr}
+\end{equation}
+The two are equivalent up to KKT multipliers; hence we present rules in terms of $\delta_t$
+and report $\eta_t$ obtained by duality in practice.
+
+\subsection{Online drift proxies and path-length surrogates}
+We maintain per-stage \emph{commutator proxies}
+\begin{equation}
+\widehat{\Delta}_t\ :=\ \widehat{\Delta}^R_t + 2\gamma\,\widehat{B}_t\,\widehat{\Delta}^P_t,
+\qquad
+\widehat{B}_t:=\min\!\Big\{\tfrac{R_{\max}}{1-\gamma}, \|v^{\text{eval}}_t\|_\infty\Big\},
+\label{eq:com-proxy}
+\end{equation}
+where $\widehat{\Delta}^R_t=\|\widehat{R}_t-\widehat{R}_{t-1}\|_\infty$ and
+$\widehat{\Delta}^P_t=\sup_{s,a}\TV(\widehat{P}_t(\cdot|s,a),\widehat{P}_{t-1}(\cdot|s,a))$ are
+empirical (classification/MMD) estimates from two adjacent windows (details in
+App.~\ref{app:metrics}). These are precisely the channels in our commutator bound
+\((\star)\), Lemma~\ref{lem:comm}.  We smooth them by an EMA:
+\(\widetilde{\Delta}_t=\beta\,\widetilde{\Delta}_{t-1}+(1-\beta)\widehat{\Delta}_t\).
+
+\paragraph{Why commutators?}
+Lemma~\ref{lem:comm} gives
+\(\|T^t_\pi v - T^{t-1}_\pi v\|_\infty \le \Delta^R_t + 2\gamma B \Delta^P_t\),
+so \(\widehat{\Delta}_t\) is a direct plug-in upper bound for the magnitude that perturbs
+one-step Bellman improvements between $t-1$ and $t$. It is thus the right \emph{scale}
+for how far the policy needs to move to keep tracking. (This is also the quantity that
+builds up to the $V_R+2\gamma B V_P$ term in Theorem~\ref{thm:dyn}.)
+
+\subsection{Drift-adaptive trust regions / temperatures}
+We use one of the following schedules (\(\mathrm{EMA}_\tau\) is an EMA with window \(\tau\); clipping avoids instability):
+
+\begin{align}
+\ \delta_t &= \mathrm{clip}\!\Big[\delta_{\min},\delta_{\max}, c_0 + c_1\,\mathrm{EMA}_\tau(\widehat{\Delta}_t)\Big]\ \!,
+\qquad\\
+\ \eta_t &= \mathrm{clip}\!\Big[\eta_{\min},\eta_{\max}, d_0 + d_1\,\mathrm{EMA}_\tau(\widehat{\Delta}_t)\Big]\ \!.
+\label{eq:adaptive-rules}
+\end{align}
+
+\noindent
+Intuition: when $\widehat{\Delta}_t$ spikes (abrupt change), we temporarily allow larger steps;
+when it is small, we tighten the trust region/temperature to reduce gratuitous policy motion, thus
+shrinking the $V_{\pi^\star}(T)$ contribution in Thm.~\ref{thm:dyn}. The rules are
+problem-agnostic and apply to KL/TRPO (set $\Omega$ the negative entropy so $D_\Omega=\KL$),
+SAC (temperature $\alpha_t\propto1/\eta_t$), and MPO-style E/M projections.
+
+\begin{algorithm}[t]
+\caption{NS--MD--MPI with Drift-Adaptive Trust Region / Temperature}
+\label{alg:nsmdmpi-da}
+\begin{algorithmic}[1]
+\STATE \textbf{Inputs:} regularizer $\Omega$, initial policy $\{\pi^{(0)}_t\}$, value $v^{(0)}$, depth $m$, smoothing $\beta$, clips $(\delta_{\min},\delta_{\max})$ or $(\eta_{\min},\eta_{\max})$.
+\FOR{$k=0,1,2,\dots$}
+  \FOR{time $t=1,2,\dots$}
+    \STATE Compute drift proxies $\widehat{\Delta}^R_t,\widehat{\Delta}^P_t$ and $\widehat{\Delta}_t$ via \Cref{eq:com-proxy}; update $\widetilde{\Delta}_t$.
+    \STATE Set $\delta_t$ or $\eta_t$ by \Cref{eq:adaptive-rules}.
+    \STATE Greedy step: solve \Cref{eq:tr} (trust region) or \Cref{eq:penalized} (penalized) to obtain $\pi^{(k+1)}_t$.
+  \ENDFOR
+  \STATE $m$-step (un)regularized evaluation to get $v^{(k+1)}$.
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Formal guarantees for the adaptive schedules}
+We first relate the comparator path-length to drift budgets through the mirror map.
+
+\begin{lemma}[Greedy-policy sensitivity to $q$-drift]
+\label{lem:sensitivity}
+Let $\Omega$ be $\sigma$-strongly convex on $\Delta_A$ with respect to a norm $\|\cdot\|$, and let
+$\pi^\star_t(\cdot|s)=\nabla\Omega^\star(q^\star_t(s,\cdot))$ be the (regularized) greedy policy at time $t$.
+Then for any state $s$,
+\(
+\|\pi^\star_t(\cdot|s)-\pi^\star_{t-1}(\cdot|s)\|
+\le \tfrac{1}{\sigma}\,\|q^\star_t(s,\cdot)-q^\star_{t-1}(s,\cdot)\|_*.
+\)
+Consequently,
+\(
+D_\Omega\!\big(\pi^\star_t(\cdot|s)\,\Vert\,\pi^\star_{t-1}(\cdot|s)\big)
+\le \tfrac{1}{2\sigma}\,\|q^\star_t(s,\cdot)-q^\star_{t-1}(s,\cdot)\|_*^2.
+\)
+\end{lemma}
+
+\begin{proof}
+By strong convexity of $\Omega$, the convex conjugate $\Omega^\star$ is $(1/\sigma)$-smooth and
+$\nabla\Omega^\star$ is $(1/\sigma)$-Lipschitz with respect to the dual norm, hence the first inequality;
+the second follows from the quadratic upper bound of Bregman divergences under smoothness.  See
+\citet{geist2019theory}, Prop.~1(i), together with standard conjugacy facts. 
+\end{proof}
+
+\begin{lemma}[Bounding $q$-drift by commutators]
+\label{lem:q-drift}
+Fix $B\!\ge\!\sup_t\|v_t^\star\|_\infty$. For any $(s,a)$,
+\[
+\big|q_t^\star(s,a)-q_{t-1}^\star(s,a)\big|
+\le \Delta^R_t + \gamma\|v_{t+1}^\star-v_t^\star\|_\infty + 2\gamma B\,\Delta^P_t.
+\]
+Moreover, $\|v_{t+1}^\star-v_t^\star\|_\infty \le \frac{1}{1-\gamma}\big(\Delta^R_{t+1}+2\gamma B\,\Delta^P_{t+1}\big)$.
+\end{lemma}
+
+\begin{proof}
+Expand $q^\star_t-q^\star_{t-1}$ and add/subtract $\gamma \E_{P_t}v^\star_t$; bound the two kernel
+differences with total-variation (as in Lemma~\ref{lem:comm}) and the value difference by resolvent
+unrolling using the contraction of $T^t_{\star}$; cf.\ the non-stationary AMPI appendix for the same
+device under time-indexed operators.
+\end{proof}
+
+\begin{proposition}[Path-length controlled by variation budgets]
+\label{prop:path-vs-variation}
+Let $V_{\pi^\star}(T)$ be defined in Def.~\ref{def:budgets}. Under the assumptions of
+Lemmas~\ref{lem:sensitivity}--\ref{lem:q-drift}, there exists a constant $c_\Omega>0$ (depending only on $\sigma$ and the chosen norms) such that
+\begin{align}
+V_{\pi^\star}(T)\ &\le\ c_\Omega\sum_{t=1}^{T}\Big(\Delta^R_t + 2\gamma B\,\Delta^P_t\Big)^2\\
+ &+\ \frac{c_\Omega}{(1-\gamma)^2}\sum_{t=1}^{T}\Big(\Delta^R_{t+1}+2\gamma B\,\Delta^P_{t+1}\Big)^2.
+\end{align}
+\end{proposition}
+
+\begin{proof}
+Apply Lemma~\ref{lem:sensitivity} pointwise, then take $\rho_t$-expectations and sum $t$.
+Use Lemma~\ref{lem:q-drift} to substitute $q$-drift by variation budgets and the resolvent bound on
+$\|v_{t+1}^\star-v_t^\star\|_\infty$. Constants assemble into $c_\Omega$.
+\end{proof}
+
+\paragraph{Consequence for Theorem~\ref{thm:dyn}.}
+Plugging Proposition~\ref{prop:path-vs-variation} into Theorem~\ref{thm:dyn} yields a bound where the
+$V_{\pi^\star}(T)$ term is \emph{itself} controlled by the budgets $(V_R,V_P)$ up to constants. In
+particular, in regimes where $\Delta^R_t,\Delta^P_t$ are small except at change points, the path-length
+contribution concentrates on those change points (squared spikes), which matches the operational role of
+\(\widehat{\Delta}_t\) in~\eqref{eq:adaptive-rules}.
+
+\begin{theorem}[Drift-adaptive dynamic regret]
+\label{thm:adaptive}
+Run Alg.~\ref{alg:nsmdmpi-da} with the schedule~\eqref{eq:adaptive-rules} and suppose the empirical
+proxies satisfy with probability $1-\delta$
+\(
+\sum_{t\le T}\widehat{\Delta}_t \le V_R(T)+2\gamma B V_P(T)+\Gamma_T(\delta)
+\)
+for some estimation slack $\Gamma_T(\delta)=o(T)$. Then for constants $K_1,K_2,K_3$ (concentrability) and
+$c_\Omega$ (mirror geometry),
+\begin{align}
+\mathrm{DynReg}(T)
+\ \le\ \frac{K_1}{(1-\gamma)^2}\!\sum_{t\le T}(\|\epsilon_{t,k}\|+\|\epsilon'_{t,k}\|) \\
+ + \frac{\bar K_2}{(1-\gamma)^2}\Big(V_R(T)+2\gamma B V_P(T)+\Gamma_T(\delta)\Big)
+\end{align}
+with $\bar K_2 = K_2 + K_3\,c_\Omega$, up to clipped constants from~\eqref{eq:adaptive-rules}.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+Start from Thm.~\ref{thm:dyn}. Replace $V_{\pi^\star}(T)$ by Prop.~\ref{prop:path-vs-variation}, then use the
+high-probability control of $\sum_t\widehat{\Delta}_t$ to convert the comparator variation into the measured budgets plus estimation slack.
+Clipping only enlarges constants. The $\epsilon,\epsilon'$ part is unaffected. The concentrability-dependent constants match those appearing in the non-stationary $L_p$ lift. 
+\end{proof}
+
+\subsection{On The novelty, safety, and scope}
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+\item \textbf{Principled adaptation knob.} The schedules in~\eqref{eq:adaptive-rules} are not heuristic:
+they are \emph{calibrated} to the commutator scale that appears in the bound (Lemma~\ref{lem:comm}) and
+therefore target the exact drift channel ($T^t_\cdot-T^{t-1}_\cdot$) that drives the $(V_R,V_P)$ term in
+dynamic regret.
+\item \textbf{Why mirror descent?} The telescoping Bregman terms from the MD greedy step deliver a clean
+path-length dependence (Thm.~\ref{thm:dyn}); Lemma~\ref{lem:sensitivity} then ties path-length to $q$-drift
+through $\nabla\Omega^\star$---a property already established in the regularized MDP literature
+(\(\nabla\Omega^\star\) is the unique greedy map and Lipschitz). 
+\item \textbf{Stationary limit and abrupt jumps.} When $\Delta^R_t=\Delta^P_t\equiv0$ the rule reduces to a
+fixed trust region/temperature and our guarantees collapse to stationary MD-MPI results. Under extremely
+abrupt, unobservable jumps the regret term scales with the (squared) jump magnitude through
+Prop.~\ref{prop:path-vs-variation}; the algorithm still contracts back as $\widehat{\Delta}_t$ decays.
+\item \textbf{Reproducibility.} We log $\widehat{\Delta}^R_t,\widehat{\Delta}^P_t,\widehat{\Delta}_t$,
+the chosen $\delta_t$/$\eta_t$, and the instantaneous Bregman move $D_\Omega(\pi^{(k+1)}_t\|\pi^{(k)}_t)$
+for every update, and we ablate $\beta,\tau,\delta_{\min},\delta_{\max}$ (Sec.~\ref{subsec:ablations}).
+\end{itemize}
+
+% \subsection{Practical defaults}
+% \begin{itemize}[leftmargin=*,itemsep=2pt]
+% \item \textbf{Smoothing:} $\beta\in[0.8,0.95]$, $\tau\!\approx\!10$--$50$ steps. Larger $\beta$ for high-variance estimators.
+% \item \textbf{Clipping:} $(\delta_{\min},\delta_{\max})=(10^{-4},10^{-1})$ for $\KL$; map to $\eta$ through KKT.
+% \item \textbf{Depth:} Reduce $m$ when $\widetilde{\Delta}_t$ is large (propagation becomes stale); increase when calm.
+% \end{itemize}
+
+
+\section{Empirical Protocol}
+\label{sec:empirical}
+
+\paragraph{Goal.}
+We design experiments to test the \emph{tracking} predictions of our theory of regularized non-stationary MDPs: (i) dynamic regret improves with drift-adaptive regularization; (ii) regret scales with the variation budgets $V_R,V_P$ and the optimal-policy path-length $V_{\pi^\star}$; (iii) benefits hold across regularizer families and evaluation depths; and (iv) in the zero-drift limit, results collapse to the stationary regularized theory.\footnote{Our operators and MD analysis follow the stationary regularized DP foundation in \citet{geist2019theory} and our stage-wise non-stationary extension (Secs.~\ref{sec:comm}--\ref{sec:md}).}
+
+\subsection{Environments and Drift Generators}
+\label{subsec:envs}
+\textbf{Tabular control (diagnostics).} GridWorld and FrozenLake with controlled drift.
+\textbf{Classic control.} CartPole (gravity ramp/jumps), MountainCar (engine power drift).
+\textbf{Continuous control.} MuJoCo (e.g., HalfCheetah, Walker2d) with physics drift (friction/damping ramps; payload steps).
+
+\paragraph{Drift patterns.}
+We instantiate four families, each parameterized by a magnitude $\alpha$ and a timescale $\tau$:
+\begin{enumerate}[leftmargin=*,nosep]
+\item \textbf{Piecewise-constant jumps} (change-points every $\tau$ steps).
+\item \textbf{Linear ramps} (slow drift; drift rate $\alpha/\tau$).
+\item \textbf{Sinusoidal} (periodic drift with amplitude $\alpha$ and period $\tau$).
+\item \textbf{Bounded random walk} (variance $\alpha^2$, clipped to remain feasible).
+\end{enumerate}
+All patterns are applied separately to rewards $R_t$ and to transition parameters that control $P_t$ (e.g., slip rate, friction), letting us dial $V_R(T)$ and $V_P(T)$.
+
+\subsection{Baselines and Our Methods}
+\label{subsec:baselines}
+\textbf{Stationary-regularized baselines:} TRPO~\citep{schulman2015trpo}, PPO, SAC~\citep{haarnoja2018sac}, MPO~\citep{abdolmaleki2018mpo} with \emph{fixed} KL/entropy/temperature schedules.
+\textbf{Windowed retraining:} Sliding-window RL (train/evaluate on last $W$ steps only).
+\textbf{Change-point resets:} Oracle reset at known change-points (upper bound on restart strategies).
+
+\textbf{Ours (regularized non-stationary DP):}
+\begin{itemize}[leftmargin=*,nosep]
+\item \emph{R-NS-MPI} (stage-wise regularized greedy, $m$-step evaluation).
+\item \emph{NS-MD-MPI} (Bregman-penalized greedy; Type 1: reg.\ eval; Type 2: unreg.\ eval).
+\item \textbf{Drift-adaptive} schedules: trust-region radius $\delta_t=c_0+c_1\widehat{\Delta}_t$ or temperature $\alpha_t=c_0+c_1\widehat{\Delta}_t$, where $\widehat{\Delta}_t$ is an online drift proxy (below).
+\end{itemize}
+
+\subsection{Drift Proxies and Variation-Budget Estimation}
+\label{subsec:drift}
+For each $(s,a)$, collect mini-batches at $t-1$ and $t$ and estimate
+\begin{align}
+\widehat{\Delta}^R_t&=\| \widehat R_t-\widehat R_{t-1}\|_\infty, \qquad\\
+\widehat{\Delta}^P_t &= \sup_{s,a}\ \mathrm{TV}\!\left(\widehat P_t(\cdot|s,a),\,\widehat P_{t-1}(\cdot|s,a)\right).
+\end{align}
+Aggregate into budgets $V_R(T)=\sum_{t\le T}\widehat{\Delta}^R_t$ and $V_P(T)=\sum_{t\le T}\widehat{\Delta}^P_t$. For continuous states, we approximate TV by $f$-divergence classification surrogates or MMD on learned embeddings (details in App.~\ref{app:metrics}). We also track optimal-policy path-length via the Bregman divergence induced by $\Omega$:
+\[
+\widehat V_{\pi^\star}(T)=\sum_{t\le T}\E_{s\sim \rho_t}\!\left[D_\Omega\!\left(\hat\pi^\star_t(\cdot|s)\,\Vert\,\hat\pi^\star_{t-1}(\cdot|s)\right)\right],
+\]
+where $\hat\pi^\star_t$ is an oracle/strong planner (see below).
+
+\subsection{Primary Metrics}
+\label{subsec:metrics}
+\textbf{(M1) Dynamic regret.} $\mathrm{DynReg}(T)=\sum_{t=1}^T \rho_t\!\left[v_t^\star - v^{\pi_t}_t\right]$, estimated as in Alg.~\ref{alg:dynreg} (oracle or fitted-model mode).
+\textbf{(M2) Return-vs-time.} Smoothed episodic return curves with $95\%$ CIs across seeds.
+\textbf{(M3) Policy movement.} Per-step $D_\Omega(\pi_t\Vert\pi_{t-1})$.
+\textbf{(M4) Bellman commutators.} $\|T^t_{\pi}v - T^{t-1}_{\pi}v\|_\infty$ via plug-in (App.~\ref{app:metrics})—a direct measure of drift channels.
+\textbf{(M5) Sample efficiency.} Area-under-curve until a fixed regret threshold.
+
+\begin{algorithm}[t]
+\caption{Estimating Dynamic Regret (Oracle or Fitted-Model)}
+\label{alg:dynreg}
+\begin{algorithmic}[1]
+\STATE \textbf{Inputs:} policies $\{\pi_t\}_{t=1}^T$, trajectories $\mc{D}_{1:T}$, discount $\gamma$, occupancy weights $\{\rho_t\}$.
+\STATE \textbf{Oracle mode (known model):} compute $v_t^\star$ by dynamic programming on $(P_t,R_t)$.
+\STATE \textbf{Fitted-model mode:} fit $\widehat P_t,\widehat R_t$ on a buffer around $t$; compute $\hat v_t^\star$ by DP/planning on $(\widehat P_t,\widehat R_t)$.
+\STATE Evaluate $v^{\pi_t}_t$ (on-policy Monte Carlo or model-based) and accumulate $\mathrm{DynReg}(T)=\sum_t \rho_t\!\left[\hat v_t^\star - v^{\pi_t}_t\right]$.
+\STATE Report mean $\pm$ CI across seeds; include oracle-vs-fitted gap.
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Ablations and Stress Tests}
+\label{subsec:ablations}
+\textbf{Regularizer family:} Shannon entropy, KL trust region, Tsallis ($q\in\{1.2,1.5\}$).
+\textbf{Evaluation depth:} $m\in\{1,5,\infty\}$.
+\textbf{Schedule design:} fixed vs.\ drift-adaptive $\delta_t,\alpha_t$; EMA smoothing windows for $\widehat{\Delta}_t$.
+\textbf{Drift magnitude/timescale:} sweep $\alpha$ and $\tau$ to induce budget ladders; verify scaling laws $\mathrm{DynReg}(T)$ vs.\ $V_R,V_P$.
+\textbf{Stationary limit:} $\alpha=0$ sanity check—methods match stationary regularized DP.
+
+\subsection{Training, Tuning, and Fairness}
+\label{subsec:fairness}
+\textbf{Budgets.} All methods receive the same interaction budget and wall-clock budget for hyperparameter search.
+\textbf{Search.} Per-method grid/Bayesian search with identical trial counts; report the search space (App.~\ref{app:hparams}).
+\textbf{Evaluation protocol.} $10$ seeds for tabular/classic control; $5$ seeds for MuJoCo. Report means, $95\%$ CIs, and \emph{paired} bootstrap tests on AUC of (M1)--(M2).
+\textbf{Implementation parity.} Common network backbones, optimizers, replay settings, and normalization across methods.
+
+\subsection{Plots and Tables}
+\label{subsec:plots}
+\begin{itemize}[leftmargin=*,nosep]
+\item \textbf{Curves:} Return and dynamic regret vs.\ time; per-step $D_\Omega(\pi_t\Vert\pi_{t-1})$.
+\item \textbf{Scaling:} Scatter of $\mathrm{DynReg}(T)$ vs.\ $V_R,V_P$ (log--log slope with CIs).
+\item \textbf{Ablations:} Bars for (fixed vs.\ adaptive) $\times$ (entropy/KL/Tsallis) $\times$ ($m$).
+\item \textbf{Diagnostics:} Bellman commutator magnitude over time; correlation with regret spikes.
+\end{itemize}
+
+
+\section{Related Work}
+Regularization in stationary MDPs via convex conjugacy, regularized Bellman operators, and MD-MPI provides a unifying view \cite{geist2019theory}. Policy-update regularization appears in TRPO \cite{schulman2015trpo}, MPO \cite{abdolmaleki2018mpo}, and maximum-entropy RL \cite{haarnoja2018sac}. Our work lifts this lens to \emph{non-stationary} models, introduces \emph{Bellman commutators} as explicit drift controls, and frames performance in \emph{dynamic regret} with \emph{variation budgets}—a tracking viewpoint absent from stationary analyses.
+
+\section{Discussion and Limitations}
+\textbf{Scope.} We analyze fully observed discounted MDPs with time-varying $(P_t,R_t)$. \textbf{Limits.} Adversarial drift without coverage/mixing, POMDPs, or game-theoretic non-stationarity remain open. Practical drift estimation and concentrability constants are bottlenecks. 
+
+\section*{Impact Statement}
+We advance the theory of regularization for RL under temporal drift by providing tracking guarantees and algorithmic guidance. Primary impacts are scientific and methodological; caution is needed in safety-critical deployments.
+
+\bibliography{main}
+\bibliographystyle{plain}
+\input{appendix}
+
+\end{document}

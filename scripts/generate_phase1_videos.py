@@ -61,34 +61,46 @@ def record_video(model_path, env_id, output_path, n_episodes=3, max_steps=1000):
     
     env.close()
     
-    # Save video using imageio
+    # Save video 
     try:
-        import imageio
-        
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
-        # Save as mp4
-        writer = imageio.get_writer(output_path, fps=30)
-        for frame in all_frames:
-            writer.append_data(frame)
-        writer.close()
+        # Try cv2 first (more reliable for mp4)
+        try:
+            import cv2
+            
+            height, width = all_frames[0].shape[:2]
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(output_path, fourcc, 30, (width, height))
+            
+            for frame in all_frames:
+                # Convert RGB to BGR for cv2
+                out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+            out.release()
+            
+            print(f"\n✅ Video saved: {output_path}")
+            print(f"   Average reward: {np.mean(episode_rewards):.2f}")
+            print(f"   Total frames: {len(all_frames)}")
+            return output_path
+            
+        except ImportError:
+            # Fallback to imageio GIF
+            import imageio
+            gif_path = output_path.replace('.mp4', '.gif')
+            imageio.mimsave(gif_path, all_frames[::3], duration=100)  # Skip frames for smaller GIF
+            
+            print(f"\n✅ GIF saved: {gif_path}")
+            print(f"   Average reward: {np.mean(episode_rewards):.2f}")
+            return gif_path
         
-        print(f"\n✅ Video saved: {output_path}")
-        print(f"   Average reward: {np.mean(episode_rewards):.2f}")
-        print(f"   Total frames: {len(all_frames)}")
-        
-        return output_path
-        
-    except ImportError:
-        print("❌ imageio not installed. Install with: pip install imageio[ffmpeg]")
-        return None
     except Exception as e:
         print(f"❌ Failed to save video: {e}")
         return None
 
 
 def main():
-    # Phase 1 models (timestamp 132731-132735)
+    # Phase 1 models (timestamp 132731-132733)
+    # Note: NSMDMPI saved as .pt params only, not full SB3 model
     models = {
         'vanilla': {
             'path': 'models/LunarLander-v3_PPO_vanilla_20260114-132731_Baseline.zip',
@@ -100,11 +112,8 @@ def main():
             'env': 'LunarLander-v3',
             'name': '2_moderate_baseline'
         },
-        'nsmdmpi': {
-            'path': 'models/LunarLander-v3_PPO_sine_20260114-132735_NSMDMPI_NSMDMPI.zip',
-            'env': 'LunarLander-v3',
-            'name': '3_moderate_nsmdmpi'
-        }
+        # NSMDMPI model was saved as .pt params, cannot load as SB3 model
+        # To fix: update callback to also save full model.zip
     }
     
     print("="*60)

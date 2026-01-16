@@ -34,3 +34,6 @@ tensorboard==2.15.1
 pytest==7.4.3
 black==23.12.1
 flake8==7.0.0
+
+# Need to run this too
+# conda install -c conda-forge box2d-py
