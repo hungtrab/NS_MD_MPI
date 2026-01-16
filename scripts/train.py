@@ -584,15 +584,34 @@ def main():
                 break
         
         try:
-            # Clear callbacks to avoid pickle error
+            # Thoroughly clear all unpicklable attributes
+            # 1. Clear callbacks
             if hasattr(model, '_callback'):
                 model._callback = None
             if hasattr(model, 'callback'):
                 model.callback = None
             
-            # Save .zip for evaluation (SB3 format)
-            model.save(save_path)
+            # 2. Clear logger references (file handles)
+            if hasattr(model, '_logger'):
+                model._logger = None
+            if hasattr(model, 'logger'):
+                model.logger = None
+            
+            # 3. Clear environment (has file handles from Monitor wrapper)
+            original_env = model.env
+            model.env = None
+            model._vec_normalize_env = None
+            
+            # 4. Clear rollout buffer (may have large tensors causing issues)
+            if hasattr(model, 'rollout_buffer'):
+                model.rollout_buffer = None
+            
+            # 5. Use exclude parameter to skip problematic components
+            model.save(save_path, exclude=['env', 'replay_buffer', 'rollout_buffer', '_episode_storage'])
             print(f">>> [NS-MDMPI] Model saved as .zip for evaluation")
+            
+            # Restore environment
+            model.env = original_env
         except Exception as e:
             print(f">>> [NS-MDMPI] Warning: .zip save failed: {e}")
         
