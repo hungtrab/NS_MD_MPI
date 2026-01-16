@@ -5,6 +5,9 @@ env:
   magnitude: 0.3
   period: 10000
   base_value: 0.0
+  bounds:
+  - -5.0
+  - 15.0
 wandb:
   project: NS_MDMPI_LunarLander
   tags:
@@ -25,14 +28,21 @@ train:
   seed: 42
 nsmdmpi:
   enabled: true
-  V_R: 10.0
-  V_P: 10.0
-  V_pi_star: 5.0
-  kappa_base: 0.01
-  lambda_base: 0.01
+  V_R: 25.0
+  V_P: 50.0
+  V_pi_star: 500.0
+  kappa_base: 0.2
+  lambda_base: 1.0
   kappa_adaptive: true
   lambda_adaptive: true
-  sensitivity: 0.1
+  trust_region_sensitivity: 1.0
+  regularization_sensitivity: 1.0
+  max_ent_coef: 0.1
+  drift_window_size: 1000
+  log_freq: 50
+  save_budget_history: true
+  budget_save_dir: budgets/
+  verbose: 1
 paths:
   log_dir: logs/
   model_dir: models/

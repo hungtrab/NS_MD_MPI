@@ -5,6 +5,9 @@ env:
   magnitude: 0.3
   period: 15000
   base_value: 0.0
+  bounds:
+  - -5.0
+  - 15.0
 wandb:
   project: NS_MDMPI_LunarLander
   tags:
