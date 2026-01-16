@@ -9,7 +9,7 @@ env:
   - -11.9
   - -5.0
 wandb:
-  project: att_4_LunarLander_Moderate_Comparison
+  project: NS_MDMPI_LunarLander
   tags:
   - lunarlander
   - moderate

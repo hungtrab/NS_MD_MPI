@@ -6,7 +6,7 @@ env:
   period: 15000
   base_value: 0.0
 wandb:
-  project: att_4_LunarLander_Moderate_Comparison
+  project: NS_MDMPI_LunarLander
   tags:
   - lunarlander
   - moderate

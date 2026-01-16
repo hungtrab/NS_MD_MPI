@@ -28,7 +28,7 @@ env:
   - 0.5
   - 2.0
 wandb:
-  project: NS_MDMPI_Halfcheetah_Multi
+  project: NS_MDMPI_HalfCheetah
   tags:
   - halfcheetah
   - multi

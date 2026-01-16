@@ -17,7 +17,7 @@ env:
   - 0.6
   - 1.4
 wandb:
-  project: att_4_Hopper_Multi_Comparison
+  project: NS_MDMPI_Hopper
   tags:
   - hopper
   - multi-param

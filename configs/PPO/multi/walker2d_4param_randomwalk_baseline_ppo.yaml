@@ -37,7 +37,7 @@ env:
   - -11.0
   - -8.0
 wandb:
-  project: NS_MDMPI_Walker2D_Multi
+  project: NS_MDMPI_Walker2d
   tags:
   - walker2d
   - multi

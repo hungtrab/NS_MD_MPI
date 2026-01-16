@@ -9,7 +9,7 @@ env:
   - 0.45
   - 1.35
 wandb:
-  project: att_4_Hopper_Moderate_Comparison
+  project: NS_MDMPI_Hopper
   tags:
   - hopper
   - moderate

@@ -1,0 +1,103 @@
+# W&B Sweep Config for LunarLander Environment
+# Usage: wandb sweep configs/sweep/sweep_lunarlander.yaml
+# Then run: wandb agent <SWEEP_ID>
+
+program: scripts/wandb_sweep_agent.py
+method: bayes
+name: NS-MDMPI LunarLander Tuning
+
+metric:
+  name: optimization_score
+  goal: maximize
+
+early_terminate:
+  type: hyperband
+  min_iter: 3
+  s: 2
+
+parameters:
+  # === NS-MDMPI Parameters (TUNING) ===
+  V_R:
+    distribution: uniform
+    min: 5.0
+    max: 20.0
+  
+  V_P:
+    distribution: uniform
+    min: 5.0
+    max: 20.0
+  
+  V_pi_star:
+    distribution: uniform
+    min: 2.5
+    max: 10.0
+  
+  kappa_base:
+    distribution: uniform
+    min: 0.1
+    max: 0.3
+  
+  lambda_base:
+    distribution: uniform
+    min: 0.5
+    max: 2.0
+  
+  trust_region_sensitivity:
+    distribution: uniform
+    min: 2.0
+    max: 10.0
+  
+  regularization_sensitivity:
+    distribution: uniform
+    min: 1.0
+    max: 5.0
+  
+  max_ent_coef:
+    distribution: uniform
+    min: 0.01
+    max: 0.1
+  
+  drift_window_size:
+    distribution: int_uniform
+    min: 500
+    max: 2000
+
+  # === Fixed Parameters ===
+  env_id:
+    value: LunarLander-v2
+  
+  drift_parameter:
+    value: gravity
+  
+  drift_type:
+    value: sine
+  
+  drift_magnitude:
+    value: 3.0
+  
+  drift_period:
+    value: 10000
+  
+  drift_base_value:
+    value: -10.0
+  
+  total_timesteps:
+    value: 200000
+  
+  n_envs:
+    value: 4
+  
+  seed:
+    value: 42
+  
+  learning_rate:
+    value: 0.0003
+  
+  n_steps:
+    value: 2048
+  
+  batch_size:
+    value: 64
+  
+  gamma:
+    value: 0.99

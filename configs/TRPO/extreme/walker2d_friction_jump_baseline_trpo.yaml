@@ -9,7 +9,7 @@ env:
   - 0.6
   - 1.4
 wandb:
-  project: att_4_Walker2d_Extreme_Comparison
+  project: NS_MDMPI_Walker2d
   tags:
   - walker2d
   - extreme
