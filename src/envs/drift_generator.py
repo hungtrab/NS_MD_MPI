@@ -157,35 +157,54 @@ class DriftGenerator:
     
     def _bounded_random_walk(self, t: int) -> float:
         """
-        Bounded random walk drift (stochastic).
+        Bounded random walk drift (stochastic but deterministic given seed).
         
         Pattern: Value performs random walk with Gaussian steps, clipped to bounds.
+        Uses pre-generated trajectory for full determinism with parallel envs.
         
         Reference: Section 8.1 - "Bounded random walk with variance σ²"
         """
+        # Pre-generate trajectory on first call for determinism
+        if not hasattr(self, '_trajectory') or self._trajectory is None:
+            self._generate_trajectory()
+        
+        # Lookup value from pre-generated trajectory
+        idx = min(t, len(self._trajectory) - 1)
+        return self._trajectory[idx]
+    
+    def _generate_trajectory(self, max_steps: int = 3000000):
+        """Pre-generate random walk trajectory for determinism."""
         sigma = self.config.sigma
         bounds = self.config.bounds
+        base = self.config.base_value if self.config.base_value is not None else 0.0
         
-        # Initialize random walk value if needed
-        if self._random_walk_value is None:
-            self._random_walk_value = self.config.base_value if self.config.base_value is not None else 0.0
+        # Generate trajectory using stored seed
+        rng = np.random.default_rng(self._seed)
         
-        # Only update if we're moving forward in time
-        if t > self._last_step:
-            steps_forward = t - self._last_step
-            
-            # Take random walk steps
-            for _ in range(steps_forward):
-                step = self.rng.normal(0, sigma)
-                self._random_walk_value += step
-                # Clip to bounds
-                self._random_walk_value = np.clip(
-                    self._random_walk_value, bounds[0], bounds[1]
-                )
-            
-            self._last_step = t
+        # Pre-generate all steps (sample every 100 steps for memory efficiency)
+        sample_rate = 100
+        n_samples = max_steps // sample_rate + 1
         
-        return self._random_walk_value
+        trajectory = [base]
+        current = base
+        for _ in range(n_samples):
+            # Take sample_rate random walk steps
+            for _ in range(sample_rate):
+                step = rng.normal(0, sigma)
+                current += step
+                current = np.clip(current, bounds[0], bounds[1])
+            trajectory.append(current)
+        
+        # Expand to full trajectory via interpolation
+        self._trajectory = []
+        for i in range(len(trajectory) - 1):
+            for j in range(sample_rate):
+                alpha = j / sample_rate
+                val = trajectory[i] * (1 - alpha) + trajectory[i + 1] * alpha
+                self._trajectory.append(val)
+        
+        # Add final values
+        self._trajectory.extend([trajectory[-1]] * sample_rate)
     
     def reset(self):
         """Reset the generator state (for new episodes)."""

@@ -29,10 +29,12 @@ train:
   seed: 42
 nsmdmpi:
   enabled: true
-  V_R: 12.278003224918699
-  V_P: 8.447093807430807
-  V_pi_star: 2.7492641675302627
+  V_R: 80.0
+  V_P: 150.0
+  V_pi_star: 1000.0
   kappa_base: 0.205722634466976
+  kappa_min: 0.15
+  kappa_max: 0.4
   lambda_base: 1.4124842855984459
   kappa_adaptive: true
   lambda_adaptive: true
