@@ -30,7 +30,7 @@ nsmdmpi:
   enabled: true
   V_R: 25.0
   V_P: 50.0
-  V_pi_star: 500.0
+  V_pi_star: 850.0
   kappa_base: 0.2
   lambda_base: 1.0
   kappa_adaptive: true

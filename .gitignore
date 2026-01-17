@@ -7,3 +7,5 @@ logs_dryrun/
 models_dryrun/
 configs/temp_*.yaml
 budgets/
+models_old/
+logs_old/

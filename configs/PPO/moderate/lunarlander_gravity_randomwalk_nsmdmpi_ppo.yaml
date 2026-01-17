@@ -29,8 +29,8 @@ train:
 nsmdmpi:
   enabled: true
   V_R: 25.0
-  V_P: 50.0
-  V_pi_star: 300.0
+  V_P: 100.0
+  V_pi_star: 600.0
   kappa_base: 0.2
   kappa_min: 0.15
   kappa_max: 0.4

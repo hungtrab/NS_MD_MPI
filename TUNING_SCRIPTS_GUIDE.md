@@ -1,103 +1,106 @@
-# Quick Reference: Hyperparameter Tuning Scripts
+# Hyperparameter Tuning Guide
 
-## 🎯 Individual Environment Tuning
+## 🌟 Recommended: W&B Sweep
 
-### Moderate Drift
+### Quick Start (All-in-One)
+```bash
+# Tạo sweep + chạy 50 trials tự động
+python scripts/wandb_sweep_agent.py --create-sweep --type moderate --env Hopper-v4 --count 50
+```
+
+### Step-by-Step
+
+**1. Tạo sweep từ config:**
+```bash
+wandb sweep configs/sweep/sweep_moderate.yaml
+# Output: Created sweep with ID: entity/NS-MDMPI-Sweep/abc123
+```
+
+**2. Chạy agent:**
+```bash
+python scripts/wandb_sweep_agent.py --sweep-id entity/NS-MDMPI-Sweep/abc123 --count 50
+```
+
+### 🚀 Parallel Tuning (Multiple Machines)
+```bash
+# Terminal 1 (or Machine 1)
+python scripts/wandb_sweep_agent.py --sweep-id <SWEEP_ID> --count 25
+
+# Terminal 2 (or Machine 2) - cùng sweep!
+python scripts/wandb_sweep_agent.py --sweep-id <SWEEP_ID> --count 25
+```
+
+### 📁 Sweep Configs
+| Config | Environment | Drift | Use Case |
+|--------|------------|-------|----------|
+| `configs/sweep/sweep_moderate.yaml` | Hopper-v4 | friction/sine | Moderate drift |
+| `configs/sweep/sweep_extreme.yaml` | Hopper-v4 | friction/random_walk | Extreme drift |
+| `configs/sweep/sweep_lunarlander.yaml` | LunarLander-v2 | gravity/sine | LunarLander |
+
+### 📊 Monitor on W&B Dashboard
+1. Go to: https://wandb.ai/<your-entity>/NS-MDMPI-Sweep
+2. Click Sweeps → Your sweep
+3. View parallel coordinates, importance, and best runs
+
+---
+
+## 🔧 Alternative: Optuna
+
+### Individual Environment Tuning
+
+**Moderate Drift:**
 ```bash
 bash scripts/tune_moderate_hopper.sh          # Hopper-v4
 bash scripts/tune_moderate_halfcheetah.sh     # HalfCheetah-v4
 bash scripts/tune_moderate_walker2d.sh        # Walker2d-v4
-bash scripts/tune_moderate_swimmer.sh         # Swimmer-v4
-bash scripts/tune_moderate_humanoid.sh        # Humanoid-v4
 bash scripts/tune_moderate_lunarlander.sh     # LunarLander-v2
 ```
 
-### Extreme Drift
+**Extreme Drift:**
 ```bash
 bash scripts/tune_extreme_hopper.sh           # Hopper-v4
 bash scripts/tune_extreme_halfcheetah.sh      # HalfCheetah-v4
-bash scripts/tune_extreme_walker2d.sh         # Walker2d-v4
-bash scripts/tune_extreme_lunarlander.sh      # LunarLander-v2
 ```
 
-## 🚀 Batch Tuning
-
-### All Environments (Sequential)
+### Monitor Optuna
 ```bash
-bash scripts/tune_all.sh
-```
-**⚠️ Warning:** Takes 10-20 hours total!
-
-### Parallel Tuning (Advanced - if you have GPUs)
-```bash
-# Terminal 1
-bash scripts/tune_moderate_hopper.sh
-
-# Terminal 2 
-bash scripts/tune_moderate_halfcheetah.sh
-
-# Terminal 3
-bash scripts/tune_extreme_hopper.sh
-```
-
-## 📊 Monitor Progress
-
-### Optuna Dashboard
-```bash
-# While tuning is running
+# Dashboard (while running)
 optuna-dashboard results/optuna_studies/moderate_hopper_full.db
+# Open: http://localhost:8080
 
-# Open browser: http://localhost:8080
-```
-
-### Check Results
-```bash
-# View best parameters
+# Check results
 cat results/tuned_params/moderate_hopper_full_best_params.yaml
-
-# List all tuned params
-ls -lh results/tuned_params/
 ```
 
-## 🔄 Resume Interrupted Tuning
+---
 
-If tuning is interrupted, just re-run the same script:
-```bash
-bash scripts/tune_moderate_hopper.sh
-```
+## ⚖️ W&B Sweep vs Optuna
 
-Optuna automatically resumes from where it left off!
+| Feature | W&B Sweep | Optuna |
+|---------|-----------|--------|
+| Cloud Dashboard | ✅ wandb.ai | ❌ |
+| Multi-Machine | ✅ Easy | ⚠️ Need DB |
+| Bayesian | ✅ | ✅ |
+| Early Stop | ✅ Hyperband | ✅ MedianPruner |
+| Experiment Tracking | ✅ Built-in | ❌ |
+
+**Recommendation:** Use W&B Sweep for cloud visibility and easy distributed tuning.
+
+---
 
 ## ⏱️ Estimated Times
 
-| Environment | Moderate (50 trials) | Extreme (50 trials) |
-|-------------|---------------------|---------------------|
-| Hopper      | ~2-3 hours          | ~2-3 hours          |
-| HalfCheetah | ~2-3 hours          | ~2-3 hours          |
-| Walker2D    | ~2-3 hours          | ~2-3 hours          |
-| Swimmer     | ~1-2 hours          | N/A                 |
-| Humanoid    | ~4-6 hours          | N/A                 |
-| LunarLander | ~1-2 hours          | ~1-2 hours          |
+| Environment | 50 Trials (200k steps) | 50 Trials (500k steps) |
+|-------------|------------------------|------------------------|
+| Hopper      | ~3-4 hours             | ~8-10 hours            |
+| HalfCheetah | ~3-4 hours             | ~8-10 hours            |
+| LunarLander | ~2-3 hours             | ~5-6 hours             |
 
-**Total if sequential: 15-25 hours**
+---
 
 ## 💡 Tips
 
-1. **Start with one env** - Test the process works
-2. **Run overnight** - Let it tune while you sleep
-3. **Use transfer learning** - Apply Hopper params to similar envs first
-4. **Parallel if possible** - Use multiple terminals/GPUs
-5. **Monitor early trials** - Stop if all trials fail
-
-## 🎛️ Custom Tuning
-
-For custom parameters:
-```bash
-python scripts/tune_hyperparameters.py \
-    --env "Hopper-v4" \
-    --config configs/PPO/moderate/hopper_friction_sine_baseline_ppo.yaml \
-    --type moderate \
-    --n-trials 100 \    # More trials
-    --n-jobs 8 \        # More parallel jobs
-    --quick             # Fast mode (100k timesteps)
-```
+1. **Start small**: Use `--type moderate --count 10` first
+2. **Monitor early**: Check W&B dashboard after 5 runs
+3. **Distributed**: Run multiple agents on the same sweep
+4. **Custom config**: Edit YAMLs in `configs/sweep/`
