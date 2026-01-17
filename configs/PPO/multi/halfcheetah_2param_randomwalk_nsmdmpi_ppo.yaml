@@ -41,9 +41,9 @@ paths:
   video_dir: videos/
 nsmdmpi:
   enabled: true
-  V_R: 400.0
-  V_P: 600.0
-  V_pi_star: 3500.0
+  V_R: 80.0
+  V_P: 150.0
+  V_pi_star: 1000.0
   kappa_base: 0.2
   kappa_min: 0.15
   kappa_max: 0.4
