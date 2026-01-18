@@ -17,7 +17,7 @@ env:
   - -5.0
   - 5.0
 wandb:
-  project: NS_MDMPI_LunarLander
+  project: att_19_LunarLander
   tags:
   - lunarlander
   - multi-param

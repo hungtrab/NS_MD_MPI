@@ -1,6 +1,6 @@
 env_id: LunarLander-v3
 wandb:
-  project: NS_MDMPI_LunarLander
+  project: att_19_LunarLander
   tags:
   - lunarlander
   - vanilla

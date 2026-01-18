@@ -1,6 +1,6 @@
 env_id: Hopper-v4
 wandb:
-  project: NS_MDMPI_Vanilla
+  project: att_19_Vanilla
   tags:
   - hopper
   - vanilla

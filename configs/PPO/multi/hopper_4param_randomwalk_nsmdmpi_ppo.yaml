@@ -37,7 +37,7 @@ env:
   - -11.0
   - -8.0
 wandb:
-  project: NS_MDMPI_Hopper
+  project: att_19_Hopper
   tags:
   - hopper
   - multi
