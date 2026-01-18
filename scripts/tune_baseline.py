@@ -23,32 +23,29 @@ from stable_baselines3.common.callbacks import EvalCallback
 from src.envs import make_nonstationary_env
 
 
-def get_config_value(config, key, default=None):
-    """Safely get value from wandb config."""
-    try:
-        return config[key]
-    except (KeyError, TypeError):
-        return default
-
-
 def train_baseline():
     """Train baseline PPO with wandb sweep config."""
     # Initialize wandb
     run = wandb.init()
     config = dict(wandb.config)  # Convert to dict to avoid recursion
     
+    # Build drift_conf dict
+    drift_conf = {
+        'parameter': config['drift_parameter'],
+        'drift_type': config['drift_type'],
+        'magnitude': config.get('drift_magnitude', 0.3),
+        'period': config.get('drift_period', 50000),
+        'base_value': config.get('drift_base_value', 1.0),
+        'bounds': config.get('bounds', None),
+        'sigma': config.get('sigma', 0.01),
+    }
+    
     # Create environment
     def make_env(rank):
         def _init():
             env = make_nonstationary_env(
                 env_id=config['env_id'],
-                parameter=config['drift_parameter'],
-                drift_type=config['drift_type'],
-                magnitude=config.get('drift_magnitude', 0.3),
-                period=config.get('drift_period', 50000),
-                base_value=config.get('drift_base_value', 1.0),
-                bounds=config.get('bounds', None),
-                sigma=config.get('sigma', 0.01),
+                drift_conf=drift_conf,
                 seed=config['seed'] + rank
             )
             return env
