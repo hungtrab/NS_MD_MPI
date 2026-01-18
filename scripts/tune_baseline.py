@@ -20,7 +20,7 @@ os.chdir(PROJECT_ROOT)
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines3.common.callbacks import EvalCallback
-from src.envs.nonstationary_wrapper import make_nonstationary_env
+from src.envs import make_nonstationary_env
 
 
 def train_baseline():
