@@ -76,7 +76,7 @@ parameters:
     value: 3.0
   
   drift_period:
-    value: 10000
+    value: 50000
   
   drift_base_value:
     value: -10.0
