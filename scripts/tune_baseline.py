@@ -29,6 +29,14 @@ def train_baseline():
     run = wandb.init()
     config = dict(wandb.config)  # Convert to dict to avoid recursion
     
+    # Default bounds for each parameter
+    DEFAULT_BOUNDS = {
+        'friction': [0.5, 1.5],
+        'mass_scale': [0.7, 1.3],
+        'damping': [0.5, 1.5],
+        'gravity': [-15.0, -5.0],
+    }
+    
     # Build drift_conf dict
     drift_conf = {
         'parameter': config['drift_parameter'],
@@ -36,7 +44,7 @@ def train_baseline():
         'magnitude': config.get('drift_magnitude', 0.3),
         'period': config.get('drift_period', 50000),
         'base_value': config.get('drift_base_value', 1.0),
-        'bounds': config.get('bounds', None),
+        'bounds': config.get('bounds') or DEFAULT_BOUNDS.get(config['drift_parameter'], [0.5, 1.5]),
         'sigma': config.get('sigma', 0.01),
     }
     
