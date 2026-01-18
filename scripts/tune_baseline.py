@@ -23,25 +23,33 @@ from stable_baselines3.common.callbacks import EvalCallback
 from src.envs import make_nonstationary_env
 
 
+def get_config_value(config, key, default=None):
+    """Safely get value from wandb config."""
+    try:
+        return config[key]
+    except (KeyError, TypeError):
+        return default
+
+
 def train_baseline():
     """Train baseline PPO with wandb sweep config."""
     # Initialize wandb
     run = wandb.init()
-    config = wandb.config
+    config = dict(wandb.config)  # Convert to dict to avoid recursion
     
     # Create environment
     def make_env(rank):
         def _init():
             env = make_nonstationary_env(
-                env_id=config.env_id,
-                parameter=config.drift_parameter,
-                drift_type=config.drift_type,
+                env_id=config['env_id'],
+                parameter=config['drift_parameter'],
+                drift_type=config['drift_type'],
                 magnitude=config.get('drift_magnitude', 0.3),
                 period=config.get('drift_period', 50000),
                 base_value=config.get('drift_base_value', 1.0),
                 bounds=config.get('bounds', None),
                 sigma=config.get('sigma', 0.01),
-                seed=config.seed + rank
+                seed=config['seed'] + rank
             )
             return env
         return _init
@@ -56,10 +64,10 @@ def train_baseline():
     model = PPO(
         "MlpPolicy",
         env,
-        learning_rate=config.learning_rate,
-        n_steps=config.n_steps,
-        batch_size=config.batch_size,
-        gamma=config.gamma,
+        learning_rate=config['learning_rate'],
+        n_steps=config['n_steps'],
+        batch_size=config['batch_size'],
+        gamma=config['gamma'],
         clip_range=config.get('clip_range', 0.2),
         ent_coef=config.get('ent_coef', 0.0),
         vf_coef=config.get('vf_coef', 0.5),
@@ -70,7 +78,7 @@ def train_baseline():
     # Train
     try:
         model.learn(
-            total_timesteps=config.total_timesteps,
+            total_timesteps=config['total_timesteps'],
             progress_bar=True
         )
         
@@ -80,16 +88,19 @@ def train_baseline():
             obs = eval_env.reset()
             episode_reward = 0
             done = False
-            while not done:
+            step = 0
+            while not done and step < 1000:
                 action, _ = model.predict(obs, deterministic=True)
                 obs, reward, done, info = eval_env.step(action)
                 episode_reward += reward[0]
+                step += 1
             rewards.append(episode_reward)
         
         mean_reward = np.mean(rewards)
         wandb.log({"mean_reward": mean_reward})
         
     except Exception as e:
+        print(f"Training error: {e}")
         wandb.log({"mean_reward": -10000, "error": str(e)})
     
     finally:
