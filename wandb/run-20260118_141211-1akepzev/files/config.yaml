@@ -1,0 +1,102 @@
+_wandb:
+    value:
+        cli_version: 0.23.1
+        e:
+            eo4vchjrbn141wvwzqrpujp86fd3247t:
+                args:
+                    - --create-sweep
+                    - --type
+                    - moderate
+                    - --env
+                    - Hopper-v4
+                    - --count
+                    - "50"
+                codePath: scripts/wandb_sweep_agent.py
+                codePathLocal: scripts/wandb_sweep_agent.py
+                cpu_count: 8
+                cpu_count_logical: 16
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "1003622154240"
+                        used: "932740648960"
+                email: hungtranbg1704@gmail.com
+                executable: /home/hungchan/miniconda3/envs/rl_hf_course/bin/python
+                git:
+                    commit: 3518d3c9d5d4e0bfeabdc49cdbff03b3f3fbaba0
+                    remote: https://github.com/hungtrab/NS_MD_MPI.git
+                gpu: NVIDIA RTX A2000 Laptop GPU
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 2560
+                      memoryTotal: "4294967296"
+                      name: NVIDIA RTX A2000 Laptop GPU
+                      uuid: GPU-595a2840-bd6f-6c35-c843-4d1510794d22
+                host: hungchan-Precision-7560
+                memory:
+                    total: "32812343296"
+                os: Linux-6.8.0-90-generic-x86_64-with-glibc2.39
+                program: /home/hungchan/Work/Deep-RL/scripts/wandb_sweep_agent.py
+                python: CPython 3.10.18
+                root: /home/hungchan/Work/Deep-RL
+                startedAt: "2026-01-18T07:12:11.599267Z"
+                writerId: eo4vchjrbn141wvwzqrpujp86fd3247t
+        m: []
+        python_version: 3.10.18
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 2
+                - 14
+            "4": 3.10.18
+            "5": 0.23.1
+            "12": 0.23.1
+            "13": linux-x86_64
+V_P:
+    value: 11.39506189695575
+V_R:
+    value: 16.02225397191539
+V_pi_star:
+    value: 5.506862132683581
+batch_size:
+    value: 64
+drift_base_value:
+    value: 0.9
+drift_magnitude:
+    value: 0.27
+drift_parameter:
+    value: friction
+drift_period:
+    value: 10000
+drift_type:
+    value: sine
+drift_window_size:
+    value: 824
+env_id:
+    value: Hopper-v4
+gamma:
+    value: 0.99
+kappa_base:
+    value: 0.20337334028511264
+lambda_base:
+    value: 0.5403898066587981
+learning_rate:
+    value: 0.0003
+max_ent_coef:
+    value: 0.07585642938828115
+n_envs:
+    value: 4
+n_steps:
+    value: 2048
+regularization_sensitivity:
+    value: 1.7882262857179496
+seed:
+    value: 42
+total_timesteps:
+    value: 200000
+trust_region_sensitivity:
+    value: 7.8773543397164705

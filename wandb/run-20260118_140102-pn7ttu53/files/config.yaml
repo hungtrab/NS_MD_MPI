@@ -1,0 +1,85 @@
+_wandb:
+    value:
+        cli_version: 0.23.1
+        e:
+            2998366o80lhhea9yly3u8micc71xqrs:
+                args:
+                    - --create-sweep
+                    - --type
+                    - moderate
+                    - --env
+                    - Hopper-v4
+                    - --count
+                    - "50"
+                codePath: scripts/wandb_sweep_agent.py
+                codePathLocal: scripts/wandb_sweep_agent.py
+                email: hungtranbg1704@gmail.com
+                executable: /home/hungchan/miniconda3/envs/rl_hf_course/bin/python
+                git:
+                    commit: 3518d3c9d5d4e0bfeabdc49cdbff03b3f3fbaba0
+                    remote: https://github.com/hungtrab/NS_MD_MPI.git
+                host: hungchan-Precision-7560
+                os: Linux-6.8.0-90-generic-x86_64-with-glibc2.39
+                program: /home/hungchan/Work/Deep-RL/scripts/wandb_sweep_agent.py
+                python: CPython 3.10.18
+                root: /home/hungchan/Work/Deep-RL
+                startedAt: "2026-01-18T07:01:02.650590Z"
+                writerId: 2998366o80lhhea9yly3u8micc71xqrs
+        m: []
+        python_version: 3.10.18
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 2
+                - 14
+            "4": 3.10.18
+            "5": 0.23.1
+            "12": 0.23.1
+            "13": linux-x86_64
+V_P:
+    value: 7.725833381754971
+V_R:
+    value: 12.583701093763356
+V_pi_star:
+    value: 7.569514165335442
+batch_size:
+    value: 64
+drift_base_value:
+    value: 0.9
+drift_magnitude:
+    value: 0.27
+drift_parameter:
+    value: friction
+drift_period:
+    value: 10000
+drift_type:
+    value: sine
+drift_window_size:
+    value: 1297
+env_id:
+    value: Hopper-v4
+gamma:
+    value: 0.99
+kappa_base:
+    value: 0.1529805747807726
+lambda_base:
+    value: 1.9555157051540069
+learning_rate:
+    value: 0.0003
+max_ent_coef:
+    value: 0.03902439158072339
+n_envs:
+    value: 4
+n_steps:
+    value: 2048
+regularization_sensitivity:
+    value: 1.786063593872517
+seed:
+    value: 42
+total_timesteps:
+    value: 200000
+trust_region_sensitivity:
+    value: 2.036599353201826

@@ -1,0 +1,46 @@
+wandb_version: 1
+
+V_P:
+  value: 16.178215884373547
+V_R:
+  value: 18.56082401112284
+V_pi_star:
+  value: 3.733782746970875
+batch_size:
+  value: 64
+drift_base_value:
+  value: 0.9
+drift_magnitude:
+  value: 0.27
+drift_parameter:
+  value: friction
+drift_period:
+  value: 10000
+drift_type:
+  value: sine
+drift_window_size:
+  value: 1055
+env_id:
+  value: HalfCheetah-v4
+gamma:
+  value: 0.99
+kappa_base:
+  value: 0.23090073666917743
+lambda_base:
+  value: 1.6376195482325318
+learning_rate:
+  value: 0.0003
+max_ent_coef:
+  value: 0.051376368240030834
+n_envs:
+  value: 4
+n_steps:
+  value: 2048
+regularization_sensitivity:
+  value: 2.1232614141662323
+seed:
+  value: 42
+total_timesteps:
+  value: 200000
+trust_region_sensitivity:
+  value: 8.972106420548586

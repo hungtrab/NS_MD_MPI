@@ -1,0 +1,1 @@
+{"_step":1,"final/V_R_remaining":0.8939287420884671,"final/V_P_remaining":0.8782370041007326,"_wandb":{"runtime":642},"_runtime":642,"final/mean_reward":566.7495963811874,"final/budget_remaining_avg":0.5907219153963998,"final/V_pi_remaining":0,"_timestamp":1.768764723833306e+09,"optimization_score":0.6387357558887936}

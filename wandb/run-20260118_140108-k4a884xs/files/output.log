@@ -1,0 +1,27 @@
+
+============================================================
+Starting sweep trial: stilted-sweep-3
+============================================================
+
+Hyperparameters:
+  V_R=8.73, V_P=8.06, V_pi_star=4.38
+  kappa_base=0.297, lambda_base=0.93
+  trust_region_sensitivity=5.63
+  regularization_sensitivity=2.33
+  max_ent_coef=0.055
+  drift_window_size=1114
+/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/gymnasium/envs/registration.py:512: DeprecationWarning: [33mWARN: The environment Hopper-v4 is out of date. You should consider upgrading to version `v5`.[0m
+  logger.deprecation(
+>>> [Wrapper] Initialized Non-Stationary Hopper
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary Hopper
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary Hopper
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary Hopper
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary Hopper
+    - friction: sine (base=0.900)
+/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+Training failed: You must install tqdm and rich in order to use the progress bar callback. It is included if you install stable-baselines with the extra packages: `pip install stable-baselines3[extra]`

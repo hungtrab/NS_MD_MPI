@@ -1,0 +1,46 @@
+wandb_version: 1
+
+V_P:
+  value: 28.716197758515065
+V_R:
+  value: 23.136913146584547
+V_pi_star:
+  value: 14.616444412421664
+batch_size:
+  value: 64
+drift_base_value:
+  value: 0.9
+drift_magnitude:
+  value: 0.27
+drift_parameter:
+  value: friction
+drift_period:
+  value: 10000
+drift_type:
+  value: sine
+drift_window_size:
+  value: 776
+env_id:
+  value: Hopper-v4
+gamma:
+  value: 0.99
+kappa_base:
+  value: 0.3874672028147846
+lambda_base:
+  value: 3.0572699192611275
+learning_rate:
+  value: 0.0003
+max_ent_coef:
+  value: 0.1507239681470706
+n_envs:
+  value: 4
+n_steps:
+  value: 2048
+regularization_sensitivity:
+  value: 9.952288196151931
+seed:
+  value: 42
+total_timesteps:
+  value: 200000
+trust_region_sensitivity:
+  value: 8.558839804942975

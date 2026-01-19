@@ -1,0 +1,38 @@
+
+============================================================
+Starting sweep trial: twilight-sweep-7
+============================================================
+
+Hyperparameters:
+  V_R=10.26, V_P=15.58, V_pi_star=4.66
+  kappa_base=0.252, lambda_base=1.64
+  trust_region_sensitivity=8.14
+  regularization_sensitivity=3.34
+  max_ent_coef=0.067
+  drift_window_size=1264
+/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/gymnasium/envs/registration.py:512: DeprecationWarning: [33mWARN: The environment HalfCheetah-v4 is out of date. You should consider upgrading to version `v5`.[0m
+  logger.deprecation(
+>>> [Wrapper] Initialized Non-Stationary HalfCheetah
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary HalfCheetah
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary HalfCheetah
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary HalfCheetah
+    - friction: sine (base=0.900)
+>>> [Wrapper] Initialized Non-Stationary HalfCheetah
+    - friction: sine (base=0.900)
+/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+[2K/home/hungchan/miniconda3/envs/rl_hf_course/lib/python3.10/site-packages/stable_baselines3/common/evaluation.py:70: ━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m19,896/200,000 [0m [ [33m0:00:48[0m < [36m0:07:10[0m , [31m420 it/s[0m ]
+UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode
+lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+[2K[35m 100%[0m [38;2;114;156;31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m204,800/200,000 [0m [ [33m0:11:45[0m < [36m0:00:00[0m , [31m240 it/s[0m ] , [31m173 it/s[0m ]m345 it/s[0m ]
+[?25h
+============================================================
+Trial Complete!
+Mean Reward: -278.77
+Budget Remaining: 50.17%
+Score: 0.1714
+============================================================
