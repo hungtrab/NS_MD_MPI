@@ -74,7 +74,7 @@ def train_with_hyperparameters():
     }
     
     # Training settings
-    total_timesteps = config.get('total_timesteps', 200_000)
+    total_timesteps = config.get('total_timesteps', 2_000_000)
     n_envs = config.get('n_envs', 4)
     seed = config.get('seed', 42)
     
@@ -320,7 +320,7 @@ def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -
         'drift_magnitude': {'value': drift_config.get('magnitude', 0.3)},
         'drift_period': {'value': drift_config.get('period', 100000)},
         'drift_base_value': {'value': drift_config.get('base_value', 1.0)},
-        'total_timesteps': {'value': 200_000},  # Shorter for tuning
+        'total_timesteps': {'value': 2_000_000},
         'n_envs': {'value': 4},
         'seed': {'value': 42},
         'learning_rate': {'value': 3e-4},
