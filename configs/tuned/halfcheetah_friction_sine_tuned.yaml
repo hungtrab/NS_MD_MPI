@@ -37,10 +37,10 @@ paths:
 
 nsmdmpi:
   enabled: true
-  # Tuned from sweep youthful_sweep_15
-  V_R: 156.85
-  V_P: 319.60
-  V_pi_star: 514.03
+  # Tuned from sweep youthful_sweep_15, scaled 10x for 2M steps
+  V_R: 1568.5
+  V_P: 3196.0
+  V_pi_star: 5140.3
   kappa_base: 0.175
   kappa_min: 0.029
   kappa_max: 0.535
