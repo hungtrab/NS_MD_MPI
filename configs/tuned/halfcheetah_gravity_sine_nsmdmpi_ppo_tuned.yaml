@@ -1,0 +1,51 @@
+env_id: HalfCheetah-v4
+env:
+  parameter: gravity
+  drift_type: sine
+  magnitude: 0.3
+  period: 100000
+  base_value: -9.81
+  bounds:
+  - -11.0
+  - -8.0
+wandb:
+  project: att_19_HalfCheetah
+  tags:
+  - halfcheetah
+  - moderate
+  - ppo
+  - gravity
+  - sine
+  - nsmdmpi
+  mode: online
+train:
+  algorithm: PPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
+nsmdmpi:
+  enabled: true
+  V_R: 27.0
+  V_P: 45.0
+  V_pi_star: 21.0
+  kappa_base: 0.32
+  kappa_min: 0.15
+  kappa_max: 0.4
+  lambda_base: 1.98
+  kappa_adaptive: true
+  lambda_adaptive: true
+  trust_region_sensitivity: 18.5
+  regularization_sensitivity: 7.9
+  max_ent_coef: 0.15
+  drift_window_size: 600
+  log_freq: 50
+  save_budget_history: true
+  budget_save_dir: budgets/
+  verbose: 1
