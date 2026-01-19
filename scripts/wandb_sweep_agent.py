@@ -85,11 +85,17 @@ def train_with_hyperparameters():
     V_P = config.get('V_P', 10.0)
     V_pi_star = config.get('V_pi_star', 5.0)
     kappa_base = config.get('kappa_base', 0.2)
+    kappa_min = config.get('kappa_min', 0.05)
+    kappa_max = config.get('kappa_max', 0.4)
     lambda_base = config.get('lambda_base', 1.0)
+    lambda_min = config.get('lambda_min', 0.1)
+    lambda_max = config.get('lambda_max', 10.0)
     trust_region_sensitivity = config.get('trust_region_sensitivity', 5.0)
     regularization_sensitivity = config.get('regularization_sensitivity', 2.0)
+    min_ent_coef = config.get('min_ent_coef', 0.0)
     max_ent_coef = config.get('max_ent_coef', 0.05)
     drift_window_size = config.get('drift_window_size', 1000)
+    drift_min_samples = config.get('drift_min_samples', 100)
     
     # PPO hyperparameters (optional tuning)
     learning_rate = config.get('learning_rate', 3e-4)
@@ -99,11 +105,12 @@ def train_with_hyperparameters():
     
     print(f"\nHyperparameters:")
     print(f"  V_R={V_R:.2f}, V_P={V_P:.2f}, V_pi_star={V_pi_star:.2f}")
-    print(f"  kappa_base={kappa_base:.3f}, lambda_base={lambda_base:.2f}")
+    print(f"  kappa: base={kappa_base:.3f}, min={kappa_min:.3f}, max={kappa_max:.3f}")
+    print(f"  lambda: base={lambda_base:.2f}, min={lambda_min:.2f}, max={lambda_max:.2f}")
     print(f"  trust_region_sensitivity={trust_region_sensitivity:.2f}")
     print(f"  regularization_sensitivity={regularization_sensitivity:.2f}")
-    print(f"  max_ent_coef={max_ent_coef:.3f}")
-    print(f"  drift_window_size={drift_window_size}")
+    print(f"  entropy: min={min_ent_coef:.3f}, max={max_ent_coef:.3f}")
+    print(f"  drift: window={drift_window_size}, min_samples={drift_min_samples}")
     
     # Create environments
     env = create_env(env_id, drift_config, n_envs=n_envs, seed=seed)
@@ -127,13 +134,19 @@ def train_with_hyperparameters():
         V_P=V_P,
         V_pi_star=V_pi_star,
         kappa_base=kappa_base,
+        kappa_min=kappa_min,
+        kappa_max=kappa_max,
         kappa_adaptive=True,
         trust_region_sensitivity=trust_region_sensitivity,
         lambda_base=lambda_base,
+        lambda_min=lambda_min,
+        lambda_max=lambda_max,
         lambda_adaptive=True,
         regularization_sensitivity=regularization_sensitivity,
+        min_ent_coef=min_ent_coef,
         max_ent_coef=max_ent_coef,
         drift_window_size=drift_window_size,
+        drift_min_samples=drift_min_samples,
         log_freq=500,
         save_budget_history=False,
         verbose=0,
@@ -215,11 +228,17 @@ def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -
             'V_P': {'distribution': 'uniform', 'min': 100.0, 'max': 400.0},
             'V_pi_star': {'distribution': 'uniform', 'min': 500.0, 'max': 2000.0},
             'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.4},
+            'kappa_min': {'distribution': 'uniform', 'min': 0.02, 'max': 0.1},
+            'kappa_max': {'distribution': 'uniform', 'min': 0.3, 'max': 0.6},
             'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 3.0},
+            'lambda_min': {'distribution': 'uniform', 'min': 0.05, 'max': 0.2},
+            'lambda_max': {'distribution': 'uniform', 'min': 5.0, 'max': 15.0},
             'trust_region_sensitivity': {'distribution': 'uniform', 'min': 5.0, 'max': 25.0},
             'regularization_sensitivity': {'distribution': 'uniform', 'min': 2.0, 'max': 10.0},
-            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.15},
+            'min_ent_coef': {'distribution': 'uniform', 'min': 0.0, 'max': 0.02},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.03, 'max': 0.15},
             'drift_window_size': {'distribution': 'int_uniform', 'min': 500, 'max': 2000},
+            'drift_min_samples': {'distribution': 'int_uniform', 'min': 50, 'max': 200},
         }
     elif 'Hopper' in env_id:
         base_ranges = {
@@ -227,11 +246,17 @@ def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -
             'V_P': {'distribution': 'uniform', 'min': 50.0, 'max': 250.0},
             'V_pi_star': {'distribution': 'uniform', 'min': 300.0, 'max': 1500.0},
             'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.35},
+            'kappa_min': {'distribution': 'uniform', 'min': 0.02, 'max': 0.08},
+            'kappa_max': {'distribution': 'uniform', 'min': 0.3, 'max': 0.5},
             'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.5},
+            'lambda_min': {'distribution': 'uniform', 'min': 0.05, 'max': 0.15},
+            'lambda_max': {'distribution': 'uniform', 'min': 5.0, 'max': 12.0},
             'trust_region_sensitivity': {'distribution': 'uniform', 'min': 3.0, 'max': 20.0},
             'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.5, 'max': 8.0},
-            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.12},
+            'min_ent_coef': {'distribution': 'uniform', 'min': 0.0, 'max': 0.015},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.02, 'max': 0.12},
             'drift_window_size': {'distribution': 'int_uniform', 'min': 400, 'max': 1500},
+            'drift_min_samples': {'distribution': 'int_uniform', 'min': 50, 'max': 150},
         }
     elif 'LunarLander' in env_id:
         base_ranges = {
@@ -239,11 +264,17 @@ def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -
             'V_P': {'distribution': 'uniform', 'min': 10.0, 'max': 50.0},
             'V_pi_star': {'distribution': 'uniform', 'min': 20.0, 'max': 150.0},
             'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.3},
+            'kappa_min': {'distribution': 'uniform', 'min': 0.03, 'max': 0.08},
+            'kappa_max': {'distribution': 'uniform', 'min': 0.25, 'max': 0.45},
             'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.0},
+            'lambda_min': {'distribution': 'uniform', 'min': 0.05, 'max': 0.15},
+            'lambda_max': {'distribution': 'uniform', 'min': 4.0, 'max': 10.0},
             'trust_region_sensitivity': {'distribution': 'uniform', 'min': 2.0, 'max': 12.0},
             'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.0, 'max': 6.0},
-            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.1},
+            'min_ent_coef': {'distribution': 'uniform', 'min': 0.0, 'max': 0.01},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.02, 'max': 0.1},
             'drift_window_size': {'distribution': 'int_uniform', 'min': 300, 'max': 1000},
+            'drift_min_samples': {'distribution': 'int_uniform', 'min': 30, 'max': 100},
         }
     else:
         # Default for unknown envs
@@ -252,11 +283,17 @@ def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -
             'V_P': {'distribution': 'uniform', 'min': 30.0, 'max': 150.0},
             'V_pi_star': {'distribution': 'uniform', 'min': 100.0, 'max': 500.0},
             'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.3},
+            'kappa_min': {'distribution': 'uniform', 'min': 0.03, 'max': 0.08},
+            'kappa_max': {'distribution': 'uniform', 'min': 0.25, 'max': 0.5},
             'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.0},
+            'lambda_min': {'distribution': 'uniform', 'min': 0.05, 'max': 0.15},
+            'lambda_max': {'distribution': 'uniform', 'min': 5.0, 'max': 12.0},
             'trust_region_sensitivity': {'distribution': 'uniform', 'min': 2.0, 'max': 15.0},
             'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.0, 'max': 7.0},
-            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.1},
+            'min_ent_coef': {'distribution': 'uniform', 'min': 0.0, 'max': 0.01},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.02, 'max': 0.1},
             'drift_window_size': {'distribution': 'int_uniform', 'min': 500, 'max': 1500},
+            'drift_min_samples': {'distribution': 'int_uniform', 'min': 50, 'max': 150},
         }
     
     # Apply experiment type modifiers
