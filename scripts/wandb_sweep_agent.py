@@ -206,44 +206,74 @@ def train_with_hyperparameters():
 
 
 def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -> Dict:
-    """Generate sweep configuration based on experiment type"""
+    """Generate sweep configuration based on experiment type and environment"""
     
-    if experiment_type == 'moderate':
-        param_ranges = {
-            'V_R': {'distribution': 'uniform', 'min': 5.0, 'max': 20.0},
-            'V_P': {'distribution': 'uniform', 'min': 5.0, 'max': 20.0},
-            'V_pi_star': {'distribution': 'uniform', 'min': 2.5, 'max': 10.0},
-            'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.3},
-            'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.0},
-            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 2.0, 'max': 10.0},
-            'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.0, 'max': 5.0},
-            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.1},
+    # Environment-specific base ranges
+    if 'HalfCheetah' in env_id:
+        base_ranges = {
+            'V_R': {'distribution': 'uniform', 'min': 50.0, 'max': 200.0},
+            'V_P': {'distribution': 'uniform', 'min': 100.0, 'max': 400.0},
+            'V_pi_star': {'distribution': 'uniform', 'min': 500.0, 'max': 2000.0},
+            'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.4},
+            'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 3.0},
+            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 5.0, 'max': 25.0},
+            'regularization_sensitivity': {'distribution': 'uniform', 'min': 2.0, 'max': 10.0},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.15},
             'drift_window_size': {'distribution': 'int_uniform', 'min': 500, 'max': 2000},
         }
-    elif experiment_type == 'extreme':
-        param_ranges = {
-            'V_R': {'distribution': 'uniform', 'min': 20.0, 'max': 50.0},
-            'V_P': {'distribution': 'uniform', 'min': 20.0, 'max': 50.0},
-            'V_pi_star': {'distribution': 'uniform', 'min': 10.0, 'max': 25.0},
-            'kappa_base': {'distribution': 'uniform', 'min': 0.15, 'max': 0.4},
-            'lambda_base': {'distribution': 'uniform', 'min': 1.0, 'max': 5.0},
-            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 5.0, 'max': 20.0},
-            'regularization_sensitivity': {'distribution': 'uniform', 'min': 3.0, 'max': 10.0},
-            'max_ent_coef': {'distribution': 'uniform', 'min': 0.05, 'max': 0.2},
-            'drift_window_size': {'distribution': 'int_uniform', 'min': 200, 'max': 1000},
+    elif 'Hopper' in env_id:
+        base_ranges = {
+            'V_R': {'distribution': 'uniform', 'min': 30.0, 'max': 150.0},
+            'V_P': {'distribution': 'uniform', 'min': 50.0, 'max': 250.0},
+            'V_pi_star': {'distribution': 'uniform', 'min': 300.0, 'max': 1500.0},
+            'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.35},
+            'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.5},
+            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 3.0, 'max': 20.0},
+            'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.5, 'max': 8.0},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.12},
+            'drift_window_size': {'distribution': 'int_uniform', 'min': 400, 'max': 1500},
         }
-    else:  # multi
-        param_ranges = {
-            'V_R': {'distribution': 'uniform', 'min': 10.0, 'max': 30.0},
-            'V_P': {'distribution': 'uniform', 'min': 10.0, 'max': 30.0},
-            'V_pi_star': {'distribution': 'uniform', 'min': 5.0, 'max': 15.0},
+    elif 'LunarLander' in env_id:
+        base_ranges = {
+            'V_R': {'distribution': 'uniform', 'min': 5.0, 'max': 30.0},
+            'V_P': {'distribution': 'uniform', 'min': 10.0, 'max': 50.0},
+            'V_pi_star': {'distribution': 'uniform', 'min': 20.0, 'max': 150.0},
             'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.3},
-            'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 3.0},
-            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 3.0, 'max': 12.0},
-            'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.5, 'max': 7.0},
-            'max_ent_coef': {'distribution': 'uniform', 'min': 0.02, 'max': 0.15},
+            'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.0},
+            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 2.0, 'max': 12.0},
+            'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.0, 'max': 6.0},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.1},
+            'drift_window_size': {'distribution': 'int_uniform', 'min': 300, 'max': 1000},
+        }
+    else:
+        # Default for unknown envs
+        base_ranges = {
+            'V_R': {'distribution': 'uniform', 'min': 20.0, 'max': 100.0},
+            'V_P': {'distribution': 'uniform', 'min': 30.0, 'max': 150.0},
+            'V_pi_star': {'distribution': 'uniform', 'min': 100.0, 'max': 500.0},
+            'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.3},
+            'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.0},
+            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 2.0, 'max': 15.0},
+            'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.0, 'max': 7.0},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.01, 'max': 0.1},
             'drift_window_size': {'distribution': 'int_uniform', 'min': 500, 'max': 1500},
         }
+    
+    # Apply experiment type modifiers
+    if experiment_type == 'extreme':
+        # Increase ranges by 50% for extreme drifts
+        for key in ['V_R', 'V_P', 'V_pi_star']:
+            base_ranges[key]['min'] *= 1.5
+            base_ranges[key]['max'] *= 1.5
+        base_ranges['trust_region_sensitivity']['max'] *= 1.3
+        base_ranges['regularization_sensitivity']['max'] *= 1.3
+    elif experiment_type == 'multi':
+        # Slightly increase for multi-param drifts
+        for key in ['V_R', 'V_P', 'V_pi_star']:
+            base_ranges[key]['min'] *= 1.2
+            base_ranges[key]['max'] *= 1.2
+    
+    param_ranges = base_ranges
     
     # Fixed parameters (not tuned)
     fixed_params = {
