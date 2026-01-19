@@ -1,98 +1,160 @@
-# Optuna Hyperparameter Tuning - Quick Reference
+# TUNING_GUIDE.md - Hướng Dẫn Tune NS-MDMPI
 
-## 🚀 Quick Start
+## Tổng Quan
 
-### 1. Install Optuna (if needed)
+Hiện tại có 2 script tuning:
+1. `scripts/wandb_sweep_agent.py` - Tune **NS-MDMPI** params
+2. `scripts/tune_baseline.py` - Tune **Baseline PPO** params
+
+---
+
+## 1. Tune NS-MDMPI với `wandb_sweep_agent.py`
+
+### Cách dùng:
 ```bash
-conda activate rl_hf_course
-pip install optuna optuna-dashboard
+python scripts/wandb_sweep_agent.py --create-sweep \
+    --type <TYPE> \
+    --env <ENV> \
+    --drift-param <PARAM> \
+    --drift-type <DRIFT> \
+    --count <N>
 ```
 
-### 2. Run Tuning
+### Arguments:
+| Arg | Mô tả | Values |
+|-----|-------|--------|
+| `--type` | Loại experiment | `moderate`, `extreme`, `multi` |
+| `--env` | Environment | `Hopper-v4`, `HalfCheetah-v4`, etc |
+| `--drift-param` | Parameter bị drift | `friction`, `mass_scale`, `damping`, `gravity` |
+| `--drift-type` | Loại drift | `sine`, `linear`, `random_walk`, `jump` |
+| `--count` | Số trials | 20, 50, etc |
+| `--config` | Custom YAML (optional) | path to yaml |
 
-**Moderate Drift (recommended to start):**
+### Ví dụ tune HalfCheetah với damping sine:
 ```bash
-bash scripts/tune_moderate.sh
+python scripts/wandb_sweep_agent.py --create-sweep \
+    --type moderate \
+    --env HalfCheetah-v4 \
+    --drift-param damping \
+    --drift-type sine \
+    --count 20
 ```
 
-**Extreme Drift:**
+---
+
+## 2. Tune theo từng Drift Config
+
+### Option A: Tạo YAML config riêng
+
+Tạo file `configs/sweep/halfcheetah_damping_sine.yaml`:
+```yaml
+program: scripts/wandb_sweep_agent.py
+method: bayes
+name: HalfCheetah Damping Sine Tuning
+
+metric:
+  name: optimization_score
+  goal: maximize
+
+parameters:
+  # NS-MDMPI params (TUNE)
+  V_R:
+    distribution: uniform
+    min: 5.0
+    max: 20.0
+  V_P:
+    distribution: uniform
+    min: 5.0
+    max: 20.0
+  V_pi_star:
+    distribution: uniform
+    min: 2.5
+    max: 10.0
+  # ... other NS-MDMPI params ...
+
+  # Fixed params
+  env_id:
+    value: HalfCheetah-v4
+  drift_parameter:
+    value: damping          # <-- THAY ĐỔI 
+  drift_type:
+    value: sine             # <-- THAY ĐỔI 
+  drift_magnitude:
+    value: 0.3
+  drift_period:
+    value: 50000
+  # ... etc ...
+```
+
+Rồi chạy:
 ```bash
-bash scripts/tune_extreme.sh
+python scripts/wandb_sweep_agent.py --create-sweep --config configs/sweep/halfcheetah_damping_sine.yaml --count 20
 ```
 
-**Multi-Parameter:**
-```bash
-bash scripts/tune_multi.sh
-```
+### Option B: Sửa script để hỗ trợ drift args (RECOMMENDED)
 
-## 📊 Monitor Progress
+Thêm args `--drift-param` và `--drift-type` vào `wandb_sweep_agent.py`.
 
-### View Optuna Dashboard (optional)
-```bash
-# In separate terminal
-optuna-dashboard results/optuna_studies/moderate_hopper_friction_sine.db
-# Open browser: http://localhost:8080
-```
+---
 
-### Check study status
-```python
-import optuna
-study = optuna.load_study(
-    study_name="moderate_hopper_friction_sine",
-    storage="sqlite:///results/optuna_studies/moderate_hopper_friction_sine.db"
-)
-print(f"Trials completed: {len(study.trials)}")
-print(f"Best value: {study.best_value}")
-print(f"Best params: {study.best_params}")
-```
+## 3. Params Được Tune (NS-MDMPI)
 
-## 🎯 Best Practices
+| Parameter | Moderate Range | Extreme Range | Mô tả |
+|-----------|----------------|---------------|-------|
+| `V_R` | 5-20 | 20-50 | Reward variation budget |
+| `V_P` | 5-20 | 20-50 | Dynamics variation budget |
+| `V_pi_star` | 2.5-10 | 10-25 | Policy budget |
+| `kappa_base` | 0.1-0.3 | 0.15-0.4 | Base trust region |
+| `lambda_base` | 0.5-2 | 1-5 | Base regularization |
+| `trust_region_sensitivity` | 2-10 | 5-20 | κ adaptation speed |
+| `regularization_sensitivity` | 1-5 | 3-10 | λ adaptation speed |
+| `max_ent_coef` | 0.01-0.1 | 0.05-0.2 | Max entropy coef |
+| `drift_window_size` | 500-2000 | 200-1000 | Drift estimation window |
 
-1. **Start small:** Run 5 validation trials first
-2. **Monitor:** Use optuna-dashboard to track progress
-3. **Resume:** Studies auto-save, safe to interrupt (Ctrl+C)
-4. **Parallel:** Adjust `--n-jobs` based on available cores
+---
 
-## ⏱️ Time Estimates
-
-| Type | Quick Mode (100k) | Full Mode (500k) |
-|------|-------------------|------------------|
-| 5 trials | ~30 min | ~2 hours |
-| 50 trials | ~6 hours | ~20 hours |
-
-With 4 parallel jobs (divide by 4).
-
-## 📁 Output Files
-
-After tuning completes:
-- **Database:** `results/optuna_studies/{study_name}.db`
-- **Best Params:** `results/tuned_params/{study_name}_best_params.yaml`
-
-## 🔄 Apply Tuned Parameters
+## 4. Tune Baseline PPO
 
 ```bash
-# Manual: Copy best params to configs
-cat results/tuned_params/moderate_hopper_friction_sine_best_params.yaml
-
-# Then update configs/PPO/moderate/*_nsmdmpi_ppo.yaml
+python scripts/tune_baseline.py --env <ENV> --drift-param <PARAM> --drift-type <TYPE> --count <N>
 ```
 
-## ⚡ Speed Tips
+### Params Được Tune (PPO):
+- `learning_rate`: 5e-5 - 1e-3
+- `n_steps`: 1024, 2048, 4096
+- `batch_size`: 32, 64, 128, 256
+- `gamma`: 0.99, 0.995, 0.999
+- `clip_range`: 0.1 - 0.3
+- `ent_coef`: 1e-4 - 1e-2
+- `vf_coef`: 0.3 - 0.7
 
-1. Use `--quick` flag (100k timesteps instead of 500k)
-2. Increase `--n-jobs` for more parallelism
-3. Run on CPU (`device='cpu'` in script)
-4. Use smaller networks during search
+---
 
-## 🐛 Troubleshooting
+## 5. Workflow Hoàn Chỉnh
 
-**Out of Memory:**
-- Reduce `--n-jobs`
-- Use `--quick` mode
+### Bước 1: Tune NS-MDMPI cho từng config
+```bash
+# friction sine
+python scripts/wandb_sweep_agent.py --create-sweep --type moderate --env HalfCheetah-v4 --count 20
 
-**Trial Pruning Too Aggressive:**
-- Increase `n_warmup_steps` in script
+# Cho các drift khác: tạo YAML config riêng (xem Option A)
+```
 
-**Slow Progress:**
-- Check CPU usage (`htop`)
-- Reduce timesteps temporarily
+### Bước 2: Lấy best params từ WandB
+1. Vào WandB dashboard → Sweeps
+2. Chọn sweep → Best run
+3. Copy config values
+
+### Bước 3: Tạo tuned config
+Tạo file `configs/tuned/<config>_tuned.yaml` với best params.
+
+### Bước 4: Chạy experiments với tuned config
+```bash
+python scripts/train.py --config configs/tuned/halfcheetah_friction_sine_nsmdmpi_ppo_tuned.yaml
+```
+
+---
+
+## 6. Link WandB Dashboard
+
+https://wandb.ai/hungtrab-hanoi-university-of-science-and-technology

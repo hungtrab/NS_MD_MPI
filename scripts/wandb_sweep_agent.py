@@ -295,6 +295,10 @@ def main():
     parser.add_argument('--type', type=str, default='moderate',
                         choices=['moderate', 'extreme', 'multi'],
                         help='Experiment type')
+    parser.add_argument('--drift-param', type=str, default='friction',
+                        help='Drift parameter: friction, mass_scale, damping, gravity')
+    parser.add_argument('--drift-type', type=str, default='sine',
+                        help='Drift type: sine, linear, random_walk, jump')
     parser.add_argument('--project', type=str, default='NS-MDMPI-Sweep',
                         help='W&B project name')
     args = parser.parse_args()
@@ -305,15 +309,16 @@ def main():
             with open(args.config, 'r') as f:
                 sweep_config = yaml.safe_load(f)
         else:
-            # Auto-generate config
+            # Auto-generate config with user-specified drift params
             drift_config = {
-                'parameter': 'friction',
-                'drift_type': 'sine',
-                'magnitude': 0.27,
-                'period': 10000,
-                'base_value': 0.9,
+                'parameter': args.drift_param,
+                'drift_type': args.drift_type,
+                'magnitude': 0.3,
+                'period': 50000,
+                'base_value': 1.0,
             }
             sweep_config = create_sweep_config(args.type, args.env, drift_config)
+            sweep_config['name'] = f"NS-MDMPI_{args.env}_{args.drift_param}_{args.drift_type}"
         
         # Create sweep
         sweep_id = wandb.sweep(sweep_config, project=args.project)
