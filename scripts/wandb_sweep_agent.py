@@ -64,13 +64,13 @@ def train_with_hyperparameters():
     # Extract hyperparameters from sweep config
     env_id = config.get('env_id', 'Hopper-v4')
     
-    # Drift config
+    # Drift config - same as YAML configs
     drift_config = {
         'parameter': config.get('drift_parameter', 'friction'),
         'drift_type': config.get('drift_type', 'sine'),
-        'magnitude': config.get('drift_magnitude', 0.27),
-        'period': config.get('drift_period', 10000),
-        'base_value': config.get('drift_base_value', 0.9),
+        'magnitude': config.get('drift_magnitude', 0.3),
+        'period': config.get('drift_period', 100000),
+        'base_value': config.get('drift_base_value', 1.0),
     }
     
     # Training settings
@@ -275,15 +275,15 @@ def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -
     
     param_ranges = base_ranges
     
-    # Fixed parameters (not tuned)
+    # Fixed parameters (not tuned) - match YAML configs
     fixed_params = {
         'env_id': {'value': env_id},
         'drift_parameter': {'value': drift_config.get('parameter', 'friction')},
         'drift_type': {'value': drift_config.get('drift_type', 'sine')},
-        'drift_magnitude': {'value': drift_config.get('magnitude', 0.27)},
-        'drift_period': {'value': drift_config.get('period', 10000)},
-        'drift_base_value': {'value': drift_config.get('base_value', 0.9)},
-        'total_timesteps': {'value': 200_000},
+        'drift_magnitude': {'value': drift_config.get('magnitude', 0.3)},
+        'drift_period': {'value': drift_config.get('period', 100000)},
+        'drift_base_value': {'value': drift_config.get('base_value', 1.0)},
+        'total_timesteps': {'value': 200_000},  # Shorter for tuning
         'n_envs': {'value': 4},
         'seed': {'value': 42},
         'learning_rate': {'value': 3e-4},
@@ -340,15 +340,18 @@ def main():
                 sweep_config = yaml.safe_load(f)
         else:
             # Auto-generate config with user-specified drift params
+            # Env settings match YAML configs
             drift_config = {
                 'parameter': args.drift_param,
                 'drift_type': args.drift_type,
                 'magnitude': 0.3,
-                'period': 50000,
+                'period': 100000,
                 'base_value': 1.0,
             }
             sweep_config = create_sweep_config(args.type, args.env, drift_config)
-            sweep_config['name'] = f"NS-MDMPI_{args.env}_{args.drift_param}_{args.drift_type}"
+            # Sweep name: env_driftparam_drifttype (e.g. HalfCheetah_friction_sine)
+            env_short = args.env.replace('-v4', '').replace('-v5', '')
+            sweep_config['name'] = f"{env_short}_{args.drift_param}_{args.drift_type}"
         
         # Create sweep
         sweep_id = wandb.sweep(sweep_config, project=args.project)
