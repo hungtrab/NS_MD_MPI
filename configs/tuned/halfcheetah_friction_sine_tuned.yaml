@@ -1,0 +1,61 @@
+# Best config from sweep youthful_sweep_15
+
+env_id: HalfCheetah-v4
+env:
+  parameter: friction
+  drift_type: sine
+  magnitude: 0.3
+  period: 100000
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 1.5
+
+wandb:
+  project: att_19_HalfCheetah
+  tags:
+  - halfcheetah
+  - friction
+  - sine
+  - nsmdmpi
+  - tuned
+  mode: online
+
+train:
+  algorithm: PPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
+
+nsmdmpi:
+  enabled: true
+  # Tuned from sweep youthful_sweep_15
+  V_R: 156.85
+  V_P: 319.60
+  V_pi_star: 514.03
+  kappa_base: 0.175
+  kappa_min: 0.029
+  kappa_max: 0.535
+  lambda_base: 1.82
+  lambda_min: 0.175
+  lambda_max: 6.55
+  kappa_adaptive: true
+  lambda_adaptive: true
+  trust_region_sensitivity: 22.28
+  regularization_sensitivity: 5.24
+  min_ent_coef: 0.015
+  max_ent_coef: 0.052
+  drift_window_size: 592
+  drift_min_samples: 88
+  log_freq: 50
+  save_budget_history: true
+  budget_save_dir: budgets/
+  verbose: 1
