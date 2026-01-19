@@ -329,6 +329,8 @@ def main():
                         help='Drift parameter: friction, mass_scale, damping, gravity')
     parser.add_argument('--drift-type', type=str, default='sine',
                         help='Drift type: sine, linear, random_walk, jump')
+    parser.add_argument('--base-config', type=str, default=None,
+                        help='Path to base YAML config to read drift settings from')
     parser.add_argument('--project', type=str, default='NS-MDMPI-Sweep',
                         help='W&B project name')
     args = parser.parse_args()
@@ -336,22 +338,42 @@ def main():
     if args.create_sweep:
         # Load or generate sweep config
         if args.config:
+            # Use custom sweep config YAML
             with open(args.config, 'r') as f:
                 sweep_config = yaml.safe_load(f)
         else:
-            # Auto-generate config with user-specified drift params
-            # Env settings match YAML configs
-            drift_config = {
-                'parameter': args.drift_param,
-                'drift_type': args.drift_type,
-                'magnitude': 0.3,
-                'period': 100000,
-                'base_value': 1.0,
-            }
-            sweep_config = create_sweep_config(args.type, args.env, drift_config)
-            # Sweep name: env_driftparam_drifttype (e.g. HalfCheetah_friction_sine)
-            env_short = args.env.replace('-v4', '').replace('-v5', '')
-            sweep_config['name'] = f"{env_short}_{args.drift_param}_{args.drift_type}"
+            # Read drift settings from base config YAML if provided
+            if args.base_config:
+                with open(args.base_config, 'r') as f:
+                    base_cfg = yaml.safe_load(f)
+                env_id = base_cfg.get('env_id', args.env)
+                env_cfg = base_cfg.get('env', {})
+                drift_config = {
+                    'parameter': env_cfg.get('parameter', args.drift_param),
+                    'drift_type': env_cfg.get('drift_type', args.drift_type),
+                    'magnitude': env_cfg.get('magnitude', 0.3),
+                    'period': env_cfg.get('period', 100000),
+                    'base_value': env_cfg.get('base_value', 1.0),
+                    'bounds': env_cfg.get('bounds', None),
+                }
+                print(f"Loaded drift config from: {args.base_config}")
+            else:
+                # Use CLI args with defaults
+                env_id = args.env
+                drift_config = {
+                    'parameter': args.drift_param,
+                    'drift_type': args.drift_type,
+                    'magnitude': 0.3,
+                    'period': 100000,
+                    'base_value': 1.0,
+                }
+            
+            # Create sweep config with hardcoded param_ranges (based on env)
+            sweep_config = create_sweep_config(args.type, env_id, drift_config)
+            
+            # Sweep name: env_driftparam_drifttype
+            env_short = env_id.replace('-v4', '').replace('-v5', '')
+            sweep_config['name'] = f"{env_short}_{drift_config['parameter']}_{drift_config['drift_type']}"
         
         # Create sweep
         sweep_id = wandb.sweep(sweep_config, project=args.project)
