@@ -1,0 +1,49 @@
+env_id: HalfCheetah-v4
+env:
+  drift_type: linear
+  magnitude: 0.3
+  period: 100000
+  parameter: damping
+  base_value: 1.0
+  bounds:
+  - 0.5
+  - 1.5
+wandb:
+  project: att_19_Halfcheetah
+  tags:
+  - halfcheetah
+  - C06
+  - linear
+  - nsmdmpi
+  mode: online
+train:
+  algorithm: PPO
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  total_timesteps: 2000000
+  seed: 42
+paths:
+  log_dir: logs/
+  model_dir: models/
+  video_dir: videos/
+nsmdmpi:
+  enabled: true
+  V_R: 100.0
+  V_P: 200.0
+  V_pi_star: 1200.0
+  kappa_base: 0.2
+  kappa_min: 0.15
+  kappa_max: 0.4
+  lambda_base: 1.0
+  kappa_adaptive: true
+  lambda_adaptive: true
+  trust_region_sensitivity: 1.0
+  regularization_sensitivity: 1.0
+  max_ent_coef: 0.1
+  drift_window_size: 1000
+  log_freq: 50
+  save_budget_history: true
+  budget_save_dir: budgets/
+  verbose: 1
