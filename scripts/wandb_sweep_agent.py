@@ -258,6 +258,24 @@ def create_sweep_config(experiment_type: str, env_id: str, drift_config: Dict) -
             'drift_window_size': {'distribution': 'int_uniform', 'min': 400, 'max': 1500},
             'drift_min_samples': {'distribution': 'int_uniform', 'min': 50, 'max': 150},
         }
+    elif 'Walker2d' in env_id or 'Walker2D' in env_id:
+        base_ranges = {
+            'V_R': {'distribution': 'uniform', 'min': 40.0, 'max': 180.0},
+            'V_P': {'distribution': 'uniform', 'min': 80.0, 'max': 300.0},
+            'V_pi_star': {'distribution': 'uniform', 'min': 400.0, 'max': 1800.0},
+            'kappa_base': {'distribution': 'uniform', 'min': 0.1, 'max': 0.38},
+            'kappa_min': {'distribution': 'uniform', 'min': 0.02, 'max': 0.09},
+            'kappa_max': {'distribution': 'uniform', 'min': 0.3, 'max': 0.55},
+            'lambda_base': {'distribution': 'uniform', 'min': 0.5, 'max': 2.8},
+            'lambda_min': {'distribution': 'uniform', 'min': 0.05, 'max': 0.18},
+            'lambda_max': {'distribution': 'uniform', 'min': 5.0, 'max': 13.0},
+            'trust_region_sensitivity': {'distribution': 'uniform', 'min': 4.0, 'max': 22.0},
+            'regularization_sensitivity': {'distribution': 'uniform', 'min': 1.8, 'max': 9.0},
+            'min_ent_coef': {'distribution': 'uniform', 'min': 0.0, 'max': 0.018},
+            'max_ent_coef': {'distribution': 'uniform', 'min': 0.025, 'max': 0.13},
+            'drift_window_size': {'distribution': 'int_uniform', 'min': 450, 'max': 1800},
+            'drift_min_samples': {'distribution': 'int_uniform', 'min': 50, 'max': 170},
+        }
     elif 'LunarLander' in env_id:
         base_ranges = {
             'V_R': {'distribution': 'uniform', 'min': 5.0, 'max': 30.0},
